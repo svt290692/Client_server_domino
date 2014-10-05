@@ -1,0 +1,77 @@
+<scene formatVersion="1.0.1" exported_by="svt" export_time="1404235784.749063" previous_export_time="0" >
+  <nodes >
+    <node name="Area" >
+      <position z="-0.361618" x="6.312694" y="7.302325" />
+      <rotation qx="-0.060626" qy="-0.215009" qz="0.169015" qw="0.959963" />
+      <scale z="1.000000" x="1.000000" y="1.000000" />
+      <game >
+        <sensors />
+        <actuators />
+      </game>
+    </node>
+    <node name="Sun" >
+      <position z="-0.722501" x="-2.576204" y="7.417638" />
+      <rotation qx="-0.040631" qy="-0.144097" qz="0.113272" qw="0.982219" />
+      <scale z="1.000000" x="1.000000" y="1.000000" />
+      <game >
+        <sensors />
+        <actuators />
+      </game>
+      <light name="Sun" type="directional" powerScale="1.0" >
+        <position z="-0.722501" x="-2.576204" y="7.417638" />
+        <lightAttenuation linear="0.04" range="5000" quadratic="0.0" constant="1.0" />
+        <direction z="-0.047" x="-0.234" y="-0.971" />
+        <colourDiffuse g="1.0" b="1.0" r="1.0" />
+        <colourSpecular g="1.0" b="1.0" r="1.0" />
+      </light>
+    </node>
+    <node name="cgaxis_models_07_23_01" >
+      <position z="0.068810" x="0.025021" y="0.025681" />
+      <rotation qx="0.707107" qy="0.000000" qz="-0.000000" qw="0.707107" />
+      <scale z="0.074066" x="0.074066" y="0.074066" />
+      <game >
+        <sensors />
+        <actuators />
+      </game>
+      <entity lock_trans_z="False" friction_x="1.0" lock_trans_x="False" lock_trans_y="False" name="cgaxis_models_07_23_01" mass_radius="1.0" velocity_min="0.0" anisotropic_friction="False" actor="False" ghost="False" damping_trans="0.03999999910593033" inertia_tensor="0.4000000059604645" lock_rot_y="False" lock_rot_x="False" lock_rot_z="False" velocity_max="0.0" mass="1.0" physics_type="STATIC" damping_rot="0.10000000149011612" friction_y="1.0" friction_z="1.0" meshFile="cgaxis_models_07_23_01.mesh" />
+    </node>
+    <node name="Lamp" >
+      <position z="-1.005454" x="1.185309" y="5.903862" />
+      <rotation qx="-0.186266" qy="-0.747579" qz="0.368133" qw="0.520489" />
+      <scale z="4.200784" x="4.200784" y="4.200784" />
+      <game >
+        <sensors />
+        <actuators />
+      </game>
+      <light name="Lamp" type="point" shadow="true" powerScale="1.0" >
+        <position z="-1.005454" x="1.185309" y="5.903862" />
+        <lightAttenuation linear="0.03333335240683057" range="5000" quadratic="0.0" constant="1.0" />
+        <colourDiffuse g="1.0" b="1.0" r="1.0" />
+        <colourSpecular g="1.0" b="1.0" r="1.0" />
+        <colourShadow g="1.0" b="1.0" r="1.0" />
+      </light>
+    </node>
+    <node name="Camera" >
+      <position z="6.507640" x="7.481132" y="5.343665" />
+      <rotation qx="0.481707" qy="0.334251" qz="-0.212922" qw="0.781600" />
+      <scale z="1.000000" x="1.000000" y="1.000000" />
+      <game >
+        <sensors />
+        <actuators />
+      </game>
+      <camera name="Camera" fov="0.5033799435163735" projectionType="perspective" >
+        <clipping nearPlaneDist="0.10000000149011612" far="100.0" farPlaneDist="100.0" near="0.10000000149011612" />
+      </camera>
+    </node>
+  </nodes>
+  <externals >
+    <item type="material" >
+      <file name="E:\модели\table\tableogre\Standard_1.material" />
+    </item>
+  </externals>
+  <environment >
+    <colourDiffuse g="0.05087608844041824" b="0.05087608844041824" r="0.05087608844041824" />
+    <colourBackground g="0.05087608844041824" b="0.05087608844041824" r="0.05087608844041824" />
+    <colourAmbient g="0.0" b="0.0" r="0.0" />
+  </environment>
+</scene>

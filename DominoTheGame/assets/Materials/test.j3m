@@ -1,0 +1,16 @@
+Material My Material : Common/MatDefs/Light/Lighting.j3md {
+     MaterialParameters {
+        GlowColor : 0 0 0 0
+        UseMaterialColors : true
+        Diffuse : 0.8 0.0 0.8 0.5
+        Ambient : 0 0 0 0
+        Specular : 0 0 0 0
+     }
+    AdditionalRenderState {
+      Wireframe Off
+      DepthWrite Off
+      PointSprite Off
+      ColorWrite On
+      DepthTest Off
+    }
+}

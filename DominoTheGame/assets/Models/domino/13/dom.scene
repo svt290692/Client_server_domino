@@ -1,0 +1,28 @@
+<scene export_time="1404785934.047199" previous_export_time="1404730529.742066" exported_by="svt" formatVersion="1.0.1" >
+  <nodes >
+    <node name="Cube.000" >
+      <position x="0.000931" y="0.019744" z="-0.002857" />
+      <rotation qw="0.707107" qx="-0.707107" qy="0.000000" qz="-0.000000" />
+      <scale x="1.000000" y="1.900000" z="0.300000" />
+      <game >
+        <sensors />
+        <actuators />
+      </game>
+      <entity velocity_min="0.0" inertia_tensor="0.4000000059604645" mass="1.0" damping_trans="0.03999999910593033" meshFile="Cube.055.mesh" lock_trans_z="False" ghost="False" lock_trans_x="False" mass_radius="1.0" friction_x="1.0" friction_y="1.0" friction_z="1.0" actor="False" physics_type="STATIC" velocity_max="0.0" lock_rot_y="False" lock_rot_x="False" lock_rot_z="False" damping_rot="0.10000000149011612" name="Cube.055" anisotropic_friction="False" lock_trans_y="False" />
+    </node>
+  </nodes>
+  <externals >
+    <item type="material" >
+      <file name="E:\модели\dominoNew\22\Material.material" />
+    </item>
+    <item type="material" >
+      <file name="E:\модели\dominoNew\22\Material.001.material" />
+    </item>
+  </externals>
+  <environment >
+    <colourAmbient g="0.0" b="0.0" r="0.0" />
+    <colourBackground g="0.0" b="0.0" r="0.0" />
+    <colourDiffuse g="0.0" b="0.0" r="0.0" />
+    <fog mode="exp" colourG="0.0" colourR="0.0" linearStart="5.0" colourB="0.0" expDensity="0.0" linearEnd="55.0" />
+  </environment>
+</scene>

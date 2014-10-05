@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<nifty xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://nifty-gui.lessvoid.com/nifty-gui" xsi:schemaLocation="https://raw.githubusercontent.com/void256/nifty-gui/1.4/nifty-core/src/main/resources/nifty.xsd https://raw.githubusercontent.com/void256/nifty-gui/1.4/nifty-core/src/main/resources/nifty.xsd">
+    <useControls filename="nifty-default-controls.xml"/>
+    <useStyles filename="nifty-default-styles.xml"/>
+    <screen id="start" controller="ru.MainGame.Gui.Controllers.HUDScreenController">
+        <layer id="mainPanel" childLayout="vertical" >
+            <panel id="topPanel" childLayout="absolute" backgroundColor="#cccccc12" width="*" x="264" y="58" valign="top" height="10.0%"/>
+            <panel id="toMenu" childLayout="center" width="*" height="90.0%">
+                <panel id="innerPanel" childLayout="absolute" width="30.0%" valign="center" align="center" height="30%"/>
+            </panel>
+        </layer>
+    </screen>
+</nifty>

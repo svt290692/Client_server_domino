@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<nifty>
+    <useControls filename="nifty-default-controls.xml"/>
+    <useStyles filename="nifty-default-styles.xml"/>
+    <screen id="start" controller="ru.MainGame.Gui.Controllers.MainMenuScreenController">
+        <layer id="menu" childLayout="vertical" backgroundImage="/Interface/preview.jpg">
+            <panel id="mainPanel" childLayout="vertical" width="100%" x="-2" y="3" valign="center" align="center" height="90%">
+                <effect>
+                        <onStartScreen name="move" mode="in" direction="right" length="300" startDelay="0" inherit="true"/>
+                        <onEndScreen name="move" mode="out" direction="left" length="300" startDelay="0" inherit="true"/>
+                </effect>
+
+                <control name="button" id="startGame" childLayout="center" backgroundColor="#ff993332" x="242" width="35%" y="10" valign="center"  label="StartGame" align="center" height="20%">
+                    <interact onClick="buttonPushed(START_GAME)" />
+                </control>
+                <panel id="separate1" childLayout="absolute" width="50%"  align="center" height="10%"/>
+
+                <control name="button" id="settings" childLayout="center" backgroundColor="#ff993355" x="265" width="30%" y="145" valign="center" label="Oprions" align="center" height="15%">
+                    <interact onClick="buttonPushed(SETTINGS)" />
+                </control>
+                <panel id="separate2" childLayout="absolute" width="50%"  align="center" height="10%"/>
+
+                <control name="button" id="about" childLayout="center" backgroundColor="#ff993377" x="284" width="25%" y="259" valign="center" label="About" align="center" height="12%">
+                    <interact onClick="buttonPushed(ABOUT)" />
+                </control>
+                <panel id="separate3" childLayout="absolute" width="50%"  align="center" height="10%"/>
+
+                <control name="button" id="exit" childLayout="center" backgroundColor="#ff99339a" x="302" width="20%" y="347" valign="center" label="Exit" align="center" height="10%">
+                    <effect>
+                        <onStartScreen name="move" mode="in" direction="right" length="300" startDelay="0" inherit="true"/>
+                        <onEndScreen name="move" mode="out" direction="left" length="300" startDelay="0" inherit="true"/>
+                    </effect>
+                    <interact onClick="buttonPushed(EXIT)" />
+                 </control>
+            </panel>
+            <control name="label" id="label" width="50%" x="305" y="45" text="Development of domino" align="right" height="15%" font="/Interface/Fonts/myDomFont.fnt"/>
+        </layer>
+    </screen>
+
+    <screen id="startGame" controller="ru.MainGame.Gui.Controllers.StartGameScreenController">
+        <layer id="menu" childLayout="vertical" backgroundImage="/Interface/preview.jpg">
+            <panel id="mainPanel" childLayout="vertical" width="100%" x="-2" y="3" valign="center" align="center" height="90%">
+                <effect>
+                        <onStartScreen name="move" mode="in" direction="right" length="300" startDelay="0" inherit="true"/>
+                        <onEndScreen name="move" mode="out" direction="left" length="300" startDelay="0" inherit="true"/>
+                </effect>
+
+                <panel id="namePanel" childLayout="horizontal" width="50" x="-2" y="3" valign="center" align="left" height="20">
+                    <control name="label" id="LBL_name" color="#33cc00ff" width="100px" x="-1px" y="-1px" align="center" valign="center" text="Enter you name :" height="45px" font="aurulent-sans-16.fnt"/>
+                    <control name="textfield" id="TF_name" text="" width="192px" x="344px" y="242px" valign="center" align="center" height="23px"/>
+                </panel>
+
+                 <panel id="separate1" childLayout="absolute" width="50%"  align="center" height="10%"/>
+                <control name="button" id="createGame" childLayout="center" backgroundColor="#ff993332" x="242" width="35%" y="10" valign="center"  label="CreateGame" align="center" height="20%">
+                    <interact onClick="buttonPushed(CREATE_GAME)" />
+                </control>
+                <panel id="separate2" childLayout="absolute" width="50%"  align="center" height="10%"/>
+
+                <control name="button" id="connect" childLayout="center" backgroundColor="#ff993355" x="265" width="30%" y="145" valign="center" label="Connect" align="center" height="15%">
+                    <interact onClick="buttonPushed(CONNECT_TO_GAME)" />
+                </control>
+
+
+
+            </panel>
+            <control name="label" id="label" width="50%" x="305" y="45" text="Development of domino" align="right" height="15%" font="/Interface/Fonts/myDomFont.fnt"/>
+        </layer>
+    </screen>
+
+    <screen id="ConnectToGame" controller="ru.MainGame.Gui.Controllers.ConnectToGameScreenController">
+        <layer id="mainLayer" childLayout="vertical" backgroundImage="/Interface/preview.jpg">
+            <panel id="mainPanel" childLayout="horizontal" width="100.0%" x="-1px" y="-1px" height="70.0%">
+                <effect>
+                    <onStartScreen name="move" mode="in" direction="right" length="300" startDelay="0" inherit="true"/>
+                    <onEndScreen name="move" mode="out" direction="left" length="300" startDelay="0" inherit="true"/>
+                </effect>
+                <control name="label" id="LBL_APaddress" color="#33cc00ff" width="100px" x="-1px" y="-1px" valign="center" text="IPaddress :" height="45px" font="aurulent-sans-16.fnt"/>
+                <control name="textfield" id="TF_IPaddress" text="127.0.0.1" width="192px" x="344px" y="242px" valign="center" align="center" height="23px"/>
+                <control name="label" id="LBLport" color="#00cc00ff" width="87px" x="99px" y="248px" valign="center" text="Port :" align="center" height="42px" font="aurulent-sans-16.fnt"/>
+                <control name="textfield" id="TF_port" text="5511" backgroundColor="#ff99009f" width="172px" x="206" y="302" valign="center" align="center" height="23px"/>
+                <control name="button" id="Connect" childLayout="center" backgroundColor="#ff99007a" x="333px" width="159px" y="196px" valign="center" label="Connect" align="center" height="31px">
+                    <interact onClick="buttonPushed(CONNECT)" />
+                </control>
+            </panel>
+            <image id="back" filename="/Interface/arrow.png" width="151px" x="-1px" y="-1px" valign="center" align="left" height="70px">
+                <effect>
+                        <onStartScreen name="move" mode="in" direction="right" length="300" startDelay="0" inherit="true"/>
+                        <onEndScreen name="move" mode="out" direction="left" length="300" startDelay="0" inherit="true"/>
+                </effect>
+            </image>
+        </layer>
+    </screen>
+
+</nifty>
