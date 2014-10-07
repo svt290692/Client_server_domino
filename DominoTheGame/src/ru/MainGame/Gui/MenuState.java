@@ -35,14 +35,18 @@ public class MenuState extends AbstractAppState implements MenuListener{
 
     private SimpleApplication application;
     private AppStateManager stateManager;
-    NiftyJmeDisplay display;
-    Nifty nifty;
+    private static NiftyJmeDisplay display = null;
+    private Nifty nifty;
 
 
     private static final Logger LOG = Logger.getLogger(MenuState.class.getName());
 
     public MenuState() {
         GlobalLogConfig.initLoggerFromGlobal(LOG);
+    }
+
+    public static NiftyJmeDisplay getDisplay() {
+        return display;
     }
 
     @Override
@@ -105,7 +109,6 @@ public class MenuState extends AbstractAppState implements MenuListener{
         application.getInputManager().setCursorVisible(false);
 
         nifty = null;
-        display = null;
 
         LOG.fine("cleanup MenuGui");
     }

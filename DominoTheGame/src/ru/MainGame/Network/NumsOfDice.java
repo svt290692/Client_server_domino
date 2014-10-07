@@ -4,18 +4,33 @@
  */
 package ru.MainGame.Network;
 
+import java.io.Serializable;
+
 /**
  *
  * @author svt
  */
-public class NumsOfDice {
-    private final int left;
-    private final int right;
+@com.jme3.network.serializing.Serializable
+public class NumsOfDice implements Serializable{
+    private  int left;
+    private  int right;
 
     public NumsOfDice(int left, int right) {
         this.left = left;
         this.right = right;
     }
+
+    public NumsOfDice() {
+    }
+
+    public void setLeft(int left) {
+        this.left = left;
+    }
+
+    public void setRight(int right) {
+        this.right = right;
+    }
+
 
     public int getLeft() {
         return left;
@@ -55,5 +70,5 @@ public class NumsOfDice {
         }
         return true;
     }
-    
+
 }

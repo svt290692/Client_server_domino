@@ -11,6 +11,7 @@ import ru.MainGame.DominoApp;
 import ru.MainGame.GlobalLogConfig;
 import ru.MainGame.Network.FromBothSides.ExtendedSpecificationMessage;
 import ru.MainGame.Network.FromServerToPlayers.StartGameMessage;
+import ru.MainGame.Network.NumsOfDice;
 import ru.mygame.tests.ServerTestListener;
 
 /**
@@ -23,12 +24,12 @@ public class ServerStarter{
     public final static String serverName = "Server";
 
     private static final Logger LOG = Logger.getLogger(ServerStarter.class.getName());
-    
+
     static{
         Serializer.registerClasses(ExtendedSpecificationMessage.class,
-                StartGameMessage.class);
+                StartGameMessage.class,NumsOfDice.class);
     }
-    
+
     public ServerStarter() {
         GlobalLogConfig.initLoggerFromGlobal(LOG);
     }
@@ -75,13 +76,13 @@ public class ServerStarter{
 
 	if(server.isRunning())
 	LOG.log(Level.INFO,"Server start at port:{0}" , new Object[]{port});
-        
+
         try {
             Thread.currentThread().join();
         } catch (InterruptedException ex) {
             Logger.getLogger(ServerStarter.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
     }
 
     private static void initParam(String[] args){

@@ -62,10 +62,11 @@ public class ExtendedSpecificationMessage extends AbstractMessage{
 
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = 37 * hash + Objects.hashCode(this.specification);
-        hash = 37 * hash + Objects.hashCode(this.WhoSend);
-        hash = 37 * hash + Objects.hashCode(this.mStatus);
+        int hash = 5;
+        hash = 67 * hash + Objects.hashCode(this.specification);
+        hash = 67 * hash + Objects.hashCode(this.WhoSend);
+        hash = 67 * hash + Objects.hashCode(this.mStatus);
+        hash = 67 * hash + Objects.hashCode(this.restrictedObject);
         return hash;
     }
 
@@ -84,7 +85,10 @@ public class ExtendedSpecificationMessage extends AbstractMessage{
         if (!Objects.equals(this.WhoSend, other.WhoSend)) {
             return false;
         }
-        if (!Objects.equals(this.mStatus, other.mStatus)) {
+        if (this.mStatus != other.mStatus) {
+            return false;
+        }
+        if (!Objects.equals(this.restrictedObject, other.restrictedObject)) {
             return false;
         }
         return true;
@@ -92,6 +96,7 @@ public class ExtendedSpecificationMessage extends AbstractMessage{
 
     @Override
     public String toString() {
-        return "ExtendedSpecificationMessage{" + "specification=" + specification + ", WhoSend=" + WhoSend + ", data=" + mStatus + '}';
+        return "ExtendedSpecificationMessage{" + "specification=" + specification + ", WhoSend=" + WhoSend + ", mStatus=" + mStatus + ", restrictedObject=" + restrictedObject + '}';
     }
+
 }

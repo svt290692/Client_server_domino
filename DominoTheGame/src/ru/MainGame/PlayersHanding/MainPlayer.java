@@ -16,6 +16,10 @@ import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import ru.MainGame.DominoApp;
 import ru.MainGame.Events.StepEvent;
 import ru.MainGame.HeapState;
@@ -41,18 +45,18 @@ public abstract class MainPlayer extends AbstractPlayer{
     private final String DICE_IN_TABLE = "I am In Table";
     private Spatial cursorDice = null;
     private Spatial selectedGuiDice = null;
-    private Vector3f scaleCursDice;
 
-    private final HeapState heap;
+
     private final Rules rules;
 
     private final float dicesWidth;
 
-    public MainPlayer(HeapState heap, Rules rules, PlayersPlaces Place,Node tableNode, SimpleApplication sApp) {
-	super(Place, sApp.getRootNode());
+
+
+    public MainPlayer(HeapState heap, Rules rules, PlayersPlaces Place,Node tableNode, SimpleApplication sApp,String name) {
+	super(Place, sApp.getRootNode(),heap,name);
         this.sApp = sApp;
 	this.guiNode = sApp.getGuiNode();
-	this.heap = heap;
 	this.rules = rules;
 	this.inputManager = sApp.getInputManager();
 	this.tableNode = tableNode;
@@ -60,6 +64,7 @@ public abstract class MainPlayer extends AbstractPlayer{
 	this.myHandGuiNode = new Node("gui main player");
 	this.cursorSpecialNode = new Node("cursor node");
 	this.dicesWidth = HeapState.getDicesWidth();
+
 
 
 	this.myHandGuiNode.setLocalTranslation(DominoApp.screenWidth / 2, DominoApp.screenHeight / 2, 0);
@@ -119,7 +124,7 @@ public abstract class MainPlayer extends AbstractPlayer{
 	Spatial clone = wasClicked.clone();
 	selectedGuiDice = wasClicked;
 
-	clone.setLocalScale(scaleCursDice);
+	clone.setLocalScale(wasClicked.getWorldScale().mult(0.6f));
 
 	if(cursorDice != null)
 	    cursorSpecialNode.detachChild(cursorDice);
@@ -131,12 +136,6 @@ public abstract class MainPlayer extends AbstractPlayer{
 
 	rules.makeTips(inTable);
     }
-
-    /**
-     * this function I create for subclass if them will wont to do something
-     * when step over for example push to net something
-     */
-
     /**
      *
      * @return gui dice of current click
@@ -210,9 +209,11 @@ public abstract class MainPlayer extends AbstractPlayer{
 	}
 	}
     }
+
     protected void endOfStep(StepEvent stepEvent){
 
     }
+
     Spatial getCursorDice() {
 	return cursorDice;
     }
@@ -238,48 +239,50 @@ public abstract class MainPlayer extends AbstractPlayer{
     }
 
     private void initDicesInTable(){
-	getNode().attachChild(
-		    heap.getDice(6, 6));
-	getNode().attachChild(
-		    heap.getDice(6, 1));
-	getNode().attachChild(
-		    heap.getDice(6, 0));
-	getNode().attachChild(
-		    heap.getDice(0, 0));
-	for(int i = 0 ; i < 6; i++){
-	    getNode().attachChild(
-		    heap.getRandomDice());
-	}
+//	getNode().attachChild(
+//		    heap.TakeFromHeap(6, 6));
+//	getNode().attachChild(
+//		    heap.TakeFromHeap(6, 1));
+//	getNode().attachChild(
+//		    heap.TakeFromHeap(6, 0));
+//	getNode().attachChild(
+//		    heap.TakeFromHeap(0, 0));
+//	for(int i = 0 ; i < 6; i++){
+//	    getNode().attachChild(
+//		    heap.TakeFromHeapRandom());
+//	}
     }
 
-    private void sortHandDicesInTable(){
-	float startPoint;
-	final int size = getNode().getChildren().size();
-	if((size % 2) == 0)
-	    startPoint = (-((size / 2) * dicesWidth));
-	else
-	    startPoint = (-((((size+1) / 2) * dicesWidth) - dicesWidth / 2));
+    public boolean TakeFromHeapRandom(){
+        Spatial d = getHeap().getRandomDice();
+        if(null == d) return false;
 
-
-	for(Spatial s : getNode().getChildren()){
-	    s.setLocalTranslation(startPoint,0,0);
-	    startPoint += dicesWidth;
-	}
+        synchronized(Mutex){
+            queueAddToScreenDices.add(d);
+        }
+        return true;
     }
 
+    private void makeGuiClone(Spatial dice){
+        Spatial cloneToGui = dice.clone();
+        cloneToGui.setLocalTranslation(Vector3f.ZERO);
+        cloneToGui.scale(600);
+        cloneToGui.setLocalRotation(new Quaternion().fromAngles(-15 * FastMath.DEG_TO_RAD, 0, 0));
+        cloneToGui.setUserData(DICE_IN_TABLE, dice);
+        myHandGuiNode.attachChild(cloneToGui);
+    }
+
+    protected void sortHandDicesInTable(){
+	sortNodeDices(getNode(), dicesWidth);
+    }
     /**
      * this method must be invoked after initDiceInTable because he take dices in Table Node
      */
     private void initDicesInGui(){
 	for(Spatial s : getNode().getChildren()){
-	    Spatial cloneToGui = s.clone();
-	    cloneToGui.setLocalTranslation(Vector3f.ZERO);
-	    cloneToGui.scale(600);
-	    cloneToGui.setLocalRotation(new Quaternion().fromAngles(-15 * FastMath.DEG_TO_RAD, 0, 0));
-	    cloneToGui.setUserData(DICE_IN_TABLE, s);
-	    myHandGuiNode.attachChild(cloneToGui);
+	    makeGuiClone(s);
 	}
-	scaleCursDice = myHandGuiNode.getChild(0).getWorldScale().mult(0.6f);
+//	scaleCursDice = myHandGuiNode.getChild(0).getWorldScale().mult(0.6f);
     }
 
     private void changeSizeOfGuiDices(boolean toBig){
@@ -289,7 +292,7 @@ public abstract class MainPlayer extends AbstractPlayer{
 	}
     }
 
-    private void sortHandDicesInGui(){
+    protected void sortHandDicesInGui(){
 	float width;
 	if(myHandGuiNode.getChildren().size() > 10){
 	    width = 60;
@@ -320,7 +323,8 @@ public abstract class MainPlayer extends AbstractPlayer{
 	}
     }
 
-    private void sortDices(){
+    @Override
+    public void sortDices(){
 	sortHandDicesInTable();
 	sortHandDicesInGui();
     }
@@ -331,4 +335,15 @@ public abstract class MainPlayer extends AbstractPlayer{
 
     }
 
+    @Override
+    public void UpdateFromApplication() {
+        synchronized (Mutex) {
+            if (!queueAddToScreenDices.isEmpty()) {
+                Spatial s = queueAddToScreenDices.remove();
+                getNode().attachChild(s);
+                makeGuiClone(s);
+                sortDices();
+            }
+        }
+    }
 }

@@ -13,6 +13,7 @@ import com.jme3.network.MessageListener;
 import com.jme3.network.Network;
 import com.jme3.scene.Node;
 import java.io.IOException;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.management.RuntimeErrorException;
@@ -25,7 +26,9 @@ import ru.MainGame.Gui.HUDInterface;
 import ru.MainGame.Gui.MenuState;
 import ru.MainGame.HeapState;
 import ru.MainGame.Network.FromBothSides.ExtendedSpecificationMessage;
+import ru.MainGame.Network.FromServerToPlayers.StartGameMessage;
 import ru.MainGame.Network.MessageSpecification;
+import ru.MainGame.Network.NumsOfDice;
 import ru.MainGame.Network.StatusPlayer;
 
 import ru.MainGame.TableHanding.Rules;
@@ -37,8 +40,8 @@ import ru.MainGame.TableHanding.Rules;
 public class MainPlayerClient extends MainPlayer{
 
     private final Client mClient;
-    private final Handler mHandler;
     SimpleApplication sApp;
+    private Handler netHandler = new Handler();
 
     private HUDInterface mInterface;
     boolean isGameStillRuning = true;
@@ -50,26 +53,24 @@ public class MainPlayerClient extends MainPlayer{
     }
 
     public MainPlayerClient(HeapState heap, Rules rules, PlayersPlaces Place,
-            Node tableNode, SimpleApplication sApp,String ipAddress,String port)
+            Node tableNode, SimpleApplication sApp,String ipAddress,String port,String name,MessageListener<Client> messageListener)
             throws IOException{
-        super(heap, rules, Place, tableNode, sApp);
+        super(heap, rules, Place, tableNode, sApp,name);
         this.sApp = sApp;
-        mHandler = new Handler();
 
         mClient = CurrentPlayer.getInstance().getClientOfCurSession();
 
         if(mClient == null){
-            throw new IOException("Client has't connect to server in menu please"
-                    + " init Player in menu");
+            throw new IOException();
         }
+        mClient.addClientStateListener(netHandler);
+        mClient.addErrorListener(netHandler);
+        mClient.addMessageListener(netHandler);
 
-        mClient.addErrorListener(mHandler);
-        mClient.addMessageListener(mHandler);
-        mClient.addClientStateListener(mHandler);
+        if(messageListener != null)
+            mClient.addMessageListener(messageListener);
 
         mClient.start();
-
-
 
         mInterface = new HUDInterface(sApp){
             @Override
@@ -86,6 +87,18 @@ public class MainPlayerClient extends MainPlayer{
         mInterface.makeReadyButton();
     }
 
+    public void addErrorListener(ErrorListener<? super Client> listener){
+        mClient.addErrorListener(listener);
+    }
+
+    public void addMessageListener(MessageListener<? super Client> listener){
+        mClient.addMessageListener(listener);
+    }
+
+    public void addClientStateListener(ClientStateListener listener){
+        mClient.addClientStateListener(listener);
+    }
+
     @Override
     protected void endOfStep(StepEvent stepEvent) {
         super.endOfStep(stepEvent);
@@ -96,6 +109,7 @@ public class MainPlayerClient extends MainPlayer{
         @Override
         public void messageReceived(Client source, Message m) {
             System.out.println("Message resive :" + m);
+
         }
 
         @Override
@@ -108,6 +122,7 @@ public class MainPlayerClient extends MainPlayer{
             ExtendedSpecificationMessage message = new ExtendedSpecificationMessage();
             message.setWhoSend(CurrentPlayer.getInstance().getName());
             message.setSpecification(MessageSpecification.INITIALIZATION);
+            message.setStatusPlayer(StatusPlayer.NOT_READY);
             mClient.send(message);
         }
 

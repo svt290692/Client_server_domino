@@ -19,6 +19,9 @@ import de.lessvoid.nifty.screen.Screen;
 import de.lessvoid.nifty.screen.ScreenController;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import ru.MainGame.GlobalLogConfig;
 import ru.MainGame.Gui.Controllers.AbstractMenuScreenController;
 import ru.MainGame.Gui.Controllers.HUDScreenController;
 
@@ -31,15 +34,21 @@ public class HUDInterface{
 
     NiftyJmeDisplay display;
     Nifty nifty;
-
+    private static final Logger LOG = Logger.getLogger(HUDInterface.class.getName());
+    static{
+        GlobalLogConfig.initLoggerFromGlobal(LOG);
+    }
     public HUDInterface(SimpleApplication sApp) {
         this.sApp = sApp;
     }
 
     public void initialize(){
 
-        display = new NiftyJmeDisplay(sApp.getAssetManager(), sApp.getInputManager(), sApp.getAudioRenderer(), sApp.getGuiViewPort());
-
+        display = MenuState.getDisplay();
+        if(null == display){
+            LOG.log(Level.SEVERE, "display of the gui in hud is not ready to start ERROR!!!!");
+            sApp.stop();
+        }
         nifty = display.getNifty();
         nifty.fromXml("Interface/hud.xml", "start");
 

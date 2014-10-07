@@ -77,9 +77,14 @@ public class ClassicRules extends Rules{
 
 	if(inTable.equals(mTable.getFirstDice())){
 	    if(resiver.getBothNum() != -1){
-		if(resiver.getLeftNum() != dice.getLeftNum()&&
-		   resiver.getLeftNum() != dice.getRightNum())
+		if(resiver.getBothNum() != dice.getLeftNum()&&
+		   resiver.getBothNum() != dice.getRightNum())
 		    return false;
+                else{
+                    if(dice.getNum(event.getInHandNum()) != resiver.getBothNum()){
+                        return false;
+                    }
+                }
 	    }
 	    else{
 		//TODO if First Dice has not BOTH NUM
@@ -167,7 +172,7 @@ public class ClassicRules extends Rules{
 		    else rightDiceRotation = DiceRotations.LEFT_TO_RIGHT;
 
 		    if(inHand == DiceNumbers.LEFT_NUM) rightFreeDice = DiceNumbers.RIGHT_NUM;
-		    else rightFreeDice = DiceNumbers.RIGHT_NUM;
+		    else rightFreeDice = DiceNumbers.LEFT_NUM;
 		}
 	    }
 	}
@@ -657,6 +662,7 @@ public class ClassicRules extends Rules{
      * @param tip Spatial that player click thought that a tip
      * @return return true if tip is correct else return false
      */
+    @Override
     public StepEvent takeTip(Spatial tip){
 	StepEvent tipEvent = tip.getUserData("tip");
 	if(tipEvent == null) return null;

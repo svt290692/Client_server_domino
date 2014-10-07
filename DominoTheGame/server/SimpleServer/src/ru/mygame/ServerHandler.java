@@ -4,6 +4,10 @@
  */
 package ru.mygame;
 
+import ru.MainGame.Network.Server.AbleToPlay;
+import ru.MainGame.Network.Server.QueuePlayersInServer;
+import ru.MainGame.Network.Server.QueuePlayers;
+import ru.MainGame.Network.Server.HostedPlayer;
 import com.jme3.network.ConnectionListener;
 import com.jme3.network.Filter;
 import com.jme3.network.HostedConnection;
@@ -22,6 +26,7 @@ import java.util.logging.Logger;
 import ru.MainGame.GlobalLogConfig;
 import ru.MainGame.Network.FromBothSides.ExtendedSpecificationMessage;
 import ru.MainGame.Network.FromServerToPlayers.StartGameMessage;
+import ru.MainGame.Network.MessageSpecification;
 import ru.MainGame.Network.NumsOfDice;
 import ru.MainGame.Network.StatusPlayer;
 
@@ -79,23 +84,57 @@ public class ServerHandler implements ConnectionListener, MessageListener<Hosted
             ExtendedSpecificationMessage msg = (ExtendedSpecificationMessage)m;
 
             switch(msg.getSpecification()){
-                case INITIALIZATION: player.setName(msg.getWhoSend()); break;
+                case INITIALIZATION:
+		    onInitResv(player, msg);
+		    sendInfoTo(source);break;
                 case NEW_STATUS:
-                    player.setStatus(msg.getStatusPlayer());
-		    printCountReadyClients();
-                    if(isAllPlayersReady()){
-//                       mServer.broadcast(createStartGameMessage());
-		       LOG.log(Level.INFO, "The game was running");
-		    }
-                    break;
-                case STEP: mServer.broadcast(msg); break;
-                    default:LOG.log(Level.WARNING,"Warning messaage is not readeble "
+                    onNewStatusResv(player, msg);break;
+                case STEP:
+		    onStepResv(player, msg);break;
+		default:
+		    LOG.log(Level.WARNING,"Warning messaage is not readeble "
                             + "becaus it is hav not specification");
             }
         }
         else {
             LOG.log(Level.WARNING, "server resive undefined message :{0}", m.getClass().getName());
         }
+    }
+    private void sendInfoTo(HostedConnection conn){
+	List<String> names = new ArrayList<>();
+	for(AbleToPlay p : queuePlayers.asList()){
+	    names.add(p.getMyName());
+	    ExtendedSpecificationMessage message = new ExtendedSpecificationMessage();
+	    message.setSpecification(MessageSpecification.INITIALIZATION);
+
+	    if(p instanceof HostedPlayer)
+		message.setStatusPlayer(((HostedPlayer)p).getStatus());
+	    else
+		message.setStatusPlayer(StatusPlayer.READY_TO_PLAY);
+
+	    message.setWhoSend(p.getMyName());
+	    conn.send(message);
+	}
+    }
+
+    private void onStepResv(HostedPlayer player,ExtendedSpecificationMessage msg){
+	mServer.broadcast(msg);
+    }
+    private void onInitResv(HostedPlayer player,ExtendedSpecificationMessage msg){
+	player.setName(msg.getWhoSend());
+	if(msg.getStatusPlayer() != null)
+	player.setStatus(msg.getStatusPlayer());
+	mServer.broadcast(msg);
+    }
+    private void onNewStatusResv(HostedPlayer player,ExtendedSpecificationMessage msg){
+	player.setStatus(msg.getStatusPlayer());
+	printCountReadyClients();
+
+	mServer.broadcast(msg);
+	if(isAllPlayersReady()){
+         mServer.broadcast(createStartGameMessage());
+	   LOG.log(Level.INFO, "The game was running");
+	}
     }
     private void printCountReadyClients(){
 	int countReady = 0;
@@ -113,14 +152,15 @@ public class ServerHandler implements ConnectionListener, MessageListener<Hosted
 
     private StartGameMessage createStartGameMessage(){
         List<NumsOfDice> dices = new ArrayList<>();
-        for(int i=0,j=0;i < 7 ;j++){
-            dices.add(new NumsOfDice(i, j));
-	    System.out.print("<" + i + "> <" +j+ ">|");
+	for(int i=0,j=0,k=0;i <= 27 ;i++){
+            dices.add(new NumsOfDice(j, k));
+	    System.out.print("<" + j + "> <" +k+ ">_");
             if(j == 6){
-                i++;
-                j = i;
-            }
+                k++;
+		j = k;
+            }else j++;
         }
+
         Collections.sort(dices, new Comparator<Object>() {
 
                 Random rand = new Random();
@@ -134,7 +174,9 @@ public class ServerHandler implements ConnectionListener, MessageListener<Hosted
         int count = 0;
         for(HostedPlayer p : mConnectedPlayers){
             List<NumsOfDice> list = new ArrayList<>();
-            list.add(dices.get(count++));
+            for(int j = 0 ; j < 6; j++){
+		list.add(dices.get(count++));
+	    }
             message.addNewEntry(p.getMyName(), list);
         }
         return message;

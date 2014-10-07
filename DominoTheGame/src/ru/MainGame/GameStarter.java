@@ -6,12 +6,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import ru.MainGame.Network.FromBothSides.ExtendedSpecificationMessage;
 import ru.MainGame.Network.FromServerToPlayers.StartGameMessage;
+import ru.MainGame.Network.NumsOfDice;
 
 public class GameStarter{
-    
+
     static{
         Serializer.registerClasses(ExtendedSpecificationMessage.class,
-                StartGameMessage.class);
+                StartGameMessage.class, NumsOfDice.class);
     }
 
     private static final Logger LOG = Logger.getLogger(GameStarter.class.getName());
