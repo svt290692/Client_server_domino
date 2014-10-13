@@ -20,7 +20,7 @@ public abstract class  Rules {
      public abstract void startGame(Spatial firstDice);
      public abstract void makeTips(Spatial dice);
      public abstract boolean isGameStarted();
-     public abstract StepEvent takeTip(Spatial tip);
+     public abstract StepEvent takeStepFromTip(Spatial tip);
      public abstract void removeTips();
      protected Spatial getTipFrom(AssetManager assetManager,Spatial dice){
 	 Spatial clone = dice.clone();

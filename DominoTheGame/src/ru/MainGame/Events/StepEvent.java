@@ -7,6 +7,7 @@ package ru.MainGame.Events;
 import com.jme3.export.JmeExporter;
 import com.jme3.export.JmeImporter;
 import com.jme3.export.Savable;
+import com.jme3.network.serializing.Serializable;
 import com.jme3.scene.Spatial;
 import java.io.IOException;
 import ru.MainGame.DiceNumbers;
@@ -15,11 +16,15 @@ import ru.MainGame.DiceNumbers;
  *
  * @author svt
  */
+@Serializable
 public class StepEvent implements Savable{
-    private final Spatial diceInTable;
-    private final Spatial diceInHand;
-    private final DiceNumbers inTableNum;
-    private final DiceNumbers inHandNum;
+    private  Spatial diceInTable;
+    private  Spatial diceInHand;
+    private  DiceNumbers inTableNum;
+    private  DiceNumbers inHandNum;
+
+    public StepEvent() {
+    }
 
     public StepEvent(Spatial diceInTable, Spatial diceInHand,
 	    DiceNumbers inTable, DiceNumbers inHand) {
@@ -27,6 +32,22 @@ public class StepEvent implements Savable{
 	this.diceInHand = diceInHand;
 	this.inTableNum = inTable;
 	this.inHandNum = inHand;
+    }
+
+    public void setDiceInTable(Spatial diceInTable) {
+        this.diceInTable = diceInTable;
+    }
+
+    public void setDiceInHand(Spatial diceInHand) {
+        this.diceInHand = diceInHand;
+    }
+
+    public void setInTableNum(DiceNumbers inTableNum) {
+        this.inTableNum = inTableNum;
+    }
+
+    public void setInHandNum(DiceNumbers inHandNum) {
+        this.inHandNum = inHandNum;
     }
 
     public Spatial getDiceInTable() {

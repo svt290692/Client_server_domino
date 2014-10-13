@@ -135,17 +135,19 @@ public class PlayersState extends AbstractAppState{
         for(AbstractPlayer player : mAllPlayers){
             player.UpdateFromApplication();
         }
-        if(isNetGameStarted == false){
+//        if(isNetGameStarted == false){
             if(!queueRegisterMessages.isEmpty())
                 registerNewPlayers();
-        }
+//        }
     }
 
     private void registerNewPlayers(){
-
-        ExtendedSpecificationMessage message = queueRegisterMessages.remove();
-        if(message.getSpecification().equals(MessageSpecification.INITIALIZATION)){
-            mAllPlayers.add(new DistancePlayer(findCorrectPlaceForDistancePlayer(), sApp.getRootNode(), heap, message.getWhoSend()));
+        synchronized(this){
+            ExtendedSpecificationMessage message = queueRegisterMessages.remove();
+            if(message.getSpecification().equals(MessageSpecification.INITIALIZATION)){
+                mAllPlayers.add(new DistancePlayer(findCorrectPlaceForDistancePlayer(), sApp.getRootNode(), heap, message.getWhoSend()));
+                notifyAll();
+            }
         }
     }
 
@@ -189,19 +191,27 @@ public class PlayersState extends AbstractAppState{
                 }
             }
             else if(m instanceof StartGameMessage){
-                StartGameMessage message = ((StartGameMessage)m);
-//                List<NumsOfDice> mPart =  message.getPartOf(CurrentPlayer.getInstance().getName());
+                synchronized(this){
+                    StartGameMessage message = ((StartGameMessage)m);
 
-                for(AbstractPlayer p : mAllPlayers){
-                    List<NumsOfDice> mPart = message.getPartOf(p.getName());
+                    while(!queueRegisterMessages.isEmpty()){
+                        try {
+                            this.wait(10);
+                        } catch (InterruptedException ex) {
+                            Logger.getLogger(PlayersState.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
+                    for(AbstractPlayer p : mAllPlayers){
+                        List<NumsOfDice> mPart = message.getPartOf(p.getName());
 
-                    for(NumsOfDice n : mPart){
-                     p.TakeFromHeap(n.getLeft(), n.getRight());
-                    System.out.println("i "+ p.getName() + "have got:" + n);
+                        for(NumsOfDice n : mPart){
+                         p.TakeFromHeap(n.getLeft(), n.getRight());
+                        System.out.println(""+ p.getName() + " have got:" + n);
+                    }
+                    }
+                    System.out.println("LETS START!!!!");
+                    isNetGameStarted = true;
                 }
-                }
-                System.out.println("LETS START!!!!");
-                isNetGameStarted = true;
             }
         }
     }

@@ -175,7 +175,9 @@ public abstract class MainPlayer extends AbstractPlayer{
      */
     protected void makeStep(Spatial who){
         StepEvent stepEvent;
-	    stepEvent = rules.takeTip(who);
+	    stepEvent = rules.takeStepFromTip(who);
+
+            rules.doStep(stepEvent);
 
 	    if(stepEvent != null){
 	     endOfStep(stepEvent);

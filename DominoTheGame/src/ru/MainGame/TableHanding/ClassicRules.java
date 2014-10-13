@@ -663,7 +663,7 @@ public class ClassicRules extends Rules{
      * @return return true if tip is correct else return false
      */
     @Override
-    public StepEvent takeTip(Spatial tip){
+    public StepEvent takeStepFromTip(Spatial tip){
 	StepEvent tipEvent = tip.getUserData("tip");
 	if(tipEvent == null) return null;
 
@@ -673,9 +673,14 @@ public class ClassicRules extends Rules{
 	    else
 		tipEvent.getDiceInHand().setUserData(MAPPING_PREF_TO_LEFT, false);
 	}
-	doStep(tipEvent);
+
+//            doStep(tipEvent);
+
+
 	return tipEvent;
     }
+
+    @Override
     public void removeTips(){
 	if(leftTip != null){
 	    mTable.getMyNode().detachChild(leftTip);
