@@ -12,6 +12,8 @@ import ru.MainGame.GlobalLogConfig;
 import ru.MainGame.Network.FromBothSides.ExtendedSpecificationMessage;
 import ru.MainGame.Network.FromServerToPlayers.StartGameMessage;
 import ru.MainGame.Network.NumsOfDice;
+import ru.MainGame.Network.StatusPlayer;
+import ru.MainGame.Network.StepToSend;
 import ru.mygame.tests.ServerTestListener;
 
 /**
@@ -27,7 +29,7 @@ public class ServerStarter{
 
     static{
         Serializer.registerClasses(ExtendedSpecificationMessage.class,
-                StartGameMessage.class,NumsOfDice.class);
+                StartGameMessage.class,NumsOfDice.class, StepToSend.class);
     }
 
     public ServerStarter() {

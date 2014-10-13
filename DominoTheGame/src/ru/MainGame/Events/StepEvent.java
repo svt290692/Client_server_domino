@@ -16,7 +16,7 @@ import ru.MainGame.DiceNumbers;
  *
  * @author svt
  */
-@Serializable
+
 public class StepEvent implements Savable{
     private  Spatial diceInTable;
     private  Spatial diceInHand;

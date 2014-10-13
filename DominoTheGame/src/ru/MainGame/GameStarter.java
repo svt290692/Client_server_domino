@@ -7,12 +7,14 @@ import java.util.logging.Logger;
 import ru.MainGame.Network.FromBothSides.ExtendedSpecificationMessage;
 import ru.MainGame.Network.FromServerToPlayers.StartGameMessage;
 import ru.MainGame.Network.NumsOfDice;
+import ru.MainGame.Network.StatusPlayer;
+import ru.MainGame.Network.StepToSend;
 
 public class GameStarter{
 
     static{
         Serializer.registerClasses(ExtendedSpecificationMessage.class,
-                StartGameMessage.class, NumsOfDice.class);
+                StartGameMessage.class, NumsOfDice.class, StepToSend.class);
     }
 
     private static final Logger LOG = Logger.getLogger(GameStarter.class.getName());

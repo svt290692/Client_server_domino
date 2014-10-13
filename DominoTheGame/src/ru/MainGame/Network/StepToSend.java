@@ -1,60 +1,34 @@
-/*
+ /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package ru.MainGame.Network;
 
+import com.jme3.network.serializing.Serializable;
+import java.util.Objects;
+
 /**
  *
  * @author svt
  */
-public class StepToSend {
-    int handLeft,handRight;
-    
-    int tableLeft,tableRight;
+@Serializable
+public class StepToSend{
+    private NumsOfDice inHand;
+    private NumsOfDice inTable;
+
+    public StepToSend(NumsOfDice inHand, NumsOfDice inTable) {
+        this.inHand = inHand;
+        this.inTable = inTable;
+    }
 
     public StepToSend() {
     }
 
-    public int getHandLeft() {
-        return handLeft;
-    }
-
-    public int getHandRight() {
-        return handRight;
-    }
-
-    public int getTableLeft() {
-        return tableLeft;
-    }
-
-    public int getTableRight() {
-        return tableRight;
-    }
-
-    public void setHandLeft(int handLeft) {
-        this.handLeft = handLeft;
-    }
-
-    public void setHandRight(int handRight) {
-        this.handRight = handRight;
-    }
-
-    public void setTableLeft(int tableLeft) {
-        this.tableLeft = tableLeft;
-    }
-
-    public void setTableRight(int tableRight) {
-        this.tableRight = tableRight;
-    }
-
     @Override
     public int hashCode() {
-        int hash = 5;
-        hash = 53 * hash + this.handLeft;
-        hash = 53 * hash + this.handRight;
-        hash = 53 * hash + this.tableLeft;
-        hash = 53 * hash + this.tableRight;
+        int hash = 3;
+        hash = 89 * hash + Objects.hashCode(this.inHand);
+        hash = 89 * hash + Objects.hashCode(this.inTable);
         return hash;
     }
 
@@ -67,26 +41,34 @@ public class StepToSend {
             return false;
         }
         final StepToSend other = (StepToSend) obj;
-        if (this.handLeft != other.handLeft) {
+        if (!Objects.equals(this.inHand, other.inHand)) {
             return false;
         }
-        if (this.handRight != other.handRight) {
-            return false;
-        }
-        if (this.tableLeft != other.tableLeft) {
-            return false;
-        }
-        if (this.tableRight != other.tableRight) {
+        if (!Objects.equals(this.inTable, other.inTable)) {
             return false;
         }
         return true;
     }
 
+    public NumsOfDice getInHand() {
+        return inHand;
+    }
+
+    public void setInHand(NumsOfDice inHand) {
+        this.inHand = inHand;
+    }
+
+    public NumsOfDice getInTable() {
+        return inTable;
+    }
+
+    public void setInTable(NumsOfDice inTable) {
+        this.inTable = inTable;
+    }
+
     @Override
     public String toString() {
-        return "StepToSend{" + "handLeft=" + handLeft + ", handRight=" + handRight +
-                ", tableLeft=" + tableLeft + ", tableRight=" + tableRight + '}';
+        return "StepToSend{" + "inHand=" + inHand + ", inTable=" + inTable + '}';
     }
-    
     
 }
