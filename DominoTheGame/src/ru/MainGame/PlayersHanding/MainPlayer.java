@@ -87,7 +87,7 @@ public abstract class MainPlayer extends AbstractPlayer{
 			DiceTrigger(collideGui);
 		    }
 		    else{
-			rules.startGame(inTable);
+			startGame(inTable);
 			myHandGuiNode.detachChild(collideGui);
 			sortDices();
 		    }
@@ -104,6 +104,14 @@ public abstract class MainPlayer extends AbstractPlayer{
 
 	    tryMakeStep();
 	}
+    }
+    /**
+     * this method woll just send command to start game, it need to subclasses
+     * to do something when game started
+     * @param diceToStart 
+     */
+    protected void startGame(Spatial diceToStart){
+        rules.startGame(diceToStart);
     }
     /**
      * just remove cursor dice

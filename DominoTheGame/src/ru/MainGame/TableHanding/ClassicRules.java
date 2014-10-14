@@ -160,7 +160,7 @@ public class ClassicRules extends Rules{
 		    else leftDiceRotation = DiceRotations.LEFT_TO_LEFT;
 
 		    if(inHand == DiceNumbers.LEFT_NUM) leftFreeDice = DiceNumbers.RIGHT_NUM;
-		    else leftFreeDice = DiceNumbers.RIGHT_NUM;
+		    else leftFreeDice = DiceNumbers.LEFT_NUM;
 		}
 	    }
 	    else{
@@ -683,11 +683,11 @@ public class ClassicRules extends Rules{
     @Override
     public void removeTips(){
 	if(leftTip != null){
-	    mTable.getMyNode().detachChild(leftTip);
+	    mTable.getNode().detachChild(leftTip);
 	    leftTip = null;
 	}
 	if(rightTip != null){
-	    mTable.getMyNode().detachChild(rightTip);
+	    mTable.getNode().detachChild(rightTip);
 	    rightTip = null;
 	}
     }

@@ -4,13 +4,14 @@
  */
 package ru.MainGame;
 
+import java.io.Serializable;
 import java.util.Random;
 
 /**
  *
  * @author svt
  */
-public enum DiceNumbers {
+public enum DiceNumbers implements Serializable{
     LEFT_NUM, RIGHT_NUM, BOTH_NUM;
 
     static DiceNumbers getRandomSide() {

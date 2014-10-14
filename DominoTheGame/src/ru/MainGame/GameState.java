@@ -75,7 +75,7 @@ public class GameState extends AbstractAppState{
 	this.mTable = new TableState(mHeap);
 	this.curRules = new ClassicRules(mTable,assetManager);
 	this.mPlayers = new PlayersState(mHeap, mTable,curRules);
-        this.tableNode = mTable.getMyNode();
+        this.tableNode = mTable.getNode();
 	this.heapNode = mHeap.getMyNode();
         cam.setLocation(new Vector3f(0.009792091f, 1.6326832f, 1.6419929f));
 	cam.setRotation(new Quaternion(0.0010556657f, 0.9016319f, -0.4324973f, 0.0022009274f));

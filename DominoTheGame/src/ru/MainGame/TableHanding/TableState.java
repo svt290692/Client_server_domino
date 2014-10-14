@@ -65,7 +65,7 @@ public class TableState extends AbstractAppState {
 	mTableNode = new Node("Table");
     }
 
-    public Node getMyNode(){
+    public Node getNode(){
         return mTableNode;
     }
 

@@ -81,8 +81,14 @@ public class HeapState extends AbstractAppState{
         return myNode;
     }
     public Spatial getDice(int left,int right){
-        for(Spatial d:myNode.getChildren()){
+        return findDiceInNode(myNode,left,right);
+    }
+    
+    public static Spatial findDiceInNode(Node node ,int left,int right){
+        for(Spatial d:node.getChildren()){
+            
             Dice dice = d.getControl(Dice.class);
+            
             if(dice == null){
                 System.err.println("error in HeapState Dice without controll name Dice");
                 LOG.log(Level.WARNING, "request of dice {0} that dont have a Controll name Dice",new Object[]{d});

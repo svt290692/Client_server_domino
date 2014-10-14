@@ -133,6 +133,9 @@ public class ServerHandler implements ConnectionListener, MessageListener<Hosted
 	mServer.broadcast(msg);
 	if(isAllPlayersReady()){
          mServer.broadcast(createStartGameMessage());
+         for(HostedPlayer p : mConnectedPlayers){
+             p.setStatus(StatusPlayer.IN_GAME);
+         }
 	   LOG.log(Level.INFO, "The game was running");
 	}
     }

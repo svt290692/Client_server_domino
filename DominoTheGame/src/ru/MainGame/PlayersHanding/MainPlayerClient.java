@@ -105,12 +105,31 @@ public class MainPlayerClient extends MainPlayer{
     
     @Override
     protected void endOfStep(StepEvent stepEvent) {
-        Spatial hand = stepEvent.getDiceInHand();
-        Spatial inTable = stepEvent.getDiceInTable();
-        ExtendedSpecificationMessage message = new ExtendedSpecificationMessage(
-                MessageSpecification.STEP, CurrentPlayer.getInstance().getName(),
-                StatusPlayer.IN_GAME,);
+        ru.MainGame.Dice hand = stepEvent.getDiceInHand().getControl(ru.MainGame.Dice.class);
+        ru.MainGame.Dice inTable = stepEvent.getDiceInTable().getControl(ru.MainGame.Dice.class);
         
+        ExtendedSpecificationMessage message = new ExtendedSpecificationMessage(
+                MessageSpecification.STEP,
+                CurrentPlayer.getInstance().getName(),
+                StatusPlayer.IN_GAME,
+                new StepToSend(new NumsOfDice(hand.getLeftNum(), hand.getRightNum()),
+                    new NumsOfDice(inTable.getLeftNum(),inTable.getRightNum()),
+                    stepEvent.getInTableNum(),stepEvent.getInHandNum()));
+        mClient.send(message);
+    }
+
+    @Override
+    protected void startGame(Spatial diceToStart) {
+        ru.MainGame.Dice hand = diceToStart.getControl(ru.MainGame.Dice.class);
+        
+        ExtendedSpecificationMessage message = new ExtendedSpecificationMessage(
+                MessageSpecification.STEP,
+                CurrentPlayer.getInstance().getName(),
+                StatusPlayer.IN_GAME,
+                new StepToSend(new NumsOfDice(hand.getLeftNum(), hand.getRightNum()),
+                   null,null,null));
+        message.setMessage("start");
+        mClient.send(message);
     }
 
     private class Handler implements MessageListener<Client>, ErrorListener<Client>, ClientStateListener{
@@ -118,7 +137,6 @@ public class MainPlayerClient extends MainPlayer{
         @Override
         public void messageReceived(Client source, Message m) {
             System.out.println("Message resive :" + m);
-
         }
 
         @Override

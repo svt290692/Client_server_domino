@@ -19,6 +19,8 @@ import ru.MainGame.Network.StatusPlayer;
 public class ExtendedSpecificationMessage extends AbstractMessage{
     private MessageSpecification specification;
 
+    private String message;
+    
     private String WhoSend;
 
     private StatusPlayer mStatus;
@@ -34,8 +36,24 @@ public class ExtendedSpecificationMessage extends AbstractMessage{
         this.mStatus = mStatus;
         this.restrictedObject = restrictedObject;
     }
-    
 
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public StatusPlayer getmStatus() {
+        return mStatus;
+    }
+
+    public void setmStatus(StatusPlayer mStatus) {
+        this.mStatus = mStatus;
+    }
+        
+    
     public MessageSpecification getSpecification() {
         return specification;
     }

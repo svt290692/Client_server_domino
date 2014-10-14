@@ -29,12 +29,15 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import ru.MainGame.CurrentPlayer;
+import ru.MainGame.DiceNumbers;
+import ru.MainGame.Events.StepEvent;
 import ru.MainGame.GlobalLogConfig;
 import ru.MainGame.HeapState;
 import ru.MainGame.Network.FromBothSides.ExtendedSpecificationMessage;
 import ru.MainGame.Network.FromServerToPlayers.StartGameMessage;
 import ru.MainGame.Network.MessageSpecification;
 import ru.MainGame.Network.NumsOfDice;
+import ru.MainGame.Network.StepToSend;
 import ru.MainGame.TableHanding.Rules;
 import ru.MainGame.TableHanding.TableState;
 
@@ -75,7 +78,7 @@ public class PlayersState extends AbstractAppState{
 
     private boolean isNetGameStarted = false;
     private static List<PlayersPlaces> busyPlaces = new ArrayList<>();
-    private final Queue<ExtendedSpecificationMessage> queueRegisterMessages = new ConcurrentLinkedQueue<>();
+    private final Queue<ExtendedSpecificationMessage> queueUnprocessedMessages = new ConcurrentLinkedQueue<>();
     private final List<AbstractPlayer> mAllPlayers = new LinkedList<>();
 
     public PlayersState(HeapState heap, TableState table, Rules rules) {
@@ -103,7 +106,7 @@ public class PlayersState extends AbstractAppState{
 
         try {
             MainPlayerClient client = new MainPlayerClient(heap, rules,
-                    PlayersPlaces.MAIN_PLAYER,table.getMyNode(), sApp,"127.0.0.1","5511",
+                    PlayersPlaces.MAIN_PLAYER,table.getNode(), sApp,"127.0.0.1","5511",
                     CurrentPlayer.getInstance().getName(),new OnlineClientHandler());
             this.mainPlayer = client;
             this.mAllPlayers.add(client);
@@ -136,18 +139,22 @@ public class PlayersState extends AbstractAppState{
             player.UpdateFromApplication();
         }
 //        if(isNetGameStarted == false){
-            if(!queueRegisterMessages.isEmpty())
+            if(!queueUnprocessedMessages.isEmpty())
                 registerNewPlayers();
 //        }
     }
 
     private void registerNewPlayers(){
-        synchronized(this){
-            ExtendedSpecificationMessage message = queueRegisterMessages.remove();
-            if(message.getSpecification().equals(MessageSpecification.INITIALIZATION)){
-                mAllPlayers.add(new DistancePlayer(findCorrectPlaceForDistancePlayer(), sApp.getRootNode(), heap, message.getWhoSend()));
+        ExtendedSpecificationMessage message = queueUnprocessedMessages.remove();
+        if(message.getSpecification().equals(MessageSpecification.INITIALIZATION)){
+            synchronized(this){
+                mAllPlayers.add(new DistancePlayer(findCorrectPlaceForDistancePlayer(),
+                        sApp.getRootNode(), heap, message.getWhoSend()));
                 notifyAll();
             }
+        }
+        else if(message.getSpecification().equals(MessageSpecification.STEP)){
+            makeResivedStepFromPlayer(message);
         }
     }
 
@@ -177,6 +184,32 @@ public class PlayersState extends AbstractAppState{
         }
         return null;
     }
+    
+    void makeResivedStepFromPlayer(ExtendedSpecificationMessage message){
+        String name = message.getWhoSend();
+        StepToSend step = (StepToSend)message.getRestrictedObject();
+            for(AbstractPlayer p :mAllPlayers ){
+                
+                if(p.getName().equals(name)){
+                    if(message.getMessage() != null && message.getMessage().split(" ")[0].equals("start")){
+                        rules.startGame(HeapState.findDiceInNode(p.getNode(),
+                                step.getInHand().getLeft(),step.getInHand().getRight()));
+                    }
+                    else{
+                        Spatial onHand = HeapState.findDiceInNode(p.getNode(),
+                                step.getInHand().getLeft(), step.getInHand().getRight());
+
+                        Spatial onTable = HeapState.findDiceInNode(table.getNode(),
+                                step.getInTable().getLeft(), step.getInTable().getRight());
+
+                        StepEvent event = new StepEvent(onTable, onHand, step.getInTableNum(),step.getInHandNum());
+                        
+                        rules.doStep(event);
+                    }
+                    p.sortDices();
+                }
+            }
+        }
 
     private class OnlineClientHandler implements MessageListener<Client>{
 
@@ -184,17 +217,22 @@ public class PlayersState extends AbstractAppState{
         public void messageReceived(Client source, Message m) {
             System.out.println("I am resive message in Players state : "  + m);
             if(m instanceof ExtendedSpecificationMessage){
+                
                 ExtendedSpecificationMessage message = (ExtendedSpecificationMessage)m;
-                if(message.getSpecification().equals(MessageSpecification.INITIALIZATION)){
+                if(message.getSpecification().equals(MessageSpecification.INITIALIZATION)){    
                     if(!(message.getWhoSend().equals(CurrentPlayer.getInstance().getName())))
-                    queueRegisterMessages.add(message);
+                    queueUnprocessedMessages.add(message);
+                }
+                else if(message.getSpecification().equals(MessageSpecification.STEP)){
+                    queueUnprocessedMessages.add(message);
                 }
             }
             else if(m instanceof StartGameMessage){
+                
                 synchronized(this){
                     StartGameMessage message = ((StartGameMessage)m);
 
-                    while(!queueRegisterMessages.isEmpty()){
+                    while(!queueUnprocessedMessages.isEmpty()){
                         try {
                             this.wait(10);
                         } catch (InterruptedException ex) {
@@ -207,14 +245,16 @@ public class PlayersState extends AbstractAppState{
                         for(NumsOfDice n : mPart){
                          p.TakeFromHeap(n.getLeft(), n.getRight());
                         System.out.println(""+ p.getName() + " have got:" + n);
-                    }
+                        }
                     }
                     System.out.println("LETS START!!!!");
                     isNetGameStarted = true;
                 }
             }
         }
+        
     }
+    
 
     public class DistancePlayer extends AbstractPlayer{
 
