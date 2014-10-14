@@ -12,6 +12,7 @@ import com.jme3.network.Message;
 import com.jme3.network.MessageListener;
 import com.jme3.network.Network;
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 import java.io.IOException;
 import java.util.List;
 import java.util.logging.Level;
@@ -30,6 +31,7 @@ import ru.MainGame.Network.FromServerToPlayers.StartGameMessage;
 import ru.MainGame.Network.MessageSpecification;
 import ru.MainGame.Network.NumsOfDice;
 import ru.MainGame.Network.StatusPlayer;
+import ru.MainGame.Network.StepToSend;
 
 import ru.MainGame.TableHanding.Rules;
 
@@ -98,10 +100,17 @@ public class MainPlayerClient extends MainPlayer{
     public void addClientStateListener(ClientStateListener listener){
         mClient.addClientStateListener(listener);
     }
-
+    
+    
+    
     @Override
     protected void endOfStep(StepEvent stepEvent) {
-        super.endOfStep(stepEvent);
+        Spatial hand = stepEvent.getDiceInHand();
+        Spatial inTable = stepEvent.getDiceInTable();
+        ExtendedSpecificationMessage message = new ExtendedSpecificationMessage(
+                MessageSpecification.STEP, CurrentPlayer.getInstance().getName(),
+                StatusPlayer.IN_GAME,);
+        
     }
 
     private class Handler implements MessageListener<Client>, ErrorListener<Client>, ClientStateListener{

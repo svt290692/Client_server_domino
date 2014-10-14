@@ -170,14 +170,14 @@ public abstract class MainPlayer extends AbstractPlayer{
         return results;
     }
     /**
-     * do step in cur tip
+     * this method take tip and convert it to StepEvent them is invoke endofStep
+     * with stepEvent argument
      * @param who - whitch tip need to take and do step
      */
     protected void makeStep(Spatial who){
         StepEvent stepEvent;
 	    stepEvent = rules.takeStepFromTip(who);
 
-            rules.doStep(stepEvent);
 
 	    if(stepEvent != null){
 	     endOfStep(stepEvent);
@@ -211,9 +211,13 @@ public abstract class MainPlayer extends AbstractPlayer{
 	}
 	}
     }
-
+    /**
+     * invoke when tip already got and need to do some action for example:
+     * do Realy step or send it to net or something else
+     * @param stepEvent 
+     */
     protected void endOfStep(StepEvent stepEvent){
-
+        rules.doStep(stepEvent);
     }
 
     Spatial getCursorDice() {

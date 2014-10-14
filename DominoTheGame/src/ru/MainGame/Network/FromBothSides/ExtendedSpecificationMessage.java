@@ -28,6 +28,14 @@ public class ExtendedSpecificationMessage extends AbstractMessage{
     public ExtendedSpecificationMessage() {
     }
 
+    public ExtendedSpecificationMessage(MessageSpecification specification, String WhoSend, StatusPlayer mStatus, Object restrictedObject) {
+        this.specification = specification;
+        this.WhoSend = WhoSend;
+        this.mStatus = mStatus;
+        this.restrictedObject = restrictedObject;
+    }
+    
+
     public MessageSpecification getSpecification() {
         return specification;
     }
