@@ -7,6 +7,7 @@ package ru.MainGame.Network.FromServerToPlayers;
 import com.jme3.network.AbstractMessage;
 import com.jme3.network.serializing.Serializable;
 import com.jme3.network.serializing.Serializer;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,26 +24,22 @@ public class StartGameMessage extends AbstractMessage{
 
 
     private Map<String,List<NumsOfDice> > startGamePart;
+    
+    private List<String> queueToSteps;
     public StartGameMessage() {
         startGamePart = new HashMap< >();
+        queueToSteps = new ArrayList<>();
     }
 
     public void addNewEntry(String namePlayer,List<NumsOfDice> dices){
         startGamePart.put(namePlayer, dices);
     }
 
-    public Map<String, List<NumsOfDice>> getStartGamePart() {
-        return startGamePart;
-    }
-
-    public List<NumsOfDice> getPartOf(String name){
-        return startGamePart.get(name);
-    }
-
     @Override
     public int hashCode() {
-        int hash = 7;
+        int hash = 5;
         hash = 29 * hash + Objects.hashCode(this.startGamePart);
+        hash = 29 * hash + Objects.hashCode(this.queueToSteps);
         return hash;
     }
 
@@ -58,16 +55,34 @@ public class StartGameMessage extends AbstractMessage{
         if (!Objects.equals(this.startGamePart, other.startGamePart)) {
             return false;
         }
+        if (!Objects.equals(this.queueToSteps, other.queueToSteps)) {
+            return false;
+        }
         return true;
+    }
+
+    public Map<String, List<NumsOfDice>> getStartGamePart() {
+        return startGamePart;
+    }
+
+    public void setStartGamePart(Map<String, List<NumsOfDice>> startGamePart) {
+        this.startGamePart = startGamePart;
+    }
+
+    public List<String> getQueueToSteps() {
+        return queueToSteps;
+    }
+
+    public void setQueueToSteps(List<String> queueToSteps) {
+        this.queueToSteps = queueToSteps;
     }
 
     @Override
     public String toString() {
-        return "StartGameMessage{" + "startGamePart=" + startGamePart + '}';
+        return "StartGameMessage{" + "startGamePart=" + startGamePart + ",\n queueToSteps=" + queueToSteps + '}';
     }
 
-    public void addNewEntry(HostedPlayer hostedPlayer, List<NumsOfDice> list) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
+   public List<NumsOfDice> getPartOf(String name){
+       return startGamePart.get(name);
+   }
 }

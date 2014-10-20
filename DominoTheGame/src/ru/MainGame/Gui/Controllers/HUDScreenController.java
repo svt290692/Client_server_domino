@@ -35,6 +35,7 @@ public class HUDScreenController implements ScreenController{
     public void setListener(java.awt.event.ActionListener listeer){
         this.listener = listeer;
     }
+    
     public void action(){
         listener.actionPerformed(null);
     }

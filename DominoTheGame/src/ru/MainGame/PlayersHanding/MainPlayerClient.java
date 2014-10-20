@@ -10,28 +10,25 @@ import com.jme3.network.ClientStateListener;
 import com.jme3.network.ErrorListener;
 import com.jme3.network.Message;
 import com.jme3.network.MessageListener;
-import com.jme3.network.Network;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import de.lessvoid.nifty.EndNotify;
 import java.io.IOException;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.management.RuntimeErrorException;
 import javax.swing.JOptionPane;
 import ru.MainGame.CurrentPlayer;
 import ru.MainGame.Events.StepEvent;
-import ru.MainGame.GameState;
 import ru.MainGame.GlobalLogConfig;
 import ru.MainGame.Gui.HUDInterface;
 import ru.MainGame.Gui.MenuState;
 import ru.MainGame.HeapState;
 import ru.MainGame.Network.FromBothSides.ExtendedSpecificationMessage;
-import ru.MainGame.Network.FromServerToPlayers.StartGameMessage;
 import ru.MainGame.Network.MessageSpecification;
 import ru.MainGame.Network.NumsOfDice;
 import ru.MainGame.Network.StatusPlayer;
 import ru.MainGame.Network.StepToSend;
+import ru.MainGame.TableHanding.ClassicRules;
 
 import ru.MainGame.TableHanding.Rules;
 
@@ -44,8 +41,6 @@ public class MainPlayerClient extends MainPlayer{
     private final Client mClient;
     SimpleApplication sApp;
     private Handler netHandler = new Handler();
-
-    private HUDInterface mInterface;
     boolean isGameStillRuning = true;
 
     private static final Logger LOG = Logger.getLogger(MainPlayerClient.class.getName());
@@ -74,19 +69,44 @@ public class MainPlayerClient extends MainPlayer{
 
         mClient.start();
 
-        mInterface = new HUDInterface(sApp){
+        mInterface = new HUDInterface(sApp, MenuState.getDisplay()){
             @Override
             public void readyPushed() {
                 super.readyPushed();
                 ExtendedSpecificationMessage message= new ExtendedSpecificationMessage();
                 message.setSpecification(MessageSpecification.NEW_STATUS);
                 message.setWhoSend(CurrentPlayer.getInstance().getName());
-                message.setStatusPlayer(StatusPlayer.READY_TO_PLAY);
+                
+                if(mInterface.getCurrentReadyButtonText().equals("Ready")){
+                    message.setStatusPlayer(StatusPlayer.READY_TO_PLAY);
+                    mInterface.changeStatus(CurrentPlayer.getInstance().getName(), "Ready");
+                    
+                    mInterface.removeCurButtonInMenu(new EndNotify() {
+
+                        @Override
+                        public void perform() {
+                            mInterface.makeButtonInButtonLayer("Not ready");
+                        }
+                    });
+                    
+                }else{
+                    message.setStatusPlayer(StatusPlayer.NOT_READY);
+                    mInterface.changeStatus(CurrentPlayer.getInstance().getName(), "Not ready");
+                    
+                    mInterface.removeCurButtonInMenu(new EndNotify() {
+
+                        @Override
+                        public void perform() {
+                            mInterface.makeButtonInButtonLayer("Ready");
+                        }
+                    });
+                    
+                }
                 mClient.send(message);
             }
         };
         mInterface.initialize();
-        mInterface.makeReadyButton();
+        mInterface.makeButtonInButtonLayer("Ready");
     }
 
     public void addErrorListener(ErrorListener<? super Client> listener){
@@ -105,16 +125,25 @@ public class MainPlayerClient extends MainPlayer{
     
     @Override
     protected void endOfStep(StepEvent stepEvent) {
-        ru.MainGame.Dice hand = stepEvent.getDiceInHand().getControl(ru.MainGame.Dice.class);
-        ru.MainGame.Dice inTable = stepEvent.getDiceInTable().getControl(ru.MainGame.Dice.class);
+        Spatial hand = stepEvent.getDiceInHand();
+        ru.MainGame.Dice handControll = stepEvent.getDiceInHand().getControl(ru.MainGame.Dice.class);
+        ru.MainGame.Dice inTableControll = stepEvent.getDiceInTable().getControl(ru.MainGame.Dice.class);
+        
+        
         
         ExtendedSpecificationMessage message = new ExtendedSpecificationMessage(
                 MessageSpecification.STEP,
                 CurrentPlayer.getInstance().getName(),
                 StatusPlayer.IN_GAME,
-                new StepToSend(new NumsOfDice(hand.getLeftNum(), hand.getRightNum()),
-                    new NumsOfDice(inTable.getLeftNum(),inTable.getRightNum()),
+                new StepToSend(new NumsOfDice(handControll.getLeftNum(), handControll.getRightNum()),
+                    new NumsOfDice(inTableControll.getLeftNum(),inTableControll.getRightNum()),
                     stepEvent.getInTableNum(),stepEvent.getInHandNum()));
+        
+        Boolean isPrefToLeft = hand.getUserData(ClassicRules.MAPPING_PREF_TO_LEFT);
+        
+        if(isPrefToLeft != null)
+            message.setMessage(isPrefToLeft ? "left" : "right");
+        
         mClient.send(message);
     }
 
@@ -167,5 +196,4 @@ public class MainPlayerClient extends MainPlayer{
         mClient.close();
         mInterface.clean();
     }
-
 }

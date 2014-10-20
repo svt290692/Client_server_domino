@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.logging.Level;
@@ -55,16 +56,22 @@ public class ServerHandler implements ConnectionListener, MessageListener<Hosted
 	LOG.log(Level.INFO, "Connection " + server.getGameName() + " was added to server: " + conn.getAddress() + " .");
 //        System.out.println("Connection  "+ conn.getAddress()+"was added to server: "+ server.getGameName());
     }
+    
     private void resiveNewConnection(HostedConnection conn){
         HostedPlayer player = new HostedPlayer(conn);
 
         queuePlayers.addPlayer(player);
         mConnectedPlayers.add(player);
     }
+    
     private void connectionLost(HostedConnection conn){
         HostedPlayer player = findPlayerFromConnection(conn);
         mConnectedPlayers.remove(player);
         queuePlayers.removePlayer(player);
+        ExtendedSpecificationMessage msg = new ExtendedSpecificationMessage(
+                MessageSpecification.DISCONNECT, player.getName(),
+                StatusPlayer.NOT_READY,null);
+        mServer.broadcast(msg);
     }
 
     @Override
@@ -100,10 +107,11 @@ public class ServerHandler implements ConnectionListener, MessageListener<Hosted
             LOG.log(Level.WARNING, "server resive undefined message :{0}", m.getClass().getName());
         }
     }
+    
     private void sendInfoTo(HostedConnection conn){
-	List<String> names = new ArrayList<>();
+//	List<String> names = new ArrayList<>();
 	for(AbleToPlay p : queuePlayers.asList()){
-	    names.add(p.getMyName());
+//	    names.add(p.getName());
 	    ExtendedSpecificationMessage message = new ExtendedSpecificationMessage();
 	    message.setSpecification(MessageSpecification.INITIALIZATION);
 
@@ -112,7 +120,7 @@ public class ServerHandler implements ConnectionListener, MessageListener<Hosted
 	    else
 		message.setStatusPlayer(StatusPlayer.READY_TO_PLAY);
 
-	    message.setWhoSend(p.getMyName());
+	    message.setWhoSend(p.getName());
 	    conn.send(message);
 	}
     }
@@ -120,12 +128,14 @@ public class ServerHandler implements ConnectionListener, MessageListener<Hosted
     private void onStepResv(HostedPlayer player,ExtendedSpecificationMessage msg){
 	mServer.broadcast(msg);
     }
+    
     private void onInitResv(HostedPlayer player,ExtendedSpecificationMessage msg){
 	player.setName(msg.getWhoSend());
 	if(msg.getStatusPlayer() != null)
 	player.setStatus(msg.getStatusPlayer());
 	mServer.broadcast(msg);
     }
+    
     private void onNewStatusResv(HostedPlayer player,ExtendedSpecificationMessage msg){
 	player.setStatus(msg.getStatusPlayer());
 	printCountReadyClients();
@@ -139,6 +149,7 @@ public class ServerHandler implements ConnectionListener, MessageListener<Hosted
 	   LOG.log(Level.INFO, "The game was running");
 	}
     }
+    
     private void printCountReadyClients(){
 	int countReady = 0;
 	int countAll = 0;
@@ -180,8 +191,44 @@ public class ServerHandler implements ConnectionListener, MessageListener<Hosted
             for(int j = 0 ; j < 6; j++){
 		list.add(dices.get(count++));
 	    }
-            message.addNewEntry(p.getMyName(), list);
+            message.addNewEntry(p.getName(), list);
         }
+        
+        String firstPlayer = null;
+        
+        for(Map.Entry<String, List<NumsOfDice> > e : message.getStartGamePart().entrySet()){
+            int biggest = -1;
+            for(NumsOfDice d: e.getValue()){
+                if(d.getLeft() == d.getRight()){
+                    if(d.getLeft() > biggest){
+                        biggest =d.getLeft();
+                        firstPlayer = e.getKey();
+                    }
+                }
+            }
+            if(null == firstPlayer){
+                biggest = 0;
+                for(NumsOfDice d: e.getValue()){
+                    int summ = (d.getLeft() + d.getRight());
+                    
+                    if(summ  > biggest){
+                        biggest = summ;
+                        firstPlayer = e.getKey();
+                    }
+                }
+            }
+            
+        }
+        List<String> queue = new LinkedList<>();
+        queue.add(firstPlayer);
+        
+        for(AbleToPlay p : queuePlayers.asList()){
+            if(!(p.getName().equals(firstPlayer))){
+                queue.add(p.getName());
+            }
+        }
+        message.setQueueToSteps(queue);
+        
         return message;
     }
 

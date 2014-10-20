@@ -20,6 +20,7 @@ import com.jme3.network.Message;
 import com.jme3.network.MessageListener;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import de.lessvoid.nifty.tools.Color;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -32,12 +33,17 @@ import ru.MainGame.CurrentPlayer;
 import ru.MainGame.DiceNumbers;
 import ru.MainGame.Events.StepEvent;
 import ru.MainGame.GlobalLogConfig;
+import ru.MainGame.Gui.MenuState;
 import ru.MainGame.HeapState;
 import ru.MainGame.Network.FromBothSides.ExtendedSpecificationMessage;
 import ru.MainGame.Network.FromServerToPlayers.StartGameMessage;
 import ru.MainGame.Network.MessageSpecification;
 import ru.MainGame.Network.NumsOfDice;
+import static ru.MainGame.Network.StatusPlayer.IN_GAME;
+import static ru.MainGame.Network.StatusPlayer.NOT_READY;
+import static ru.MainGame.Network.StatusPlayer.READY_TO_PLAY;
 import ru.MainGame.Network.StepToSend;
+import ru.MainGame.TableHanding.ClassicRules;
 import ru.MainGame.TableHanding.Rules;
 import ru.MainGame.TableHanding.TableState;
 
@@ -77,9 +83,12 @@ public class PlayersState extends AbstractAppState{
     }
 
     private boolean isNetGameStarted = false;
+    private boolean isMainPlayerStepWait = false;
+    
     private static List<PlayersPlaces> busyPlaces = new ArrayList<>();
-    private final Queue<ExtendedSpecificationMessage> queueUnprocessedMessages = new ConcurrentLinkedQueue<>();
+    private final Queue<Message> queueUnprocessedMessages = new ConcurrentLinkedQueue<>();
     private final List<AbstractPlayer> mAllPlayers = new LinkedList<>();
+    private Queue<String> queuePlayersToAllowSteps = null;
 
     public PlayersState(HeapState heap, TableState table, Rules rules) {
 	this.heap = heap;
@@ -87,6 +96,7 @@ public class PlayersState extends AbstractAppState{
 	this.rules = rules;
         GlobalLogConfig.initLoggerFromGlobal(LOG);
     }
+    
     public static void registerPlace(PlayersPlaces place){
         busyPlaces.add(place);
     }
@@ -116,8 +126,9 @@ public class PlayersState extends AbstractAppState{
         }
 
 	initInput();
+        mainPlayer.getInterface().addPlayerToTopPanel(CurrentPlayer.getInstance().getName(), "Not ready",true);
     }
-
+    
     private void initInput(){
         PickingListener listener = new PickingListener();
 
@@ -128,7 +139,7 @@ public class PlayersState extends AbstractAppState{
 
 	inputManager.addListener(listener,MappingsToInput.PICK.map,MappingsToInput.CLEAR.map);
     }
-
+    
     @Override
     public void update(float tpf) {
 	if(mainPlayer.isCursorDiceExists() == true){
@@ -140,24 +151,99 @@ public class PlayersState extends AbstractAppState{
         }
 //        if(isNetGameStarted == false){
             if(!queueUnprocessedMessages.isEmpty())
-                registerNewPlayers();
+                resiveNewMessagesAppProcess();
 //        }
     }
 
-    private void registerNewPlayers(){
-        ExtendedSpecificationMessage message = queueUnprocessedMessages.remove();
-        if(message.getSpecification().equals(MessageSpecification.INITIALIZATION)){
-            synchronized(this){
-                mAllPlayers.add(new DistancePlayer(findCorrectPlaceForDistancePlayer(),
-                        sApp.getRootNode(), heap, message.getWhoSend()));
-                notifyAll();
+    private void resiveNewMessagesAppProcess(){
+        Message message = queueUnprocessedMessages.remove();
+        if(message instanceof ExtendedSpecificationMessage){
+            ExtendedSpecificationMessage extendedMessage = (ExtendedSpecificationMessage)message;
+            if(extendedMessage.getSpecification().equals(MessageSpecification.INITIALIZATION)){
+                synchronized(this){
+                    mAllPlayers.add(new DistancePlayer(findCorrectPlaceForDistancePlayer(),
+                            sApp.getRootNode(), heap, extendedMessage.getWhoSend()));
+                    
+                    String status = null;
+                    switch(extendedMessage.getStatus()){
+                        case READY_TO_PLAY: status = "Ready";break;
+                        case NOT_READY: status = "Not ready";break;
+                        case IN_GAME: status = "";break;
+                    }
+                    
+                    mainPlayer.getInterface().addPlayerToTopPanel(extendedMessage.getWhoSend(),status,false);
+                    notifyAll();
+                }
+            }
+            else if(extendedMessage.getSpecification().equals(MessageSpecification.NEW_STATUS)){
+                String status = null;
+                switch(extendedMessage.getStatus()){
+                    case READY_TO_PLAY: status = "Ready";break;
+                    case NOT_READY: status = "Not ready";break;
+                    case IN_GAME: status = "";break;
+                }
+                mainPlayer.getInterface().changeStatus(extendedMessage.getWhoSend(),status);
+//                mainPlayer.getInterface().changeColor(status, new Color(255f, 0.5f, 0.7f, 0.5f));
+            }
+            else if(extendedMessage.getSpecification().equals(MessageSpecification.DISCONNECT)){
+                mainPlayer.getInterface().removePlayer(extendedMessage.getWhoSend());
+                queuePlayersToAllowSteps.remove(extendedMessage.getWhoSend());
+                for(AbstractPlayer p : mAllPlayers){
+                    if(p.getName().equals(extendedMessage.getWhoSend())){
+                        mAllPlayers.remove(p);
+                        busyPlaces.remove(p.getPlace());
+                        break;
+                    }
+                }
+            }
+            else if(extendedMessage.getSpecification().equals(MessageSpecification.STEP)){
+                makeResivedStepFromDistancePlayer(extendedMessage);
             }
         }
-        else if(message.getSpecification().equals(MessageSpecification.STEP)){
-            makeResivedStepFromPlayer(message);
+        else{
+            StartGameMessage startMessage = (StartGameMessage)message;
+//            mainPlayer.getInterface().cleanTopPanel();
+            
+            for(String name :startMessage.getStartGamePart().keySet()){
+//                if( ! (CurrentPlayer.getInstance().getName().equals(name)) )
+                mainPlayer.getInterface().changeStatus(name, " ");
+            }
+            
+            queuePlayersToAllowSteps = new ConcurrentLinkedQueue<>(startMessage.getQueueToSteps());
+            if(queuePlayersToAllowSteps.element().equals(CurrentPlayer.getInstance().getName())){
+                allowMainStep();
+            }
+                mainPlayer.getInterface().changeStatus(queuePlayersToAllowSteps.element(),
+                    "Move dominoes");
+            mainPlayer.getInterface().removeCurButtonInMenu(null);
         }
     }
-
+    
+    private void turnNextPlayerStep(){
+        if(queuePlayersToAllowSteps.element().equals(CurrentPlayer.getInstance().getName())){
+            denieMainStep();
+        }
+        
+        mainPlayer.getInterface().changeStatus(queuePlayersToAllowSteps.element(),
+                    "");
+        queuePlayersToAllowSteps.add(queuePlayersToAllowSteps.remove());
+        mainPlayer.getInterface().changeStatus(queuePlayersToAllowSteps.element(),
+                    "Move dominoes");
+        if(queuePlayersToAllowSteps.element().equals(CurrentPlayer.getInstance().getName())){
+                allowMainStep();
+        }
+    }
+    
+    private void allowMainStep(){
+//        sApp.getInputManager().setCursorVisible(true);
+        isMainPlayerStepWait = true;
+    }
+    
+    private void denieMainStep(){
+//        sApp.getInputManager().setCursorVisible(false);
+        isMainPlayerStepWait = false;
+    }
+    
     @Override
     public void cleanup() {
         mainPlayer.killPlayer();
@@ -166,17 +252,16 @@ public class PlayersState extends AbstractAppState{
     private class PickingListener implements ActionListener{
 
 	public void onAction(String name, boolean isPressed, float tpf) {
-	    if(name.equals(MappingsToInput.PICK.map)){
+	    if(name.equals(MappingsToInput.PICK.map) && isMainPlayerStepWait == true){
 		mainPlayer.mouseClick(isPressed);
 	    }
             else if(name.equals(MappingsToInput.CLEAR.map)){
                 if(true == isPressed)
                 mainPlayer.clearCursor();
             }
-
 	}
-
     }
+    
     private PlayersPlaces findCorrectPlaceForDistancePlayer(){
         for(PlayersPlaces p : PlayersPlaces.values()){
             if(busyPlaces.contains(p)) continue;
@@ -185,7 +270,7 @@ public class PlayersState extends AbstractAppState{
         return null;
     }
     
-    void makeResivedStepFromPlayer(ExtendedSpecificationMessage message){
+    void makeResivedStepFromDistancePlayer(ExtendedSpecificationMessage message){
         String name = message.getWhoSend();
         StepToSend step = (StepToSend)message.getRestrictedObject();
             for(AbstractPlayer p :mAllPlayers ){
@@ -202,11 +287,28 @@ public class PlayersState extends AbstractAppState{
                         Spatial onTable = HeapState.findDiceInNode(table.getNode(),
                                 step.getInTable().getLeft(), step.getInTable().getRight());
 
+                        if(message.getMessage() != null){ 
+                            String m = message.getMessage().split(" ")[0];
+                            
+                            switch (m) {
+                                case "left":
+                                    onHand.setUserData(ClassicRules.MAPPING_PREF_TO_LEFT, true);
+                                    break;
+                                case "right":
+                                    onHand.setUserData(ClassicRules.MAPPING_PREF_TO_LEFT, false);
+                                    break;
+                            }
+                        }
+                        
                         StepEvent event = new StepEvent(onTable, onHand, step.getInTableNum(),step.getInHandNum());
                         
                         rules.doStep(event);
                     }
                     p.sortDices();
+                    //
+                    turnNextPlayerStep();
+                    
+                    break;
                 }
             }
         }
@@ -219,9 +321,14 @@ public class PlayersState extends AbstractAppState{
             if(m instanceof ExtendedSpecificationMessage){
                 
                 ExtendedSpecificationMessage message = (ExtendedSpecificationMessage)m;
-                if(message.getSpecification().equals(MessageSpecification.INITIALIZATION)){    
+                if(message.getSpecification().equals(MessageSpecification.INITIALIZATION)||
+                        message.getSpecification().equals(MessageSpecification.NEW_STATUS)||
+                        message.getSpecification().equals(MessageSpecification.DISCONNECT)){
+                    
+                    
                     if(!(message.getWhoSend().equals(CurrentPlayer.getInstance().getName())))
                     queueUnprocessedMessages.add(message);
+                    
                 }
                 else if(message.getSpecification().equals(MessageSpecification.STEP)){
                     queueUnprocessedMessages.add(message);
@@ -231,12 +338,12 @@ public class PlayersState extends AbstractAppState{
                 
                 synchronized(this){
                     StartGameMessage message = ((StartGameMessage)m);
-
+                        queueUnprocessedMessages.add(message);
                     while(!queueUnprocessedMessages.isEmpty()){
                         try {
                             this.wait(10);
                         } catch (InterruptedException ex) {
-                            Logger.getLogger(PlayersState.class.getName()).log(Level.SEVERE, null, ex);
+                            Logger.getLogger(PlayersState.class.getName()).log(Level.SEVERE, "interrupt when wait", ex);
                         }
                     }
                     for(AbstractPlayer p : mAllPlayers){
@@ -255,7 +362,6 @@ public class PlayersState extends AbstractAppState{
         
     }
     
-
     public class DistancePlayer extends AbstractPlayer{
 
         public DistancePlayer(PlayersPlaces Place, Node rootNode, HeapState heap,String name) {

@@ -22,6 +22,7 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import ru.MainGame.DominoApp;
 import ru.MainGame.Events.StepEvent;
+import ru.MainGame.Gui.HUDInterface;
 import ru.MainGame.HeapState;
 import ru.MainGame.TableHanding.Rules;
 import ru.MainGame.TableHanding.TableState;
@@ -47,11 +48,10 @@ public abstract class MainPlayer extends AbstractPlayer{
     private Spatial selectedGuiDice = null;
 
 
-    private final Rules rules;
+    protected final Rules rules;
 
     private final float dicesWidth;
-
-
+    protected HUDInterface mInterface;
 
     public MainPlayer(HeapState heap, Rules rules, PlayersPlaces Place,Node tableNode, SimpleApplication sApp,String name) {
 	super(Place, sApp.getRootNode(),heap,name);
@@ -65,12 +65,14 @@ public abstract class MainPlayer extends AbstractPlayer{
 	this.cursorSpecialNode = new Node("cursor node");
 	this.dicesWidth = HeapState.getDicesWidth();
 
-
-
 	this.myHandGuiNode.setLocalTranslation(DominoApp.screenWidth / 2, DominoApp.screenHeight / 2, 0);
 	this.guiNode.attachChild(myHandGuiNode);
 	this.guiNode.attachChild(cursorSpecialNode);
 	initDices();
+    }
+
+    public HUDInterface getInterface() {
+        return mInterface;
     }
 
     void mouseClick(boolean isPressed){
@@ -360,4 +362,5 @@ public abstract class MainPlayer extends AbstractPlayer{
             }
         }
     }
+    
 }

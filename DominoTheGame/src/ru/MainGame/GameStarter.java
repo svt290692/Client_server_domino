@@ -29,7 +29,7 @@ public class GameStarter{
         cfg.setFrameRate(60); // set to less than or equal screen refresh rate
         cfg.setVSync(true);   // prevents page tearing
         cfg.setFrequency(60); // set to screen refresh rate
-        cfg.setResolution(1024, 768);
+        cfg.setResolution(800, 640);
         cfg.setFullscreen(false);
         cfg.setSamples(2);    // anti-aliasing
         cfg.setTitle("GOAT"); // branding: window name

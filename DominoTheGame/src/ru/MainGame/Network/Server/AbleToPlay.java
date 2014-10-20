@@ -15,7 +15,7 @@ public class AbleToPlay {
 	this.myName = null;
     }
 
-    public String getMyName() {
+    public String getName() {
 	return myName;
     }
 

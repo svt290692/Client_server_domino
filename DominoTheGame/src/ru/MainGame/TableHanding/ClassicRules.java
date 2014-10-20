@@ -46,7 +46,7 @@ public class ClassicRules extends Rules{
 
     private final AssetManager assetManager;
 
-    private final String MAPPING_PREF_TO_LEFT = "pref to left";
+    public static final String MAPPING_PREF_TO_LEFT = "pref to left";
     public ClassicRules(TableState mTable, AssetManager assetManager) {
 	this.mTable = mTable;
 	this.assetManager = assetManager;

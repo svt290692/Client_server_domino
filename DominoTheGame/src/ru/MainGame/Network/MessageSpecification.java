@@ -10,6 +10,7 @@ package ru.MainGame.Network;
  */
 public enum MessageSpecification {
     INITIALIZATION,
+    DISCONNECT,
     STEP,
     NEW_STATUS;
 }

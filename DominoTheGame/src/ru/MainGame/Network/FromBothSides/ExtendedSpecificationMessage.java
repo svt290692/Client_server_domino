@@ -30,7 +30,8 @@ public class ExtendedSpecificationMessage extends AbstractMessage{
     public ExtendedSpecificationMessage() {
     }
 
-    public ExtendedSpecificationMessage(MessageSpecification specification, String WhoSend, StatusPlayer mStatus, Object restrictedObject) {
+    public ExtendedSpecificationMessage(MessageSpecification specification,
+            String WhoSend, StatusPlayer mStatus, Object restrictedObject) {
         this.specification = specification;
         this.WhoSend = WhoSend;
         this.mStatus = mStatus;
@@ -45,7 +46,7 @@ public class ExtendedSpecificationMessage extends AbstractMessage{
         this.message = message;
     }
 
-    public StatusPlayer getmStatus() {
+    public StatusPlayer getStatus() {
         return mStatus;
     }
 

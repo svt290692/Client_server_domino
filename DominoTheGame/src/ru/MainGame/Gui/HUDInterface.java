@@ -6,23 +6,26 @@
 package ru.MainGame.Gui;
 
 import com.jme3.app.SimpleApplication;
-import com.jme3.app.state.AbstractAppState;
 import com.jme3.niftygui.NiftyJmeDisplay;
+import de.lessvoid.nifty.EndNotify;
 import de.lessvoid.nifty.Nifty;
 import de.lessvoid.nifty.builder.ControlBuilder;
 import de.lessvoid.nifty.builder.ControlDefinitionBuilder;
 import de.lessvoid.nifty.builder.EffectBuilder;
+import de.lessvoid.nifty.builder.ElementBuilder;
 import de.lessvoid.nifty.builder.PanelBuilder;
 import de.lessvoid.nifty.builder.TextBuilder;
+import de.lessvoid.nifty.controls.Button;
+import de.lessvoid.nifty.controls.Label;
 import de.lessvoid.nifty.controls.button.builder.ButtonBuilder;
-import de.lessvoid.nifty.screen.Screen;
-import de.lessvoid.nifty.screen.ScreenController;
+import de.lessvoid.nifty.controls.label.builder.LabelBuilder;
+import de.lessvoid.nifty.elements.Element;
+import de.lessvoid.nifty.tools.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import ru.MainGame.GlobalLogConfig;
-import ru.MainGame.Gui.Controllers.AbstractMenuScreenController;
 import ru.MainGame.Gui.Controllers.HUDScreenController;
 
 /**
@@ -35,16 +38,19 @@ public class HUDInterface{
     NiftyJmeDisplay display;
     Nifty nifty;
     private static final Logger LOG = Logger.getLogger(HUDInterface.class.getName());
+    private static final String PLAYER = "Player";
+    private String textOfCurButton = null;
     static{
         GlobalLogConfig.initLoggerFromGlobal(LOG);
     }
-    public HUDInterface(SimpleApplication sApp) {
+    
+    public HUDInterface(SimpleApplication sApp,NiftyJmeDisplay diasplay) {
         this.sApp = sApp;
+        this.display = diasplay;
     }
 
     public void initialize(){
 
-        display = MenuState.getDisplay();
         if(null == display){
             LOG.log(Level.SEVERE, "display of the gui in hud is not ready to start ERROR!!!!");
             sApp.stop();
@@ -60,36 +66,78 @@ public class HUDInterface{
                 }
             });
 
-        new ControlDefinitionBuilder("player") {{
-            align(Align.Center);
-            valign(VAlign.Center);
-            controller("de.lessvoid.nifty.controls.button.ButtonControl");
-            inputMapping("de.lessvoid.nifty.input.mapping.MenuInputMapping");
-            style("nifty-button");
-            panel(new PanelBuilder() {{
-            onStartScreenEffect(new EffectBuilder("move"){{
-                length(150);
-                effectParameter("mode", "in");
-                effectParameter("direction", "right");
-            }});
-            onEndScreenEffect(new EffectBuilder("move"){{
-                length(150);
-                effectParameter("mode", "out");
-                effectParameter("direction", "left");
-            }});
-            style("#panel");
-            width("50px");
-            height("20px");
-            focusable(false);
-            text(new TextBuilder("#text") {{
-            style("#text");
-            text(controlParameter("label"));
-            }});
-            }});
-        }}.registerControlDefintion(nifty);
-
+//        new ControlDefinitionBuilder("player") {{
+//            align(Align.Center);
+//            valign(VAlign.Center);
+//            controller("de.lessvoid.nifty.controls.button.ButtonControl");
+//            inputMapping("de.lessvoid.nifty.input.mapping.MenuInputMapping");
+////            style("nifty-button");
+//            panel(new PanelBuilder() {{
+//                height("7.0%");
+//                width("70px");
+//                childLayout(ChildLayoutType.Vertical);
+//            onStartScreenEffect(new EffectBuilder("move"){{
+//                length(150);
+//                effectParameter("mode", "in");
+//                effectParameter("direction", "right");
+//            }});
+//            
+//            onEndScreenEffect(new EffectBuilder("move"){{
+//                length(150);
+//                effectParameter("mode", "out");
+//                effectParameter("direction", "left");
+//            }});
+//            
+//            style("#panel");
+//            
+//            control(new LabelBuilder("nameL"){{
+//                text(controlParameter("name"));
+//                valign(VAlign.Top);
+//            }});
+//            
+//            control(new LabelBuilder("stateL"){{
+//                text(controlParameter("state"));
+//                valign(VAlign.Bottom);
+//            }});
+//            
+//            backgroundColor(new Color(0.8f, 0.5f, 0.1f, 0.7f));
+//            focusable(false);
+////            text(new TextBuilder("#text") {{
+////            style("#text");
+////            text(controlParameter("label"));
+////            }});
+//            }});
+//        }}.registerControlDefintion(nifty);
+        
         sApp.getGuiViewPort().addProcessor(display);
+        
+//        new PanelBuilder("panelka"){{
+//            childLayout(ChildLayoutType.Vertical);
+//            width("70px");
+//            height("8.0%");
+//            
+////            control(new LabelBuilder("name"){{
+////                text("1Str");
+////                valign(VAlign.Top);
+////            }});
+//            
+////            control(new LabelBuilder("state"){{
+////                text("2Str");
+////                valign(VAlign.Bottom);
+////            }});
+//        }}.build(nifty, nifty.getCurrentScreen(), nifty.getCurrentScreen().findElementByName("topPanel"));
+        
     }
+    
+    public void changeStatus(String player,String status){
+        Label l = ((Label)nifty.getCurrentScreen().findElementByName("state" + player).getNiftyControl(Label.class));
+        if(l != null){
+            l.setText(status);
+            System.err.println("!!!!!ChangeStatus of "+ player + " to " + l.getText());
+        }
+    }
+    
+    
 
     public void clean(){
 
@@ -101,21 +149,64 @@ public class HUDInterface{
         display = null;
     }
 
-    public void addlabel(String label){
-    new ControlBuilder("player_" + label, "player") {{
-            parameter("label", "label");
+    /**
+     * add special player element with name and status
+     * @param name 
+     */
+    public void addPlayerToTopPanel(final String name,final String status,final boolean isMainPlayer){
+        
+    new PanelBuilder(PLAYER+name){{
+        childLayout(ElementBuilder.ChildLayoutType.Center);
+        width("25.0%");
+        height("*");
+        if(isMainPlayer)
+            backgroundColor("#33ff3323");
+        
+        control(new LabelBuilder("name"+name){{
+            text(name);
+            width("*");
+            valignTop();
+            valign(ElementBuilder.VAlign.Top);
+        }});
+        control(new LabelBuilder("state"+name){{
+            text(status);
+            width("*");
+            valignBottom();
+            valign(ElementBuilder.VAlign.Bottom);
+        }});
+        onStartScreenEffect(new EffectBuilder("move"){{
+            length(150);
+            effectParameter("mode", "in");
+            effectParameter("direction", "right");
+        }});
+        onEndScreenEffect(new EffectBuilder("move"){{
+            length(150);
+            effectParameter("mode", "out");
+            effectParameter("direction", "left");
+        }});
         }}.build(nifty, nifty.getCurrentScreen(), nifty.getCurrentScreen().findElementByName("topPanel"));
+    
+    }
+    
+    public void cleanTopPanel(){
+        for(Element e : nifty.getCurrentScreen().findElementByName("topPanel").getElements()){
+            e.markForRemoval();
+        }
+    }
+    
+    /**
+     * just remove player from top panel
+     * @param name 
+     */
+    public void removePlayer(String name){
+        Element el = nifty.getCurrentScreen().findElementByName(PLAYER + name);
+        if(el != null)
+        el.markForRemoval();
     }
 
-    public void removeLabel(String label){
-        try{
-        nifty.getCurrentScreen().findElementByName("player_" + label).markForRemoval();
-        }catch(NullPointerException ex){/*Just nothing*/}
-    }
-
-    public void makeReadyButton(){
-
-        new ButtonBuilder("ready", "Ready!"){{
+    public void makeButtonInButtonLayer(String text){
+        textOfCurButton = text;
+        new ButtonBuilder("ready", text){{
           interactOnClick("action()");
             onStartScreenEffect(new EffectBuilder("move"){{
                 length(150);
@@ -132,8 +223,20 @@ public class HUDInterface{
         }}.build(nifty, nifty.getCurrentScreen(),
         nifty.getCurrentScreen().findElementByName("toMenu"));
     }
-
+    
+    public String getCurrentReadyButtonText(){
+        return textOfCurButton;
+    }
+    
     public void readyPushed(){
-        nifty.getCurrentScreen().findElementByName("ready").markForRemoval();
+//        nifty.getCurrentScreen().findElementByName("ready").markForRemoval();
+    }
+    
+    public void removeCurButtonInMenu(EndNotify end){
+        Element el =  nifty.getCurrentScreen().findElementByName("ready");
+            if(end != null)
+                el.markForRemoval(end);
+            else
+                el.markForRemoval();
     }
 }
