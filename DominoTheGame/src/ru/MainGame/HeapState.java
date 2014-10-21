@@ -76,6 +76,7 @@ public class HeapState extends AbstractAppState{
 
     @Override
     public void cleanup() {
+        myNode.detachAllChildren();
     }
     public Node getMyNode(){
         return myNode;

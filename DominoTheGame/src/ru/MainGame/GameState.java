@@ -38,6 +38,7 @@ public class GameState extends AbstractAppState{
     private AppStateManager stateManager;
     private Camera cam;
     private Node guiNode;
+    private Spatial table;
 
     private HeapState mHeap;
     private TableState mTable;
@@ -45,6 +46,8 @@ public class GameState extends AbstractAppState{
 
     private Node heapNode;
     private Node tableNode;
+    
+    DirectionalLight light;
 
     private Rules curRules;
 
@@ -74,7 +77,7 @@ public class GameState extends AbstractAppState{
 	}
 	this.mTable = new TableState(mHeap);
 	this.curRules = new ClassicRules(mTable,assetManager);
-	this.mPlayers = new PlayersState(mHeap, mTable,curRules);
+	this.mPlayers = new PlayersState(mHeap, mTable,curRules,this);
         this.tableNode = mTable.getNode();
 	this.heapNode = mHeap.getMyNode();
         cam.setLocation(new Vector3f(0.009792091f, 1.6326832f, 1.6419929f));
@@ -99,13 +102,18 @@ public class GameState extends AbstractAppState{
 
     @Override
     public void cleanup() {
+        stateManager.detach(mHeap);
+        stateManager.detach(mTable);
+        stateManager.detach(mPlayers);
+        rootNode.detachAllChildren();
+        rootNode.removeLight(light);
     }
 
     void InitLight(){
-    DirectionalLight sun = new DirectionalLight();
-    sun.setDirection((cam.getDirection()));
-    sun.setColor(ColorRGBA.White);
-    rootNode.addLight(sun);
+    light = new DirectionalLight();
+    light.setDirection((cam.getDirection()));
+    light.setColor(ColorRGBA.White);
+    rootNode.addLight(light);
 
     DirectionalLight sunGui = new DirectionalLight();
     sunGui.setDirection(new Vector3f(0, 0, -1.0f));
@@ -113,7 +121,7 @@ public class GameState extends AbstractAppState{
     LOG.finest("Light was initialized");
     }
     void InitScene(){
-        Spatial table = assetManager.loadModel("Models/table/table.j3o");
+        table = assetManager.loadModel("Models/table/table.j3o");
         table.setLocalTranslation(0,-2.37f, 0);
         rootNode.attachChild(table);
 

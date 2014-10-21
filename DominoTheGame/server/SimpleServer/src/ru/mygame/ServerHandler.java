@@ -107,6 +107,30 @@ public class ServerHandler implements ConnectionListener, MessageListener<Hosted
             LOG.log(Level.WARNING, "server resive undefined message :{0}", m.getClass().getName());
         }
     }
+//    private void onRequestReceive(HostedPlayer from,ExtendedSpecificationMessage msg){
+//        ExtendedSpecificationMessage message = new ExtendedSpecificationMessage();
+//        
+//        message.setSpecification(MessageSpecification.ALLOW);
+//        message.setWhoSend("Server");
+//        
+//        check:{
+//            if(queuePlayers.asList().size() > 2){
+//                message.setSpecification(MessageSpecification.DENIE);
+//                message.setMessage("The game already Full");
+//                break check;
+//            }
+//
+//            for(HostedPlayer p : mConnectedPlayers){
+//                if(p.getName().equals(msg.getWhoSend())){
+//                    message.setSpecification(MessageSpecification.DENIE);
+//                    message.setMessage("Player with this name already in game!"
+//                            + " Please enter another name");
+//                    break check;
+//                }
+//            }
+//        }
+//        from.getmConnection().send(message);
+//    }
     
     private void sendInfoTo(HostedConnection conn){
 //	List<String> names = new ArrayList<>();
@@ -115,8 +139,10 @@ public class ServerHandler implements ConnectionListener, MessageListener<Hosted
 	    ExtendedSpecificationMessage message = new ExtendedSpecificationMessage();
 	    message.setSpecification(MessageSpecification.INITIALIZATION);
 
-	    if(p instanceof HostedPlayer)
+	    if(p instanceof HostedPlayer){
 		message.setStatusPlayer(((HostedPlayer)p).getStatus());
+                message.setRestrictedObject(new Integer(p.getIndexOfAvatar()));
+            }
 	    else
 		message.setStatusPlayer(StatusPlayer.READY_TO_PLAY);
 
@@ -130,7 +156,26 @@ public class ServerHandler implements ConnectionListener, MessageListener<Hosted
     }
     
     private void onInitResv(HostedPlayer player,ExtendedSpecificationMessage msg){
+        
+        if(queuePlayers.asList().size() > 3){
+            msg.setSpecification(MessageSpecification.KICK);
+            msg.setMessage("The game already Full");
+            player.getmConnection().send(msg);
+            return;
+        }
+        
+        for(HostedPlayer p : mConnectedPlayers){
+            if(p.getName() != null && p.getName().equals(msg.getWhoSend())){
+                msg.setSpecification(MessageSpecification.KICK);
+                msg.setMessage("Player with this name already in game!"
+                        + " Please enter another name");
+                player.getmConnection().send(msg);
+                return;
+            }
+        }
+        
 	player.setName(msg.getWhoSend());
+        player.setIndexOfAvatar((Integer)msg.getRestrictedObject());
 	if(msg.getStatusPlayer() != null)
 	player.setStatus(msg.getStatusPlayer());
 	mServer.broadcast(msg);

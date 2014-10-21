@@ -38,20 +38,20 @@ public class ExtendedSpecificationMessage extends AbstractMessage{
         this.restrictedObject = restrictedObject;
     }
 
+    public ExtendedSpecificationMessage(MessageSpecification specification, String message, String WhoSend, StatusPlayer mStatus, Object restrictedObject) {
+        this.specification = specification;
+        this.message = message;
+        this.WhoSend = WhoSend;
+        this.mStatus = mStatus;
+        this.restrictedObject = restrictedObject;
+    }
+    
     public String getMessage() {
         return message;
     }
 
     public void setMessage(String message) {
         this.message = message;
-    }
-
-    public StatusPlayer getStatus() {
-        return mStatus;
-    }
-
-    public void setmStatus(StatusPlayer mStatus) {
-        this.mStatus = mStatus;
     }
         
     

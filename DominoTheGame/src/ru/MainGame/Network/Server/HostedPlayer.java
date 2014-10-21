@@ -17,6 +17,7 @@ public class HostedPlayer extends AbleToPlay{
 
     private HostedConnection mConnection;
     private StatusPlayer myStatus;
+    
     public HostedPlayer(HostedConnection connection) {
 	super();
 	myStatus = StatusPlayer.NOT_READY;

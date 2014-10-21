@@ -45,10 +45,10 @@
                         <onEndScreen name="move" mode="out" direction="left" length="300" startDelay="0" inherit="true"/>
                 </effect>
 
-                <panel id="namePanel" childLayout="horizontal" width="50" x="-2" y="3" valign="center" align="left" height="20">
+<!--                <panel id="namePanel" childLayout="horizontal" width="50" x="-2" y="3" valign="center" align="left" height="20">
                     <control name="label" id="LBL_name" color="#33cc00ff" width="100px" x="-1px" y="-1px" align="center" valign="center" text="Enter you name :" height="45px" font="aurulent-sans-16.fnt"/>
                     <control name="textfield" id="TF_name" text="" width="192px" x="344px" y="242px" valign="center" align="center" height="23px"/>
-                </panel>
+                </panel>-->
 
                  <panel id="separate1" childLayout="absolute" width="50%"  align="center" height="10%"/>
                 <control name="button" id="createGame" childLayout="center" backgroundColor="#ff993332" x="242" width="35%" y="10" valign="center"  label="CreateGame" align="center" height="20%">
@@ -68,26 +68,42 @@
     </screen>
 
     <screen id="ConnectToGame" controller="ru.MainGame.Gui.Controllers.ConnectToGameScreenController">
-        <layer id="mainLayer" childLayout="vertical" backgroundImage="/Interface/preview.jpg">
-            <panel id="mainPanel" childLayout="horizontal" width="100.0%" x="-1px" y="-1px" height="70.0%">
+        <layer id="mainLayer" childLayout="overlay" backgroundImage="/Interface/preview.jpg">
+            <panel id="overlayPanel" childLayout="center" width="100.0%" x="-1px" y="-1px" height="70.0%">
                 <effect>
-                    <onStartScreen name="move" mode="in" direction="right" length="300" startDelay="0" inherit="true"/>
-                    <onEndScreen name="move" mode="out" direction="left" length="300" startDelay="0" inherit="true"/>
+                            <onStartScreen name="move" mode="in" direction="right" length="300" startDelay="0" inherit="true"/>
+                            <onEndScreen name="move" mode="out" direction="left" length="300" startDelay="0" inherit="true"/>
                 </effect>
-                <control name="label" id="LBL_APaddress" color="#33cc00ff" width="100px" x="-1px" y="-1px" valign="center" text="IPaddress :" height="45px" font="aurulent-sans-16.fnt"/>
-                <control name="textfield" id="TF_IPaddress" text="127.0.0.1" width="192px" x="344px" y="242px" valign="center" align="center" height="23px"/>
-                <control name="label" id="LBLport" color="#00cc00ff" width="87px" x="99px" y="248px" valign="center" text="Port :" align="center" height="42px" font="aurulent-sans-16.fnt"/>
-                <control name="textfield" id="TF_port" text="5511" backgroundColor="#ff99009f" width="172px" x="206" y="302" valign="center" align="center" height="23px"/>
-                <control name="button" id="Connect" childLayout="center" backgroundColor="#ff99007a" x="333px" width="159px" y="196px" valign="center" label="Connect" align="center" height="31px">
-                    <interact onClick="buttonPushed(CONNECT)" />
-                </control>
+                
+                <panel id="namePanel" childLayout="horizontal" valign="top" align="left" width="*" x="-1px" y="-1px" height="30.0%">
+                    <control name="label" id="LBL_name" color="#33cc00ff" width="100px" x="-1px" y="-1px" valign="center" text="Name :" height="45px" font="aurulent-sans-16.fnt"/>
+                    <control name="textfield" id="TF_name" text="Player" width="192px" x="344px" y="242px" valign="center" align="center" height="23px"/>
+                    <control id="#imageSelect" name="imageSelect" width="126px" imageWidth="80px" imageHeight="80px" imageList="/Interface/Images/avatar0.png,/Interface/Images/avatar1.png,/Interface/Images/avatar2.png,/Interface/Images/avatar3.png" />
+                </panel>
+                
+                <panel id="mainPanel" childLayout="horizontal" valign="center" align="left" width="*" x="-1px" y="-1px" height="30.0%">
+                    <control name="label" id="LBL_APaddress" color="#33cc00ff" width="100px" x="-1px" y="-1px" valign="center" text="IPaddress :" height="45px" font="aurulent-sans-16.fnt"/>
+                    <control name="textfield" id="TF_IPaddress" text="127.0.0.1" width="192px" x="344px" y="242px" valign="center" align="center" height="23px"/>
+                    <control name="label" id="LBLport" color="#00cc00ff" width="87px" x="99px" y="248px" valign="center" text="Port :" align="center" height="42px" font="aurulent-sans-16.fnt"/>
+                    <control name="textfield" id="TF_port" text="5511" backgroundColor="#ff99009f" width="172px" x="206" y="302" valign="center" align="center" height="23px"/>
+                    <control name="button" id="Connect" childLayout="center" backgroundColor="#ff99007a" x="333px" width="159px" y="196px" valign="center" label="Connect" align="center" height="31px">
+                        <interact onClick="buttonPushed(CONNECT)" />
+                    </control>
+                </panel>
+                
+                
+                
+                <image id="back" filename="/Interface/arrow.png" width="151px" x="-1px" y="-1px" valign="bottom" align="left" height="70px"/>
             </panel>
-            <image id="back" filename="/Interface/arrow.png" width="151px" x="-1px" y="-1px" valign="center" align="left" height="70px">
-                <effect>
-                        <onStartScreen name="move" mode="in" direction="right" length="300" startDelay="0" inherit="true"/>
-                        <onEndScreen name="move" mode="out" direction="left" length="300" startDelay="0" inherit="true"/>
-                </effect>
-            </image>
+        </layer>
+    </screen>
+    
+    <screen id="hud" controller="ru.MainGame.Gui.Controllers.HUDScreenController">
+        <layer id="mainPanel" childLayout="vertical" >
+            <panel id="topPanel" childLayout="horizontal" backgroundColor="#cccccc12" width="*" x="264" y="58" valign="top" height="10.0%"/>
+            <panel id="toMenu" childLayout="center" width="*" height="90.0%">
+                <panel id="innerPanel" childLayout="absolute" width="30.0%" valign="center" align="center" height="30%"/>
+            </panel>
         </layer>
     </screen>
 

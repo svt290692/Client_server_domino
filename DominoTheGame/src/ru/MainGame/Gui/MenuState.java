@@ -13,14 +13,10 @@ import com.jme3.network.Client;
 import com.jme3.network.Network;
 import com.jme3.niftygui.NiftyJmeDisplay;
 import de.lessvoid.nifty.Nifty;
-import de.lessvoid.nifty.builder.ControlBuilder;
-import de.lessvoid.nifty.builder.ControlDefinitionBuilder;
-import de.lessvoid.nifty.builder.PanelBuilder;
-import de.lessvoid.nifty.builder.TextBuilder;
-import de.lessvoid.nifty.controls.Controller;
+import de.lessvoid.nifty.controls.ImageSelect;
 import de.lessvoid.nifty.controls.TextField;
-import de.lessvoid.nifty.controls.button.builder.ButtonBuilder;
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import ru.MainGame.CurrentPlayer;
@@ -37,16 +33,13 @@ public class MenuState extends AbstractAppState implements MenuListener{
     private AppStateManager stateManager;
     private static NiftyJmeDisplay display = null;
     private Nifty nifty;
-
-
+    
+    private AtomicBoolean timeToGame = new AtomicBoolean(false);
+    
     private static final Logger LOG = Logger.getLogger(MenuState.class.getName());
 
     public MenuState() {
         GlobalLogConfig.initLoggerFromGlobal(LOG);
-    }
-
-    public static NiftyJmeDisplay getDisplay() {
-        return display;
     }
 
     @Override
@@ -56,20 +49,20 @@ public class MenuState extends AbstractAppState implements MenuListener{
         this.stateManager = stateManager;
 
         application.getInputManager().setCursorVisible(true);
+        
+        synchronized(GuiInterfaceHandler.getInstance()){
+            display = GuiInterfaceHandler.getInstance().getDisplay();
 
-        display = new NiftyJmeDisplay(app.getAssetManager(), app.getInputManager(), app.getAudioRenderer(), app.getGuiViewPort());
+            nifty = GuiInterfaceHandler.getInstance().getNifty();
+            ((AbstractMenuScreenController)nifty.getScreen("start").
+                    getScreenController()).setListener(this);
+            ((AbstractMenuScreenController)nifty.getScreen("startGame").
+                    getScreenController()).setListener(this);
+            ((AbstractMenuScreenController)nifty.getScreen("ConnectToGame").
+                    getScreenController()).setListener(this);
+            nifty.gotoScreen("start");
 
-        nifty = display.getNifty();
-        nifty.fromXml("Interface/menu.xml", "start");
-        ((AbstractMenuScreenController)nifty.getScreen("start").
-                getScreenController()).setListener(this);
-        ((AbstractMenuScreenController)nifty.getScreen("startGame").
-                getScreenController()).setListener(this);
-        ((AbstractMenuScreenController)nifty.getScreen("ConnectToGame").
-                getScreenController()).setListener(this);
-
-        application.getGuiViewPort().addProcessor(display);
-
+        }
 //        new ControlDefinitionBuilder("button") {{
 //            align(Align.Center);
 //            valign(VAlign.Center);
@@ -98,19 +91,24 @@ public class MenuState extends AbstractAppState implements MenuListener{
     @Override
     public void update(float tpf) {
         super.update(tpf);
+        if(nifty.getCurrentScreen().getScreenId().equals("hud")){
+            nifty.gotoScreen("start");
+        }
     }
 
     @Override
     public void cleanup() {
-        super.cleanup();
+        synchronized(GuiInterfaceHandler.getInstance()){
+//            super.cleanup();
+//
+//            nifty.exit();
+//            application.getViewPort().removeProcessor(display);
+//            application.getInputManager().setCursorVisible(false);
+//
+//            nifty = null;
 
-        nifty.exit();
-        application.getViewPort().removeProcessor(display);
-        application.getInputManager().setCursorVisible(false);
-
-        nifty = null;
-
-        LOG.fine("cleanup MenuGui");
+    //        LOG.fine("cleanup MenuGui");
+        }
     }
 
 
@@ -125,19 +123,15 @@ public class MenuState extends AbstractAppState implements MenuListener{
     public void triggerdConnectToGame() {
         System.out.println("triggerdConnectToGame");
         nifty.gotoScreen("ConnectToGame");
-
-        CurrentPlayer.getInstance().setName(
-                nifty.getCurrentScreen().findNiftyControl(
-                "TF_name", TextField.class).getDisplayedText());
     }
 
     @Override
     public void triggerdCreateGame() {
         System.out.println("triggerdCreateGame");
 
-        CurrentPlayer.getInstance().setName(
-                nifty.getCurrentScreen().findNiftyControl(
-                "TF_name", TextField.class).getDisplayedText());
+//        CurrentPlayer.getInstance().setName(
+//                nifty.getCurrentScreen().findNiftyControl(
+//                "TF_name", TextField.class).getDisplayedText());
     }
 
     @Override
@@ -176,7 +170,14 @@ public class MenuState extends AbstractAppState implements MenuListener{
         System.out.println("triggerdConnectToGame_connect");
         String ip = ((TextField)nifty.getScreen("ConnectToGame").findNiftyControl("TF_IPaddress", TextField.class)).getDisplayedText();
         String port = ((TextField)nifty.getScreen("ConnectToGame").findNiftyControl("TF_port", TextField.class)).getDisplayedText();
-
+        
+        CurrentPlayer.getInstance().setName(
+                nifty.getCurrentScreen().findNiftyControl(
+                "TF_name", TextField.class).getDisplayedText());
+        
+        ImageSelect select = nifty.getCurrentScreen().findNiftyControl("#imageSelect", ImageSelect.class);
+        CurrentPlayer.getInstance().setIndexOfAvatar(select.getSelectedImageIndex());
+        
         System.out.println("ip=" + ip + "port= "+port);
         try {
             Client client = Network.connectToServer(ip, Integer.parseInt(port));
@@ -189,7 +190,7 @@ public class MenuState extends AbstractAppState implements MenuListener{
             System.err.println("error connect");
         }
     }
-
+    
     @Override
     public void triggerdCreateGame_create() {
         System.out.println("triggerdCreateGame_create");

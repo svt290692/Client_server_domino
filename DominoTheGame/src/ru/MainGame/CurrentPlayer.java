@@ -13,8 +13,17 @@ import java.util.Random;
  */
 public class CurrentPlayer {
     private String name;
+    int indexOfAvatar;
     private Client ClientOfCurSession;
 
+    public int getIndexOfAvatar() {
+        return indexOfAvatar;
+    }
+
+    public void setIndexOfAvatar(int indexOfAvatar) {
+        this.indexOfAvatar = indexOfAvatar;
+    }
+    
     public String getName() {
         return name;
     }

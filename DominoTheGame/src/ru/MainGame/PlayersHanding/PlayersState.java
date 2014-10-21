@@ -20,6 +20,7 @@ import com.jme3.network.Message;
 import com.jme3.network.MessageListener;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import de.lessvoid.nifty.elements.Element;
 import de.lessvoid.nifty.tools.Color;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,12 +28,17 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 import ru.MainGame.CurrentPlayer;
 import ru.MainGame.DiceNumbers;
 import ru.MainGame.Events.StepEvent;
+import ru.MainGame.GameStarter;
+import ru.MainGame.GameState;
 import ru.MainGame.GlobalLogConfig;
+import ru.MainGame.Gui.GuiInterfaceHandler;
 import ru.MainGame.Gui.MenuState;
 import ru.MainGame.HeapState;
 import ru.MainGame.Network.FromBothSides.ExtendedSpecificationMessage;
@@ -62,8 +68,10 @@ public class PlayersState extends AbstractAppState{
     private final HeapState heap;
     private final TableState table;
     private final Rules rules;
-
+    private final GameState gameState;
     private MainPlayer mainPlayer;
+    
+    PickingListener mMouseListener;
 
     private static final Logger LOG = Logger.getLogger(PlayersState.class.getName());
 
@@ -89,11 +97,13 @@ public class PlayersState extends AbstractAppState{
     private final Queue<Message> queueUnprocessedMessages = new ConcurrentLinkedQueue<>();
     private final List<AbstractPlayer> mAllPlayers = new LinkedList<>();
     private Queue<String> queuePlayersToAllowSteps = null;
+    
 
-    public PlayersState(HeapState heap, TableState table, Rules rules) {
+    public PlayersState(HeapState heap, TableState table, Rules rules,GameState gameState) {
 	this.heap = heap;
 	this.table = table;
 	this.rules = rules;
+        this.gameState = gameState;
         GlobalLogConfig.initLoggerFromGlobal(LOG);
     }
     
@@ -126,18 +136,21 @@ public class PlayersState extends AbstractAppState{
         }
 
 	initInput();
-        mainPlayer.getInterface().addPlayerToTopPanel(CurrentPlayer.getInstance().getName(), "Not ready",true);
+        mainPlayer.getInterface().addPlayerToTopPanel(
+                CurrentPlayer.getInstance().getName(), "Not ready",
+                CurrentPlayer.getInstance().getIndexOfAvatar(),true);
+//        markToClearInterface.set(true);
     }
     
     private void initInput(){
-        PickingListener listener = new PickingListener();
+        mMouseListener = new PickingListener();
 
 	inputManager.addMapping(MappingsToInput.PICK.map,
 		new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
         inputManager.addMapping(MappingsToInput.CLEAR.map,
 		new MouseButtonTrigger(MouseInput.BUTTON_RIGHT));
 
-	inputManager.addListener(listener,MappingsToInput.PICK.map,MappingsToInput.CLEAR.map);
+	inputManager.addListener(mMouseListener,MappingsToInput.PICK.map,MappingsToInput.CLEAR.map);
     }
     
     @Override
@@ -149,10 +162,11 @@ public class PlayersState extends AbstractAppState{
         for(AbstractPlayer player : mAllPlayers){
             player.UpdateFromApplication();
         }
-//        if(isNetGameStarted == false){
-            if(!queueUnprocessedMessages.isEmpty())
-                resiveNewMessagesAppProcess();
-//        }
+
+        if(!queueUnprocessedMessages.isEmpty())
+            resiveNewMessagesAppProcess();
+        
+        
     }
 
     private void resiveNewMessagesAppProcess(){
@@ -165,19 +179,20 @@ public class PlayersState extends AbstractAppState{
                             sApp.getRootNode(), heap, extendedMessage.getWhoSend()));
                     
                     String status = null;
-                    switch(extendedMessage.getStatus()){
+                    switch(extendedMessage.getStatusPlayer()){
                         case READY_TO_PLAY: status = "Ready";break;
                         case NOT_READY: status = "Not ready";break;
                         case IN_GAME: status = "";break;
                     }
-                    
-                    mainPlayer.getInterface().addPlayerToTopPanel(extendedMessage.getWhoSend(),status,false);
+                    int index = (Integer)extendedMessage.getRestrictedObject();
+                    mainPlayer.getInterface().addPlayerToTopPanel(
+                            extendedMessage.getWhoSend(),status,index,false);
                     notifyAll();
                 }
             }
             else if(extendedMessage.getSpecification().equals(MessageSpecification.NEW_STATUS)){
                 String status = null;
-                switch(extendedMessage.getStatus()){
+                switch(extendedMessage.getStatusPlayer()){
                     case READY_TO_PLAY: status = "Ready";break;
                     case NOT_READY: status = "Not ready";break;
                     case IN_GAME: status = "";break;
@@ -246,7 +261,14 @@ public class PlayersState extends AbstractAppState{
     
     @Override
     public void cleanup() {
+//        mainPlayer.getInterface().cleanTopPanel();
+        if(mainPlayer != null)
         mainPlayer.killPlayer();
+        
+        inputManager.deleteMapping(MappingsToInput.PICK.map);
+        inputManager.deleteMapping(MappingsToInput.CLEAR.map);
+        inputManager.removeListener(mMouseListener);
+        
     }
 
     private class PickingListener implements ActionListener{
@@ -325,13 +347,22 @@ public class PlayersState extends AbstractAppState{
                         message.getSpecification().equals(MessageSpecification.NEW_STATUS)||
                         message.getSpecification().equals(MessageSpecification.DISCONNECT)){
                     
-                    
                     if(!(message.getWhoSend().equals(CurrentPlayer.getInstance().getName())))
                     queueUnprocessedMessages.add(message);
                     
                 }
                 else if(message.getSpecification().equals(MessageSpecification.STEP)){
                     queueUnprocessedMessages.add(message);
+                }else if(message.getSpecification().equals(MessageSpecification.KICK)){
+                    JOptionPane.showMessageDialog(null, message.getMessage());
+                    sApp.stop();
+//                    timeToOut.set(true);
+//                    GuiInterfaceHandler.getInstance().getNifty().exit();
+//                    GuiInterfaceHandler.getInstance().getNifty().fromXml(
+//                            "Interface/menu.xml", "start");
+
+//                    sApp.getStateManager().detach(gameState);
+//                    sApp.getStateManager().attach(new MenuState());
                 }
             }
             else if(m instanceof StartGameMessage){

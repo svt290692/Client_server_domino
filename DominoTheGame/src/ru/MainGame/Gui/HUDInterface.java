@@ -13,6 +13,7 @@ import de.lessvoid.nifty.builder.ControlBuilder;
 import de.lessvoid.nifty.builder.ControlDefinitionBuilder;
 import de.lessvoid.nifty.builder.EffectBuilder;
 import de.lessvoid.nifty.builder.ElementBuilder;
+import de.lessvoid.nifty.builder.ImageBuilder;
 import de.lessvoid.nifty.builder.PanelBuilder;
 import de.lessvoid.nifty.builder.TextBuilder;
 import de.lessvoid.nifty.controls.Button;
@@ -50,22 +51,27 @@ public class HUDInterface{
     }
 
     public void initialize(){
+        synchronized(GuiInterfaceHandler.getInstance()){
+            if(null == display){
+                LOG.log(Level.SEVERE, "display of the gui in hud is not ready to start ERROR!!!!");
+                sApp.stop();
+            }
+            
+            nifty = display.getNifty();
+            nifty.gotoScreen("hud");
+//            cleanTopPanel();
+//            nifty.fromXml("Interface/hud.xml", "hudstart");
+    //        nifty.gotoScreen("hudstart");
+//
+//            sApp.getGuiViewPort().addProcessor(display);
+            ((HUDScreenController)nifty.getScreen("hud").getScreenController()).setListener(new ActionListener() {
 
-        if(null == display){
-            LOG.log(Level.SEVERE, "display of the gui in hud is not ready to start ERROR!!!!");
-            sApp.stop();
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        readyPushed();
+                    }
+                });
         }
-        nifty = display.getNifty();
-        nifty.fromXml("Interface/hud.xml", "start");
-
-        ((HUDScreenController)nifty.getCurrentScreen().getScreenController()).setListener(new ActionListener() {
-
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    readyPushed();
-                }
-            });
-
 //        new ControlDefinitionBuilder("player") {{
 //            align(Align.Center);
 //            valign(VAlign.Center);
@@ -109,7 +115,6 @@ public class HUDInterface{
 //            }});
 //        }}.registerControlDefintion(nifty);
         
-        sApp.getGuiViewPort().addProcessor(display);
         
 //        new PanelBuilder("panelka"){{
 //            childLayout(ChildLayoutType.Vertical);
@@ -125,12 +130,12 @@ public class HUDInterface{
 ////                text("2Str");
 ////                valign(VAlign.Bottom);
 ////            }});
-//        }}.build(nifty, nifty.getCurrentScreen(), nifty.getCurrentScreen().findElementByName("topPanel"));
+//        }}.build(nifty, nifty.getScreen("hud"), nifty.getScreen("hud").findElementByName("topPanel"));
         
     }
     
     public void changeStatus(String player,String status){
-        Label l = ((Label)nifty.getCurrentScreen().findElementByName("state" + player).getNiftyControl(Label.class));
+        Label l = ((Label)nifty.getScreen("hud").findElementByName("state" + player).getNiftyControl(Label.class));
         if(l != null){
             l.setText(status);
             System.err.println("!!!!!ChangeStatus of "+ player + " to " + l.getText());
@@ -140,20 +145,21 @@ public class HUDInterface{
     
 
     public void clean(){
-
-        nifty.exit();
-        sApp.getViewPort().removeProcessor(display);
-        sApp.getInputManager().setCursorVisible(false);
-
-        nifty = null;
-        display = null;
+//        synchronized(GuiInterfaceHandler.getInstance()){
+//            nifty.exit();
+//            sApp.getViewPort().removeProcessor(display);
+//            sApp.getInputManager().setCursorVisible(false);
+//
+//            nifty = null;
+//    //        display = null;
+//        }
     }
 
     /**
      * add special player element with name and status
      * @param name 
      */
-    public void addPlayerToTopPanel(final String name,final String status,final boolean isMainPlayer){
+    public void addPlayerToTopPanel(final String name,final String status,final int indexOfAvatar,final boolean isMainPlayer){
         
     new PanelBuilder(PLAYER+name){{
         childLayout(ElementBuilder.ChildLayoutType.Center);
@@ -162,16 +168,25 @@ public class HUDInterface{
         if(isMainPlayer)
             backgroundColor("#33ff3323");
         
+        image(new ImageBuilder("avatar"+name){{
+            filename("/Interface/Images/avatar"+indexOfAvatar+".png");
+            width("60px");
+            height("60px");
+            alignLeft();
+            valignCenter();
+        }});
         control(new LabelBuilder("name"+name){{
             text(name);
             width("*");
             valignTop();
+            alignCenter();
             valign(ElementBuilder.VAlign.Top);
         }});
         control(new LabelBuilder("state"+name){{
             text(status);
             width("*");
             valignBottom();
+            alignCenter();
             valign(ElementBuilder.VAlign.Bottom);
         }});
         onStartScreenEffect(new EffectBuilder("move"){{
@@ -184,12 +199,16 @@ public class HUDInterface{
             effectParameter("mode", "out");
             effectParameter("direction", "left");
         }});
-        }}.build(nifty, nifty.getCurrentScreen(), nifty.getCurrentScreen().findElementByName("topPanel"));
+        }}.build(nifty, nifty.getScreen("hud"), nifty.getScreen("hud").findElementByName("topPanel"));
     
     }
     
+    public boolean isTopPanelEmpty(){
+        return (nifty.getScreen("hud").findElementByName("topPanel").getElements().isEmpty());
+    }
+    
     public void cleanTopPanel(){
-        for(Element e : nifty.getCurrentScreen().findElementByName("topPanel").getElements()){
+        for(Element e : nifty.getScreen("hud").findElementByName("topPanel").getElements()){
             e.markForRemoval();
         }
     }
@@ -199,7 +218,7 @@ public class HUDInterface{
      * @param name 
      */
     public void removePlayer(String name){
-        Element el = nifty.getCurrentScreen().findElementByName(PLAYER + name);
+        Element el = nifty.getScreen("hud").findElementByName(PLAYER + name);
         if(el != null)
         el.markForRemoval();
     }
@@ -220,8 +239,8 @@ public class HUDInterface{
                 alignLeft();
                 valignCenter();
             }});
-        }}.build(nifty, nifty.getCurrentScreen(),
-        nifty.getCurrentScreen().findElementByName("toMenu"));
+        }}.build(nifty, nifty.getScreen("hud"),
+        nifty.getScreen("hud").findElementByName("toMenu"));
     }
     
     public String getCurrentReadyButtonText(){
@@ -229,11 +248,11 @@ public class HUDInterface{
     }
     
     public void readyPushed(){
-//        nifty.getCurrentScreen().findElementByName("ready").markForRemoval();
+//        nifty.getScreen("hud").findElementByName("ready").markForRemoval();
     }
     
     public void removeCurButtonInMenu(EndNotify end){
-        Element el =  nifty.getCurrentScreen().findElementByName("ready");
+        Element el =  nifty.getScreen("hud").findElementByName("ready");
             if(end != null)
                 el.markForRemoval(end);
             else

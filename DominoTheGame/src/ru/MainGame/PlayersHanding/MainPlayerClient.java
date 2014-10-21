@@ -20,6 +20,7 @@ import javax.swing.JOptionPane;
 import ru.MainGame.CurrentPlayer;
 import ru.MainGame.Events.StepEvent;
 import ru.MainGame.GlobalLogConfig;
+import ru.MainGame.Gui.GuiInterfaceHandler;
 import ru.MainGame.Gui.HUDInterface;
 import ru.MainGame.Gui.MenuState;
 import ru.MainGame.HeapState;
@@ -69,7 +70,10 @@ public class MainPlayerClient extends MainPlayer{
 
         mClient.start();
 
-        mInterface = new HUDInterface(sApp, MenuState.getDisplay()){
+        mInterface = new HUDInterface(sApp, GuiInterfaceHandler.getInstance().getDisplay()){
+//            {
+//                cleanTopPanel();
+//            }
             @Override
             public void readyPushed() {
                 super.readyPushed();
@@ -106,6 +110,12 @@ public class MainPlayerClient extends MainPlayer{
             }
         };
         mInterface.initialize();
+//        mInterface.cleanTopPanel();
+        try {
+            Thread.sleep(10);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(MainPlayerClient.class.getName()).log(Level.SEVERE, null, ex);
+        }
         mInterface.makeButtonInButtonLayer("Ready");
     }
 
@@ -120,8 +130,6 @@ public class MainPlayerClient extends MainPlayer{
     public void addClientStateListener(ClientStateListener listener){
         mClient.addClientStateListener(listener);
     }
-    
-    
     
     @Override
     protected void endOfStep(StepEvent stepEvent) {
@@ -161,11 +169,13 @@ public class MainPlayerClient extends MainPlayer{
         mClient.send(message);
     }
 
+    
     private class Handler implements MessageListener<Client>, ErrorListener<Client>, ClientStateListener{
 
         @Override
         public void messageReceived(Client source, Message m) {
-            System.out.println("Message resive :" + m);
+//            System.out.println("Message resive :" + m);
+            //TODO ?
         }
 
         @Override
@@ -179,6 +189,7 @@ public class MainPlayerClient extends MainPlayer{
             message.setWhoSend(CurrentPlayer.getInstance().getName());
             message.setSpecification(MessageSpecification.INITIALIZATION);
             message.setStatusPlayer(StatusPlayer.NOT_READY);
+            message.setRestrictedObject(new Integer(CurrentPlayer.getInstance().getIndexOfAvatar()));
             mClient.send(message);
         }
 

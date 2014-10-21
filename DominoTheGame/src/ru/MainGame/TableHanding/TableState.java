@@ -27,7 +27,6 @@ public class TableState extends AbstractAppState {
 
     private Spatial firstDice = null;
 
-
     private Node mTableNode;
     private Node rootNode;
 
@@ -56,6 +55,7 @@ public class TableState extends AbstractAppState {
 
     @Override
     public void cleanup() {
+        
     }
 
     public TableState(HeapState heap) {

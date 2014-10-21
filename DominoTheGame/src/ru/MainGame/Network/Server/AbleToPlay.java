@@ -10,7 +10,16 @@ package ru.MainGame.Network.Server;
  */
 public class AbleToPlay {
     private String myName;
+    private int indexOfAvatar;
 
+    public int getIndexOfAvatar() {
+        return indexOfAvatar;
+    }
+
+    public void setIndexOfAvatar(int indexOfAvatar) {
+        this.indexOfAvatar = indexOfAvatar;
+    }
+    
     public AbleToPlay() {
 	this.myName = null;
     }
