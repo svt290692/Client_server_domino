@@ -38,6 +38,7 @@ public class DominoApp extends SimpleApplication {
         GuiInterfaceHandler.getInstance().setNifty(nifty);
         getGuiViewPort().addProcessor(display);
         
+        setPauseOnLostFocus(false);
         
         stateManager.attach(new MenuState());
 

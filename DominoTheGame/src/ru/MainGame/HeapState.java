@@ -112,29 +112,27 @@ public class HeapState extends AbstractAppState{
     }
 
     private void initMyNode(){
-        int countFigurInLine = 7;
         int numDice = 0;
         float widthDist = MDominoWidth;
         float heightDist = MDominoHeight;
         Vector3f dropPoint = new Vector3f(0,TableHeight,0);
-        while(countFigurInLine >= 0){
+        for(int j = 0; j < 4;j++){
 
-        for(int i = 0; i < countFigurInLine;i++){
+        for(int i = 0; i < 6;i++){
 
         Spatial DiceModel = listAllDices.get(numDice);
 
         DiceModel.scale(0.04f);
-	DiceModel.setLocalRotation(new Quaternion().fromAngles(-90 * FastMath.DEG_TO_RAD, 0, 0));
+	DiceModel.setLocalRotation(new Quaternion().fromAngles(90 * FastMath.DEG_TO_RAD, 0, 0));
         DiceModel.setLocalTranslation(dropPoint);
 
         myNode.attachChild(DiceModel);
 
         numDice++;
-        dropPoint.z -= heightDist;
-        }
-        countFigurInLine--;
         dropPoint.x += widthDist;
-        dropPoint.z = 0;
+        }
+        dropPoint.z -= heightDist;
+        dropPoint.x = 0;
 	}
     }
 }

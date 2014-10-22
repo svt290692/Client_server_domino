@@ -17,6 +17,7 @@ import com.jme3.cinematic.events.CinematicEventListener;
 import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Spatial;
+import de.lessvoid.nifty.EndNotify;
 
 /**
  *
@@ -26,6 +27,7 @@ public class DiceSimpleAnimator implements DiceAnimator{
     private final Spatial mDice;
     private final Transform firstPlace;
     private final Transform endPlace;
+    private EndNotify endAction = new EndNotify(){@Override public void perform() {}};
     
     public DiceSimpleAnimator(Spatial mDice, Transform firstPlace, Transform endPlace) {
         this.mDice = mDice;
@@ -37,48 +39,31 @@ public class DiceSimpleAnimator implements DiceAnimator{
     public void doAnimation(final boolean finalReplace) {
         final AnimationFactory factory = new AnimationFactory(8, "anim");
         final Transform takeOff = new Transform(
-                new Vector3f(firstPlace.getTranslation().x,
-                firstPlace.getTranslation().y + 0.4f,
-                firstPlace.getTranslation().z),
+                new Vector3f((endPlace.getTranslation().x - firstPlace.getTranslation().x) / 2 ,
+                firstPlace.getTranslation().y + 0.15f,
+                endPlace.getTranslation().z - ((endPlace.getTranslation().z - firstPlace.getTranslation().z) / 2)),
                 endPlace.getRotation().clone(), mDice.getLocalScale());
         
-        factory.addTimeTransform(0, firstPlace);
-        factory.addTimeTransform(1, takeOff);
-        factory.addTimeTranslation(3, endPlace.getTranslation().clone().setY(endPlace.getTranslation().y + 0.5f));
-        factory.addTimeTransform(4, endPlace);
+        factory.addTimeTransform(0f, firstPlace);
+        factory.addTimeTransform(0.5f, takeOff);
+//        factory.addTimeTranslation(2, endPlace.getTranslation().clone().setY(endPlace.getTranslation().y + 0.5f));
+        factory.addTimeTransform(1f, endPlace);
 
         final AnimControl control = new AnimControl();
         final Animation anim = factory.buildAnimation();
         control.addAnim(anim);
         mDice.addControl(control);
-//        System.out.println(control.getAnimationNames());
-        
-//        final AnimationEvent newEvent = new AnimationEvent(mDice, "anim", LoopMode.DontLoop);
-//        newEvent.addListener(new MyAnimPostListener(anim, control,finalReplace));
+
         control.addListener(new MyAnimPostListener(anim, control,finalReplace));
+        AnimationEventCounter.getInstance().captureAnimationSlot();
         control.createChannel().setAnim("anim");
-        
-//        newEvent.play();
-//        mCinematic.addCinematicEvent(0, newEvent);
-//
-//        
-//        mCinematic.addListener(new CinematicEventListener() {
-//        public void onPlay(CinematicEvent cinematic) {
-//        }
-//
-//        public void onPause(CinematicEvent cinematic) {
-//        }
-//
-//        public void onStop(CinematicEvent cinematic) {
-//            if(finalReplace)
-//            model.setLocalTransform(endPlace);
-//            
-//            control.clearChannels();
-//            model.removeControl(control);
-////            mCinematic.removeCinematicEvent(newEvent);
-//        }});
-//        mCinematic.play();
+
     }
+
+    public void setEndAction(EndNotify endAction) {
+        this.endAction = endAction;
+    }
+    
     class MyAnimPostListener implements AnimEventListener{
         
         final Animation anim;
@@ -90,28 +75,24 @@ public class DiceSimpleAnimator implements DiceAnimator{
             this.control = control;
             this.finalReplace = finalReplace;
         }
-//        public void onPlay(CinematicEvent cinematic) {
-//        }
-//
-//        public void onPause(CinematicEvent cinematic) {
-//        }
-//
-//        public void onStop(CinematicEvent cinematic) {
-//            
-//        }
 
+        @Override
         public void onAnimCycleDone(AnimControl control, AnimChannel channel, String animName) {
             if(finalReplace)
             control.getSpatial().setLocalTransform(endPlace);
+            
+            AnimationEventCounter.getInstance().releaseAnimationSlot();
                 
             this.control.removeAnim(anim);
             mDice.removeControl(AnimControl.class);
+            endAction.perform();
         }
 
+        @Override
         public void onAnimChange(AnimControl control, AnimChannel channel, String animName) {
         }
-        
     }
+    
     @Override
     public String toString() {
         return "DiceSimpleAnimator{" + "mDice=" + mDice + ", firstPlace=" + firstPlace + ", endPlace=" + endPlace + '}';

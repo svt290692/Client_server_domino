@@ -16,14 +16,20 @@ import de.lessvoid.nifty.builder.ElementBuilder;
 import de.lessvoid.nifty.builder.ImageBuilder;
 import de.lessvoid.nifty.builder.PanelBuilder;
 import de.lessvoid.nifty.builder.TextBuilder;
+import de.lessvoid.nifty.controls.AbstractController;
 import de.lessvoid.nifty.controls.Button;
 import de.lessvoid.nifty.controls.Label;
 import de.lessvoid.nifty.controls.button.builder.ButtonBuilder;
 import de.lessvoid.nifty.controls.label.builder.LabelBuilder;
+import de.lessvoid.nifty.effects.EffectEventId;
 import de.lessvoid.nifty.elements.Element;
+import de.lessvoid.nifty.input.NiftyInputEvent;
+import de.lessvoid.nifty.screen.Screen;
 import de.lessvoid.nifty.tools.Color;
+import de.lessvoid.xml.xpp3.Attributes;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import ru.MainGame.GlobalLogConfig;
@@ -59,11 +65,7 @@ public class HUDInterface{
             
             nifty = display.getNifty();
             nifty.gotoScreen("hud");
-//            cleanTopPanel();
-//            nifty.fromXml("Interface/hud.xml", "hudstart");
-    //        nifty.gotoScreen("hudstart");
-//
-//            sApp.getGuiViewPort().addProcessor(display);
+
             ((HUDScreenController)nifty.getScreen("hud").getScreenController()).setListener(new ActionListener() {
 
                     @Override
@@ -72,66 +74,6 @@ public class HUDInterface{
                     }
                 });
         }
-//        new ControlDefinitionBuilder("player") {{
-//            align(Align.Center);
-//            valign(VAlign.Center);
-//            controller("de.lessvoid.nifty.controls.button.ButtonControl");
-//            inputMapping("de.lessvoid.nifty.input.mapping.MenuInputMapping");
-////            style("nifty-button");
-//            panel(new PanelBuilder() {{
-//                height("7.0%");
-//                width("70px");
-//                childLayout(ChildLayoutType.Vertical);
-//            onStartScreenEffect(new EffectBuilder("move"){{
-//                length(150);
-//                effectParameter("mode", "in");
-//                effectParameter("direction", "right");
-//            }});
-//            
-//            onEndScreenEffect(new EffectBuilder("move"){{
-//                length(150);
-//                effectParameter("mode", "out");
-//                effectParameter("direction", "left");
-//            }});
-//            
-//            style("#panel");
-//            
-//            control(new LabelBuilder("nameL"){{
-//                text(controlParameter("name"));
-//                valign(VAlign.Top);
-//            }});
-//            
-//            control(new LabelBuilder("stateL"){{
-//                text(controlParameter("state"));
-//                valign(VAlign.Bottom);
-//            }});
-//            
-//            backgroundColor(new Color(0.8f, 0.5f, 0.1f, 0.7f));
-//            focusable(false);
-////            text(new TextBuilder("#text") {{
-////            style("#text");
-////            text(controlParameter("label"));
-////            }});
-//            }});
-//        }}.registerControlDefintion(nifty);
-        
-        
-//        new PanelBuilder("panelka"){{
-//            childLayout(ChildLayoutType.Vertical);
-//            width("70px");
-//            height("8.0%");
-//            
-////            control(new LabelBuilder("name"){{
-////                text("1Str");
-////                valign(VAlign.Top);
-////            }});
-//            
-////            control(new LabelBuilder("state"){{
-////                text("2Str");
-////                valign(VAlign.Bottom);
-////            }});
-//        }}.build(nifty, nifty.getScreen("hud"), nifty.getScreen("hud").findElementByName("topPanel"));
-        
     }
     
     public void changeStatus(String player,String status){
@@ -155,6 +97,44 @@ public class HUDInterface{
 //        }
     }
 
+    public void makePopupText(final String text){
+        new LabelBuilder("popupText" + text){{
+            text(text);
+            font("/Interface/Fonts/popopFont.fnt");
+            color("#660000ff");
+//            width("*");
+            onStartScreenEffect(new EffectBuilder("fade"){{
+                    effectParameter("start", "#0");
+                    effectParameter("end", "#f");
+//                    startDelay(2000);
+                    length(1000);
+//                    alternateDisable("exit");
+//                    inherit(true);
+                }});
+                onEndScreenEffect(new EffectBuilder("fade"){{
+                    effectParameter("start", "#f");
+                    effectParameter("end", "#0");
+                    startDelay(6000);
+                    length(1000);
+//                    alternateDisable("exit");
+//                    inherit(false);
+//                    post(true);
+                    
+                }});
+            alignCenter();
+            valignCenter();
+            
+        }}.build(nifty, nifty.getScreen("hud"), nifty.getScreen("hud").
+                findElementByName("toText")).startEffect(EffectEventId.onStartScreen, new EndNotify() {
+
+            @Override
+            public void perform() {
+                nifty.getScreen("hud").findElementByName("popupText" + text).markForRemoval();
+            }
+        });
+        
+    }
+    
     /**
      * add special player element with name and status
      * @param name 
@@ -162,33 +142,63 @@ public class HUDInterface{
     public void addPlayerToTopPanel(final String name,final String status,final int indexOfAvatar,final boolean isMainPlayer){
         
     new PanelBuilder(PLAYER+name){{
-        childLayout(ElementBuilder.ChildLayoutType.Center);
+        childLayout(ElementBuilder.ChildLayoutType.Horizontal);
         width("25.0%");
         height("*");
-        if(isMainPlayer)
-            backgroundColor("#33ff3323");
+        style("nifty-panel");
+//        if(isMainPlayer)
+//            backgroundColor("#33ff3323");
         
         image(new ImageBuilder("avatar"+name){{
             filename("/Interface/Images/avatar"+indexOfAvatar+".png");
-            width("60px");
-            height("60px");
+            width("50px");
+            height("50px");
             alignLeft();
             valignCenter();
         }});
+ 
+        panel(new PanelBuilder("temp"+name){{
+        width("35.0%");
+        height("*");
+        childLayout(ChildLayoutType.Vertical);
+        
         control(new LabelBuilder("name"+name){{
             text(name);
             width("*");
-            valignTop();
+            valignCenter();
             alignCenter();
-            valign(ElementBuilder.VAlign.Top);
+//            valign(ElementBuilder.VAlign.Top);
         }});
+        
+        if(isMainPlayer)
+        control(new LabelBuilder("you"+name){{
+            text("(you)");
+            width("*");
+            valignCenter();
+            alignCenter();
+//            valign(ElementBuilder.VAlign.Top);
+        }});
+        }});
+        
+        panel(new PanelBuilder("temp"){{
+        width("35.0%");
+        height("*");
+        childLayout(ChildLayoutType.Vertical);
+        
         control(new LabelBuilder("state"+name){{
             text(status);
             width("*");
-            valignBottom();
+            height("30px");
+            valignCenter();
             alignCenter();
-            valign(ElementBuilder.VAlign.Bottom);
+//            valign(ElementBuilder.VAlign.Bottom);
         }});
+        }});
+        
+        
+        
+        
+        
         onStartScreenEffect(new EffectBuilder("move"){{
             length(150);
             effectParameter("mode", "in");

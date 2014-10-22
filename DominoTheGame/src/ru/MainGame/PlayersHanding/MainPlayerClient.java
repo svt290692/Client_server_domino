@@ -71,12 +71,13 @@ public class MainPlayerClient extends MainPlayer{
         mClient.start();
 
         mInterface = new HUDInterface(sApp, GuiInterfaceHandler.getInstance().getDisplay()){
-//            {
-//                cleanTopPanel();
-//            }
             @Override
             public void readyPushed() {
                 super.readyPushed();
+                //TEST
+//                mInterface.makePopupText("MEGATEXT!!!");
+                //END
+                
                 ExtendedSpecificationMessage message= new ExtendedSpecificationMessage();
                 message.setSpecification(MessageSpecification.NEW_STATUS);
                 message.setWhoSend(CurrentPlayer.getInstance().getName());

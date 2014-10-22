@@ -20,10 +20,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 import ru.MainGame.DominoApp;
 import ru.MainGame.Events.StepEvent;
 import ru.MainGame.Gui.HUDInterface;
 import ru.MainGame.HeapState;
+import ru.MainGame.TableHanding.DiceAnimator;
+import ru.MainGame.TableHanding.DiceSimpleAnimator;
 import ru.MainGame.TableHanding.Rules;
 import ru.MainGame.TableHanding.TableState;
 
@@ -46,8 +49,7 @@ public abstract class MainPlayer extends AbstractPlayer{
     private final String DICE_IN_TABLE = "I am In Table";
     private Spatial cursorDice = null;
     private Spatial selectedGuiDice = null;
-
-
+    
     protected final Rules rules;
 
     private final float dicesWidth;
@@ -144,7 +146,7 @@ public abstract class MainPlayer extends AbstractPlayer{
         //cam will not rotate if cursor dice exists
         sApp.getFlyByCamera().setEnabled(false);
 
-	rules.makeTips(inTable);
+	rules.TryMakeTips(inTable);
     }
     /**
      *
@@ -233,7 +235,7 @@ public abstract class MainPlayer extends AbstractPlayer{
     Spatial getCursorDice() {
 	return cursorDice;
     }
-
+    
     public boolean isCursorDiceExists(){
 	return cursorDice != null;
     }
@@ -269,14 +271,13 @@ public abstract class MainPlayer extends AbstractPlayer{
 //	}
     }
 
-    public boolean TakeFromHeapRandom(){
+    public Spatial TakeFromHeapRandom(){
         Spatial d = getHeap().getRandomDice();
-        if(null == d) return false;
 
         synchronized(Mutex){
             queueAddToScreenDices.add(d);
         }
-        return true;
+        return d;
     }
 
     private void makeGuiClone(Spatial dice){
@@ -356,6 +357,7 @@ public abstract class MainPlayer extends AbstractPlayer{
         synchronized (Mutex) {
             if (!queueAddToScreenDices.isEmpty()) {
                 Spatial s = queueAddToScreenDices.remove();
+                s.setLocalRotation(new Quaternion().fromAngles(-90 * FastMath.DEG_TO_RAD, 0, 0));
                 getNode().attachChild(s);
                 makeGuiClone(s);
                 sortDices();

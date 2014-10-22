@@ -18,7 +18,7 @@ import ru.MainGame.Events.StepEvent;
 public abstract class  Rules {
      public abstract void doStep(StepEvent event);
      public abstract void startGame(Spatial firstDice);
-     public abstract void makeTips(Spatial dice);
+     public abstract boolean TryMakeTips(Spatial dice);
      public abstract boolean isGameStarted();
      public abstract StepEvent takeStepFromTip(Spatial tip);
      public abstract void removeTips();

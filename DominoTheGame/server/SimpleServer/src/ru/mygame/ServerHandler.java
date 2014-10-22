@@ -92,8 +92,7 @@ public class ServerHandler implements ConnectionListener, MessageListener<Hosted
 
             switch(msg.getSpecification()){
                 case INITIALIZATION:
-		    onInitResv(player, msg);
-		    sendInfoTo(source);break;
+		    onInitResv(player, msg);break;
                 case NEW_STATUS:
                     onNewStatusResv(player, msg);break;
                 case STEP:
@@ -107,31 +106,7 @@ public class ServerHandler implements ConnectionListener, MessageListener<Hosted
             LOG.log(Level.WARNING, "server resive undefined message :{0}", m.getClass().getName());
         }
     }
-//    private void onRequestReceive(HostedPlayer from,ExtendedSpecificationMessage msg){
-//        ExtendedSpecificationMessage message = new ExtendedSpecificationMessage();
-//        
-//        message.setSpecification(MessageSpecification.ALLOW);
-//        message.setWhoSend("Server");
-//        
-//        check:{
-//            if(queuePlayers.asList().size() > 2){
-//                message.setSpecification(MessageSpecification.DENIE);
-//                message.setMessage("The game already Full");
-//                break check;
-//            }
-//
-//            for(HostedPlayer p : mConnectedPlayers){
-//                if(p.getName().equals(msg.getWhoSend())){
-//                    message.setSpecification(MessageSpecification.DENIE);
-//                    message.setMessage("Player with this name already in game!"
-//                            + " Please enter another name");
-//                    break check;
-//                }
-//            }
-//        }
-//        from.getmConnection().send(message);
-//    }
-    
+
     private void sendInfoTo(HostedConnection conn){
 //	List<String> names = new ArrayList<>();
 	for(AbleToPlay p : queuePlayers.asList()){
@@ -179,6 +154,7 @@ public class ServerHandler implements ConnectionListener, MessageListener<Hosted
 	if(msg.getStatusPlayer() != null)
 	player.setStatus(msg.getStatusPlayer());
 	mServer.broadcast(msg);
+        sendInfoTo(player.getmConnection());
     }
     
     private void onNewStatusResv(HostedPlayer player,ExtendedSpecificationMessage msg){
@@ -241,29 +217,32 @@ public class ServerHandler implements ConnectionListener, MessageListener<Hosted
         
         String firstPlayer = null;
         
+        int biggest = -1;
         for(Map.Entry<String, List<NumsOfDice> > e : message.getStartGamePart().entrySet()){
-            int biggest = -1;
             for(NumsOfDice d: e.getValue()){
                 if(d.getLeft() == d.getRight()){
                     if(d.getLeft() > biggest){
-                        biggest =d.getLeft();
+                        biggest = d.getLeft();
                         firstPlayer = e.getKey();
                     }
                 }
             }
-            if(null == firstPlayer){
-                biggest = 0;
-                for(NumsOfDice d: e.getValue()){
-                    int summ = (d.getLeft() + d.getRight());
-                    
-                    if(summ  > biggest){
-                        biggest = summ;
-                        firstPlayer = e.getKey();
-                    }
-                }
-            }
-            
         }
+        if(null == firstPlayer){
+        biggest = 0;
+        for(Map.Entry<String, List<NumsOfDice> > e : message.getStartGamePart().entrySet()){
+            
+            for(NumsOfDice d: e.getValue()){
+                int summ = (d.getLeft() + d.getRight());
+
+                if(summ  > biggest){
+                    biggest = summ;
+                    firstPlayer = e.getKey();
+                }
+            }   
+        }
+        }
+        
         List<String> queue = new LinkedList<>();
         queue.add(firstPlayer);
         

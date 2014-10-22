@@ -65,9 +65,9 @@ public class ClassicRules extends Rules{
     public void doStep(StepEvent event)throws IllegalStateException,IllegalArgumentException{
 	if(!isStepCorrect(event))
 	    throw new IllegalStateException(" Numbers of dices is not identical");
-
+        
 	ReplaceEvent replaceEvent = convertAndCommitEvent(event,true);
-        mTable.attachDice(replaceEvent, false,true);
+        mTable.attachDice(replaceEvent, true,true);
     }
 
     private boolean isStepCorrect(StepEvent event)throws IllegalArgumentException{
@@ -611,9 +611,10 @@ public class ClassicRules extends Rules{
 	return new ReplaceEvent(diceInTable, diceInHand, tablePlace, dicePlace);
     }
 
-    public void makeTips(Spatial dice) {
+    @Override
+    public boolean TryMakeTips(Spatial dice) {
 	removeTips();
-
+        boolean succes = false;
 	StepEvent leftTip = null;
 	StepEvent rightTip = null;
 	Dice controll = dice.getControl(Dice.class);
@@ -635,6 +636,7 @@ public class ClassicRules extends Rules{
 	    else if(isStepCorrect(rightCheckToRight)) rightTip = rightCheckToRight;
 	}
 	if(leftTip != null){
+            succes = true;
 	    Spatial tip = getTipFrom(assetManager, dice);
 	    tip.setUserData(MAPPING_PREF_TO_LEFT, true);
 	    StepEvent tipEvent = new
@@ -646,6 +648,7 @@ public class ClassicRules extends Rules{
 	    this.leftTip = tip;
 	}
 	if(rightTip != null){
+            succes = true;
 	    Spatial tip = getTipFrom(assetManager, dice);
 	    tip.setUserData(MAPPING_PREF_TO_LEFT, false);
 	    StepEvent tipEvent = new
@@ -656,6 +659,7 @@ public class ClassicRules extends Rules{
 	    tip.setUserData("tip",rightTip);
 	    this.rightTip = tip;
 	}
+        return succes;
     }
     /**
      *

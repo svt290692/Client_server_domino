@@ -102,6 +102,7 @@
         <layer id="mainPanel" childLayout="vertical" >
             <panel id="topPanel" childLayout="horizontal" backgroundColor="#cccccc12" width="*" x="264" y="58" valign="top" height="10.0%"/>
             <panel id="toMenu" childLayout="center" width="*" height="90.0%">
+                <panel id="toText" childLayout="vertical" backgroundColor="#cccccc12" valign="top" align="center" width="*" x="264" y="58" height="40.0%"/>
                 <panel id="innerPanel" childLayout="absolute" width="30.0%" valign="center" align="center" height="30%"/>
             </panel>
         </layer>

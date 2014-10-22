@@ -4,13 +4,18 @@
  */
 package ru.MainGame.PlayersHanding;
 
+import com.jme3.math.FastMath;
+import com.jme3.math.Quaternion;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 import ru.MainGame.HeapState;
+import ru.MainGame.TableHanding.DiceAnimator;
+import ru.MainGame.TableHanding.DiceSimpleAnimator;
 
 /**
  *
@@ -83,6 +88,7 @@ public abstract class AbstractPlayer{
             startPoint = (-((((size + 1) / 2) * dicesWidth) - dicesWidth / 2));
         }
         for (Spatial s : node.getChildren()) {
+            
             s.setLocalTranslation(startPoint, 0, 0);
             startPoint += dicesWidth;
         }
