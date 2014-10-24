@@ -13,6 +13,10 @@ public enum MessageSpecification {
     REQUEST,
     DISCONNECT,
     STEP,
+    GET_DICE_FROM_HEAP,
+    FISH,
+    EMPTY_HAND,
+    SCORE,
     NEW_STATUS,
     KICK;
 }

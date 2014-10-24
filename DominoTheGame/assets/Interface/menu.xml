@@ -90,9 +90,6 @@
                         <interact onClick="buttonPushed(CONNECT)" />
                     </control>
                 </panel>
-                
-                
-                
                 <image id="back" filename="/Interface/arrow.png" width="151px" x="-1px" y="-1px" valign="bottom" align="left" height="70px"/>
             </panel>
         </layer>

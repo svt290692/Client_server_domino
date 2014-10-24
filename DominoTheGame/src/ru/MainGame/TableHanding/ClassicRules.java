@@ -52,16 +52,19 @@ public class ClassicRules extends Rules{
 	this.assetManager = assetManager;
     }
 
+    @Override
     public boolean isGameStarted(){
 	return GameStarted;
     }
 
+    @Override
     public void startGame(Spatial firstDice){
 	GameStarted = true;
 	leftDice = rightDice = firstDice;
-	mTable.attachFirstDice(firstDice, false);
+	mTable.attachFirstDice(firstDice, true);
     }
 
+    @Override
     public void doStep(StepEvent event)throws IllegalStateException,IllegalArgumentException{
 	if(!isStepCorrect(event))
 	    throw new IllegalStateException(" Numbers of dices is not identical");

@@ -29,6 +29,9 @@ import de.lessvoid.nifty.tools.Color;
 import de.lessvoid.xml.xpp3.Attributes;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -47,6 +50,7 @@ public class HUDInterface{
     private static final Logger LOG = Logger.getLogger(HUDInterface.class.getName());
     private static final String PLAYER = "Player";
     private String textOfCurButton = null;
+    private HUDScreenController mController;
     static{
         GlobalLogConfig.initLoggerFromGlobal(LOG);
     }
@@ -66,7 +70,8 @@ public class HUDInterface{
             nifty = display.getNifty();
             nifty.gotoScreen("hud");
 
-            ((HUDScreenController)nifty.getScreen("hud").getScreenController()).setListener(new ActionListener() {
+            mController = ((HUDScreenController)nifty.getScreen("hud").getScreenController());
+            mController.setListener(new ActionListener() {
 
                     @Override
                     public void actionPerformed(ActionEvent e) {
@@ -77,7 +82,11 @@ public class HUDInterface{
     }
     
     public void changeStatus(String player,String status){
-        Label l = ((Label)nifty.getScreen("hud").findElementByName("state" + player).getNiftyControl(Label.class));
+        Element el = nifty.getScreen("hud").findElementByName("state" + player);
+        if(el == null)
+            return;
+        
+        Label l = ((Label)el.getNiftyControl(Label.class));
         if(l != null){
             l.setText(status);
             System.err.println("!!!!!ChangeStatus of "+ player + " to " + l.getText());
@@ -98,10 +107,18 @@ public class HUDInterface{
     }
 
     public void makePopupText(final String text){
+        
+        Element element = nifty.getScreen("hud").
+                findElementByName("popupText" + text);
+        if(element != null){
+            element.markForRemoval();
+            return;
+        }
+        
         new LabelBuilder("popupText" + text){{
             text(text);
             font("/Interface/Fonts/popopFont.fnt");
-            color("#660000ff");
+            color("#000000ff");
 //            width("*");
             onStartScreenEffect(new EffectBuilder("fade"){{
                     effectParameter("start", "#0");
@@ -132,7 +149,99 @@ public class HUDInterface{
                 nifty.getScreen("hud").findElementByName("popupText" + text).markForRemoval();
             }
         });
+    }
+    
+    public void removeGuiPbject(String name,EndNotify end){
+        Element element = nifty.getScreen("hud").
+                findElementByName(name);
+        if(element != null){
+            element.markForRemoval(end);
+        }
+    }
+    
+    public void makeScoreDeck(final Collection<String> stringsToPut,final boolean fish){
+        final Element el = (new PanelBuilder("Score"){{
+        childLayout(ElementBuilder.ChildLayoutType.Vertical);
         
+        backgroundImage("/Interface/Images/deck.jpg");
+        width("50.0%");
+        height("50%");
+        font("/Interface/Fonts/myDomFont.fnt");
+        
+        if(fish == true){
+            image(new ImageBuilder("fish"){{
+                
+            onStartScreenEffect(new EffectBuilder("move"){{
+            length(200);
+            effectParameter("mode", "in");
+            effectParameter("direction", "bottom");
+            }});
+            
+            onEndScreenEffect(new EffectBuilder("move"){{
+            length(200);
+            effectParameter("mode", "out");
+            effectParameter("direction", "bottom");
+            }});
+                
+            filename("/Interface/Images/fish.png");
+            }});
+        }
+        
+        for(String s : stringsToPut){
+            control(new LabelBuilder("scoreName" + s, s){{
+                font("/Interface/Fonts/myDomFont.fnt");
+            onStartScreenEffect(new EffectBuilder("move"){{
+            length(200);
+            effectParameter("mode", "in");
+            effectParameter("direction", "bottom");
+            }});
+            
+            onEndScreenEffect(new EffectBuilder("move"){{
+            length(200);
+            effectParameter("mode", "out");
+            effectParameter("direction", "bottom");
+            }});
+            }});
+        }
+        
+        control(new ButtonBuilder("closeScore", "Ok"){{
+        interactOnClick("onEndLookToScore()");
+            alignLeft();
+            valignCenter();
+            onStartScreenEffect(new EffectBuilder("move"){{
+            length(200);
+            effectParameter("mode", "in");
+            effectParameter("direction", "bottom");
+            }});
+            
+            onEndScreenEffect(new EffectBuilder("move"){{
+            length(200);
+            effectParameter("mode", "out");
+            effectParameter("direction", "bottom");
+            }});
+        
+        }});
+        
+        onStartScreenEffect(new EffectBuilder("move"){{
+            length(200);
+            effectParameter("mode", "in");
+            effectParameter("direction", "bottom");
+        }});
+        onEndScreenEffect(new EffectBuilder("move"){{
+            length(200);
+            effectParameter("mode", "out");
+            effectParameter("direction", "bottom");
+        }});
+        alignCenter();
+        valignCenter();
+        }}.build(nifty, nifty.getScreen("hud"), nifty.getScreen("hud").findElementByName("toMenu")));
+        mController.setEndLookToScoreNotify(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                el.markForRemoval();
+            }
+        });
     }
     
     /**
@@ -258,7 +367,6 @@ public class HUDInterface{
     }
     
     public void readyPushed(){
-//        nifty.getScreen("hud").findElementByName("ready").markForRemoval();
     }
     
     public void removeCurButtonInMenu(EndNotify end){

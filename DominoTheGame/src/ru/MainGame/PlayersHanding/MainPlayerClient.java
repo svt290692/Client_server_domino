@@ -154,6 +154,17 @@ public class MainPlayerClient extends MainPlayer{
             message.setMessage(isPrefToLeft ? "left" : "right");
         
         mClient.send(message);
+        
+        try{Thread.sleep(10);}catch(InterruptedException ignore){}
+        
+        if(getHand().isEmpty()){
+            mInterface.makePopupText("You're out!!!");
+            ExtendedSpecificationMessage msg = new ExtendedSpecificationMessage();
+            msg.setWhoSend(CurrentPlayer.getInstance().getName());
+            msg.setSpecification(MessageSpecification.EMPTY_HAND);
+            msg.setStatusPlayer(StatusPlayer.WATCHER);
+            CurrentPlayer.getInstance().getClientOfCurSession().send(msg);
+        }
     }
 
     @Override

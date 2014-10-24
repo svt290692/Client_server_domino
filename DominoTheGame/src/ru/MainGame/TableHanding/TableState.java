@@ -112,7 +112,7 @@ public class TableState extends AbstractAppState {
             if(Animate){ //ANIM
             DiceAnimator animator = new DiceSimpleAnimator(
                     dice,
-                    dice.getWorldTransform().clone(), center);
+                    dice.getWorldTransform().clone(), center.clone());
             animator.doAnimation(true);
         }
         else

@@ -11,5 +11,6 @@ package ru.MainGame.Network;
 public enum StatusPlayer {
     NOT_READY,
     READY_TO_PLAY,
+    WATCHER,
     IN_GAME;
 }

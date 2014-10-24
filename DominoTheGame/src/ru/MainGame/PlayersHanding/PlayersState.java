@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -35,6 +36,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import ru.MainGame.CurrentPlayer;
+import ru.MainGame.Dice;
 import ru.MainGame.DiceNumbers;
 import ru.MainGame.Events.StepEvent;
 import ru.MainGame.GameStarter;
@@ -96,7 +98,8 @@ public class PlayersState extends AbstractAppState{
 
     private boolean isNetGameStarted = false;
     private boolean isMainPlayerStepWait = false;
-    private boolean isNeedGoToHeep = false;
+    private boolean isCantStep = false;
+    private AtomicBoolean fish = new AtomicBoolean(false);
     
     private static List<PlayersPlaces> busyPlaces = new ArrayList<>();
     private final Queue<Message> queueUnprocessedMessages = new ConcurrentLinkedQueue<>();
@@ -164,29 +167,51 @@ public class PlayersState extends AbstractAppState{
 	    mainPlayer.setCursorDicePos(
 		    inputManager.getCursorPosition());
 	}
-        for(AbstractPlayer player : mAllPlayers){
-            player.UpdateFromApplication();
-        }
 
         if(!queueUnprocessedMessages.isEmpty())
             resiveNewMessagesAppProcess();
         
-        if(isNeedGoToHeep == true){
+        for(AbstractPlayer player : mAllPlayers){
+            player.UpdateFromApplication();
+        }
+        
+        if(isCantStep == true){
             Spatial dice = mainPlayer.TakeFromHeapRandom();
+            
             if(dice == null){
                 ExtendedSpecificationMessage msg = new ExtendedSpecificationMessage(
                         MessageSpecification.STEP, CurrentPlayer.getInstance().getName(),
                         StatusPlayer.IN_GAME, null);
                 CurrentPlayer.getInstance().getClientOfCurSession().send(msg);
+                mainPlayer.getInterface().makePopupText("You Check");
+                isCantStep = false;
             }else if(rules.TryMakeTips(dice) == true){
+                
+                NumsOfDice diceToSend = new NumsOfDice(
+                            dice.getControl(Dice.class).getLeftNum(),
+                            dice.getControl(Dice.class).getRightNum());
+                
                 rules.removeTips();
-                isNeedGoToHeep = false;
+                isCantStep = false;
                 mainPlayer.getInterface().makePopupText("Found!");
+                sendMyNewDiceFromHeap(diceToSend);
+            }else{
+                NumsOfDice diceToSend = new NumsOfDice(
+                            dice.getControl(Dice.class).getLeftNum(),
+                            dice.getControl(Dice.class).getRightNum());
+                sendMyNewDiceFromHeap(diceToSend);
             }
         }
-        
     }
 
+    private void sendMyNewDiceFromHeap(NumsOfDice dice){
+        ExtendedSpecificationMessage msg = new ExtendedSpecificationMessage(
+                        MessageSpecification.GET_DICE_FROM_HEAP,
+                        CurrentPlayer.getInstance().getName(),
+                        IN_GAME,dice);
+                CurrentPlayer.getInstance().getClientOfCurSession().send(msg);
+    }
+    
     private void turnNextPlayerStep(){
         if(queuePlayersToAllowSteps.element().equals(CurrentPlayer.getInstance().getName())){
             denieMainStep();
@@ -194,27 +219,76 @@ public class PlayersState extends AbstractAppState{
         
         mainPlayer.getInterface().changeStatus(queuePlayersToAllowSteps.element(),
                     "");
+        
+        
         queuePlayersToAllowSteps.add(queuePlayersToAllowSteps.remove());
+        
+        while(getPlayer(queuePlayersToAllowSteps.element()).getHand().isEmpty()){
+            queuePlayersToAllowSteps.remove();
+            if(queuePlayersToAllowSteps.isEmpty())
+                return;
+        }
+        
+        if(queuePlayersToAllowSteps.size() == 1 && 
+                queuePlayersToAllowSteps.element().equals(
+                CurrentPlayer.getInstance().getName())){
+            sendMyScoreToServer();
+            return;
+        }
+        
         mainPlayer.getInterface().changeStatus(queuePlayersToAllowSteps.element(),
                     "Move\n dominoes");
         if(queuePlayersToAllowSteps.element().equals(CurrentPlayer.getInstance().getName())){
-                allowMainStep();
-                
-                boolean isStepsExists = false;
-                for(Spatial s : mainPlayer.getHand()){
-                    if(rules.TryMakeTips(s) == true){
-                        isStepsExists = true;
-                        break;
-                    }
+            allowMainStep();
+
+            boolean isStepsExists = false;
+            for(Spatial s : mainPlayer.getHand()){
+                if(rules.TryMakeTips(s) == true){
+                    isStepsExists = true;
+                    break;
                 }
-                rules.removeTips();
-                if(isStepsExists)
-                    mainPlayer.getInterface().makePopupText("Your turn");
-                else{
+            }
+            rules.removeTips();
+            if(isStepsExists)
+                mainPlayer.getInterface().makePopupText("Your turn");
+            else{
+                if(mainPlayer.getHand().size() > 0 && heap.getNode().getChildren().size() > 0){
                     mainPlayer.getInterface().makePopupText("You must go to heap...");
-                    isNeedGoToHeep = true;
                 }
+                if(fish.get() == false)
+                    isCantStep = true;
+            }
+
+//            boolean isAllExceptMeEmpty = true;
+//
+//            for(AbstractPlayer p : mAllPlayers){
+//                if(!(p instanceof MainPlayer))
+//                {
+//                    if(!p.getHand().isEmpty()){
+//                        isAllExceptMeEmpty = false;
+//                        break;
+//                    }
+//                }
+//            }
+//            if(isAllExceptMeEmpty == true){
+//                sendMyScoreToServer();
+//            }
         }
+    }
+    private AbstractPlayer getPlayer(String name){
+        for(AbstractPlayer p : mAllPlayers)
+            if(p.getName().equals(name))
+                return p;
+        return null;
+    }
+    
+    private void sendExtendedMessage(MessageSpecification specific,Object restrictedObject,String message){
+        ExtendedSpecificationMessage msg = new ExtendedSpecificationMessage();
+        msg.setSpecification(specific);
+        msg.setWhoSend(CurrentPlayer.getInstance().getName());
+        msg.setRestrictedObject(restrictedObject);
+        msg.setMessage(message);
+        CurrentPlayer.getInstance().getClientOfCurSession().send(msg);
     }
     
     private void allowMainStep(){
@@ -255,11 +329,12 @@ public class PlayersState extends AbstractAppState{
     }
     
     private PlayersPlaces findCorrectPlaceForDistancePlayer(){
-        for(PlayersPlaces p : PlayersPlaces.values()){
-            if(busyPlaces.contains(p)) continue;
-            else return p;
-        }
-        return null;
+            for(PlayersPlaces p : PlayersPlaces.values()){
+                if(busyPlaces.contains(p)) continue;
+                else return p;
+            }
+            
+            return null;
     }
     
     private void resiveNewMessagesAppProcess(){
@@ -268,9 +343,14 @@ public class PlayersState extends AbstractAppState{
             ExtendedSpecificationMessage extendedMessage = (ExtendedSpecificationMessage)message;
             if(extendedMessage.getSpecification().equals(MessageSpecification.INITIALIZATION)){
                 synchronized(this){
-                    mAllPlayers.add(new DistancePlayer(findCorrectPlaceForDistancePlayer(),
+                    for(AbstractPlayer p : mAllPlayers){
+                        if(p.getName().equals(extendedMessage.getWhoSend()))
+                            return;
+                    }
+                    PlayersPlaces place = findCorrectPlaceForDistancePlayer();
+                    mAllPlayers.add(new DistancePlayer(place,
                             sApp.getRootNode(), heap, extendedMessage.getWhoSend()));
-                    
+
                     String status = null;
                     switch(extendedMessage.getStatusPlayer()){
                         case READY_TO_PLAY: status = "Ready";break;
@@ -315,6 +395,31 @@ public class PlayersState extends AbstractAppState{
             else if(extendedMessage.getSpecification().equals(MessageSpecification.STEP)){
                 makeResivedStepFromDistancePlayer(extendedMessage);
             }
+            else if(extendedMessage.getSpecification().equals(MessageSpecification.GET_DICE_FROM_HEAP)){
+                for(AbstractPlayer p : mAllPlayers){
+                    if(p.getName().equals(extendedMessage.getWhoSend())){
+                        NumsOfDice dice = (NumsOfDice)extendedMessage.getRestrictedObject();
+                        p.TakeFromHeap(dice.getLeft(),dice.getRight());
+//                            mainPlayer.getInterface().makePopupText(
+//                                    message.getWhoSend() + "take dice from heap");
+                    }
+                }
+            }
+            else if(extendedMessage.getSpecification().equals(MessageSpecification.FISH)){
+                sendMyScoreToServer();
+                fish.set(true);
+//                mainPlayer.getInterface().makeFish(null);
+            }
+            else if(extendedMessage.getSpecification().equals(MessageSpecification.SCORE)){
+                Map<String,Integer> map = (Map<String,Integer>)(extendedMessage.getRestrictedObject());
+                List<String> strings = new ArrayList<>();
+                
+                for(String name : map.keySet()){
+                    strings.add("PLAYER : " + name + "____" + map.get(name));
+                }
+                mainPlayer.getInterface().makeScoreDeck(
+                        strings,"fish".equals(extendedMessage.getMessage()));
+            }
         }
         else{
             StartGameMessage startMessage = (StartGameMessage)message;
@@ -335,7 +440,23 @@ public class PlayersState extends AbstractAppState{
             isNetGameStarted = true;
             mainPlayer.getInterface().makePopupText("Lets start!!!");
         }
+    }
     
+    private void sendMyScoreToServer(){
+        int score = 0;
+        for(Spatial s : mainPlayer.getHand()){
+            Dice d = s.getControl(Dice.class);
+            
+            if(d.getBothNum() == 0) 
+                score += 25;
+            else
+                score += d.getLeftNum() +d.getRightNum();
+        }
+        
+        ExtendedSpecificationMessage msg = new ExtendedSpecificationMessage(
+                MessageSpecification.SCORE, CurrentPlayer.getInstance().getName(),
+                IN_GAME, new Integer(score));
+        CurrentPlayer.getInstance().getClientOfCurSession().send(msg);
     }
     
     void makeResivedStepFromDistancePlayer(ExtendedSpecificationMessage message){
@@ -343,26 +464,27 @@ public class PlayersState extends AbstractAppState{
         StepToSend step = (StepToSend)message.getRestrictedObject();
         if(step == null){
             turnNextPlayerStep();
-            mainPlayer.getInterface().makePopupText("Player : " + name +" Check!");
+            if(!name.equals(CurrentPlayer.getInstance().getName()))
+                mainPlayer.getInterface().makePopupText("Player : " + name +" Check!");
         }else{
             for(AbstractPlayer p :mAllPlayers ){
                 
                 if(p.getName().equals(name)){
                     if(message.getMessage() != null && message.getMessage().split(" ")[0].equals("start")){
-                        rules.startGame(HeapState.findDiceInNode(p.getNode(),
+                        rules.startGame(HeapState.findDiceIn(p.getNode().getChildren(),
                                 step.getInHand().getLeft(),step.getInHand().getRight()));
     
                     }
                     else{
-                        Spatial onHand = HeapState.findDiceInNode(p.getNode(),
+                        Spatial onHand = HeapState.findDiceIn(p.getNode().getChildren(),
                                 step.getInHand().getLeft(), step.getInHand().getRight());
 
-                        Spatial onTable = HeapState.findDiceInNode(table.getNode(),
+                        Spatial onTable = HeapState.findDiceIn(table.getNode().getChildren(),
                                 step.getInTable().getLeft(), step.getInTable().getRight());
 
                         if(message.getMessage() != null){ 
                             String m = message.getMessage().split(" ")[0];
-                            
+//                            try{
                             switch (m) {
                                 case "left":
                                     onHand.setUserData(ClassicRules.MAPPING_PREF_TO_LEFT, true);
@@ -371,6 +493,9 @@ public class PlayersState extends AbstractAppState{
                                     onHand.setUserData(ClassicRules.MAPPING_PREF_TO_LEFT, false);
                                     break;
                             }
+//                            }catch(NullPointerException ex){
+//                                System.err.println("pipec");
+//                            }
                         }
                         
                         StepEvent event = new StepEvent(onTable, onHand, step.getInTableNum(),step.getInHandNum());
@@ -391,7 +516,7 @@ public class PlayersState extends AbstractAppState{
 
         @Override
         public void messageReceived(Client source, Message m) {
-            System.out.println("I am resive message in Players state : "  + m);
+            System.err.println("I am resive message in Players state : "  + m);
             if(m instanceof ExtendedSpecificationMessage){
                 
                 ExtendedSpecificationMessage message = (ExtendedSpecificationMessage)m;
@@ -399,22 +524,31 @@ public class PlayersState extends AbstractAppState{
                         message.getSpecification().equals(MessageSpecification.NEW_STATUS)||
                         message.getSpecification().equals(MessageSpecification.DISCONNECT)){
                     
-                    if(!(message.getWhoSend().equals(CurrentPlayer.getInstance().getName())))
-                    queueUnprocessedMessages.add(message);
-                    
+                    if(!(message.getWhoSend().equals(CurrentPlayer.getInstance().getName()))){
+                        queueUnprocessedMessages.add(message);
+                    }
                 }
                 else if(message.getSpecification().equals(MessageSpecification.STEP)){
                     queueUnprocessedMessages.add(message);
                 }else if(message.getSpecification().equals(MessageSpecification.KICK)){
                     JOptionPane.showMessageDialog(null, message.getMessage());
                     sApp.stop();
-//                    timeToOut.set(true);
-//                    GuiInterfaceHandler.getInstance().getNifty().exit();
-//                    GuiInterfaceHandler.getInstance().getNifty().fromXml(
-//                            "Interface/menu.xml", "start");
-
-//                    sApp.getStateManager().detach(gameState);
-//                    sApp.getStateManager().attach(new MenuState());
+                }
+                else if(message.getSpecification().equals(MessageSpecification.GET_DICE_FROM_HEAP)){
+                    queueUnprocessedMessages.add(message);
+                }
+//                else if(message.getSpecification().equals(MessageSpecification.EMPTY_HAND)){
+//                    for(AbstractPlayer p : mAllPlayers){
+//                        if(p.getName().equals(message.getWhoSend())){
+//                            
+//                        }
+//                    }
+//                }
+                else if(message.getSpecification().equals(MessageSpecification.FISH)){
+                    queueUnprocessedMessages.add(message);                    
+                }
+                else if(message.getSpecification().equals(MessageSpecification.SCORE)){
+                    queueUnprocessedMessages.add(message);                    
                 }
             }
             else if(m instanceof StartGameMessage){
@@ -456,7 +590,7 @@ public class PlayersState extends AbstractAppState{
         public void UpdateFromApplication() {
             if(!queueAddToScreenDices.isEmpty()){
                 Spatial s = queueAddToScreenDices.remove();
-                s.setLocalRotation(new Quaternion().fromAngles(90 * FastMath.DEG_TO_RAD, 0, 0));
+                s.setLocalRotation(new Quaternion().fromAngles(-90 * FastMath.DEG_TO_RAD, 0, 0));
                 getNode().attachChild(s);
                 sortNodeDices(getNode(), HeapState.getDicesWidth());
             }
@@ -465,7 +599,6 @@ public class PlayersState extends AbstractAppState{
         @Override
         public void sortDices() {
             sortNodeDices(myNode, HeapState.getDicesWidth());
-
         }
     }
 }

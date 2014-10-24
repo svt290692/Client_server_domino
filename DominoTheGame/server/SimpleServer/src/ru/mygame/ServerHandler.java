@@ -17,6 +17,7 @@ import com.jme3.network.Server;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +41,9 @@ public class ServerHandler implements ConnectionListener, MessageListener<Hosted
     private final Server mServer;
     private final QueuePlayers queuePlayers;
     private List<HostedPlayer> mConnectedPlayers;
+    private boolean fish = false;
+    
+    private int countOfChecks = 0;
     private static final Logger LOG = Logger.getLogger(ServerHandler.class.getName());
 
     public ServerHandler(Server mServer) {
@@ -52,12 +56,11 @@ public class ServerHandler implements ConnectionListener, MessageListener<Hosted
 
     @Override
     public void connectionAdded(Server server, HostedConnection conn) {
-        resiveNewConnection(conn);
 	LOG.log(Level.INFO, "Connection " + server.getGameName() + " was added to server: " + conn.getAddress() + " .");
 //        System.out.println("Connection  "+ conn.getAddress()+"was added to server: "+ server.getGameName());
     }
     
-    private void resiveNewConnection(HostedConnection conn){
+    private void initNewPlayer(HostedConnection conn){
         HostedPlayer player = new HostedPlayer(conn);
 
         queuePlayers.addPlayer(player);
@@ -66,6 +69,10 @@ public class ServerHandler implements ConnectionListener, MessageListener<Hosted
     
     private void connectionLost(HostedConnection conn){
         HostedPlayer player = findPlayerFromConnection(conn);
+        if(player == null || player.getName() == null || player.getName().isEmpty()){
+            return;
+        }
+        
         mConnectedPlayers.remove(player);
         queuePlayers.removePlayer(player);
         ExtendedSpecificationMessage msg = new ExtendedSpecificationMessage(
@@ -92,11 +99,23 @@ public class ServerHandler implements ConnectionListener, MessageListener<Hosted
 
             switch(msg.getSpecification()){
                 case INITIALIZATION:
-		    onInitResv(player, msg);break;
+		    onInitResv(source, msg);
+                    break;
                 case NEW_STATUS:
-                    onNewStatusResv(player, msg);break;
+                    onNewStatusResv(player, msg);
+                    break;
                 case STEP:
-		    onStepResv(player, msg);break;
+		    onStepResv(player, msg);
+                    break;
+                case GET_DICE_FROM_HEAP: 
+                    broadcastAllExceptOne(player, msg);
+                    break;
+                case EMPTY_HAND:
+                    onEmptyHandResv(player, msg);
+                    break;
+                case SCORE:
+                    onScoreResv(player, msg);
+                     break;
 		default:
 		    LOG.log(Level.WARNING,"Warning messaage is not readeble "
                             + "becaus it is hav not specification");
@@ -105,6 +124,55 @@ public class ServerHandler implements ConnectionListener, MessageListener<Hosted
         else {
             LOG.log(Level.WARNING, "server resive undefined message :{0}", m.getClass().getName());
         }
+    }
+    
+    private void onScoreResv(HostedPlayer player,ExtendedSpecificationMessage msg){
+        int score = (Integer)msg.getRestrictedObject();
+        if(player.getScore() == 0){
+            if(score > 13){
+                player.setScore(score);
+            }
+        }else{
+            player.incScore(score);
+        }
+        
+        
+        
+        boolean isAnotherWatchers = true;
+        for(AbleToPlay p : queuePlayers.asList()){
+            if(p.getName().equals(player.getName()) && !p.getStatus().equals(StatusPlayer.WATCHER)){
+                isAnotherWatchers = false;
+                break;
+            }
+        }
+        
+        if(isAnotherWatchers || (fish == true && isAnotherWatchers == true && player.getStatus().equals(StatusPlayer.WATCHER))){
+            Map<String,Integer> finalScore = new HashMap<>();
+            for(AbleToPlay p : queuePlayers.asList()){
+                finalScore.put(p.getName(), p.getScore());
+            }
+            ExtendedSpecificationMessage message = new ExtendedSpecificationMessage();
+            message.setWhoSend("SERVER");
+            message.setRestrictedObject(finalScore);
+            message.setSpecification(MessageSpecification.SCORE);
+            mServer.broadcast(message);
+            fish = false;
+        }
+    }
+    
+    private void onEmptyHandResv(HostedPlayer player,ExtendedSpecificationMessage msg){
+        player.setStatus(StatusPlayer.WATCHER);
+        int countWatcher = 0;
+        for(AbleToPlay p : queuePlayers.asList()){
+            if(StatusPlayer.WATCHER.equals(p.getStatus()))
+                countWatcher++;
+        }
+        
+        if(countWatcher == (queuePlayers.asList().size() -1)){
+            
+        }
+        
+//        mServer.broadcast(msg);
     }
 
     private void sendInfoTo(HostedConnection conn){
@@ -127,15 +195,33 @@ public class ServerHandler implements ConnectionListener, MessageListener<Hosted
     }
 
     private void onStepResv(HostedPlayer player,ExtendedSpecificationMessage msg){
+        if(countOfChecks == queuePlayers.asList().size()){
+            sendFish();
+            fish = true;
+            countOfChecks = 0;
+        }
+        if(null == msg.getRestrictedObject())
+            countOfChecks++;
+        else 
+            countOfChecks = 0;
+        
 	mServer.broadcast(msg);
     }
     
-    private void onInitResv(HostedPlayer player,ExtendedSpecificationMessage msg){
+    private void sendFish(){
+        ExtendedSpecificationMessage msg = new ExtendedSpecificationMessage();
+        msg.setMessage("FISH!!!");
+        msg.setSpecification(MessageSpecification.FISH);
+        msg.setWhoSend("SERVER");
+        mServer.broadcast(msg);
+    }
+    
+    private void onInitResv(HostedConnection player,ExtendedSpecificationMessage msg){
         
         if(queuePlayers.asList().size() > 3){
             msg.setSpecification(MessageSpecification.KICK);
             msg.setMessage("The game already Full");
-            player.getmConnection().send(msg);
+            player.send(msg);
             return;
         }
         
@@ -144,17 +230,19 @@ public class ServerHandler implements ConnectionListener, MessageListener<Hosted
                 msg.setSpecification(MessageSpecification.KICK);
                 msg.setMessage("Player with this name already in game!"
                         + " Please enter another name");
-                player.getmConnection().send(msg);
+                player.send(msg);
                 return;
             }
         }
+        initNewPlayer(player);
+        HostedPlayer readyPlayer = findPlayerFromConnection(player);
         
-	player.setName(msg.getWhoSend());
-        player.setIndexOfAvatar((Integer)msg.getRestrictedObject());
+	readyPlayer.setName(msg.getWhoSend());
+        readyPlayer.setIndexOfAvatar((Integer)msg.getRestrictedObject());
 	if(msg.getStatusPlayer() != null)
-	player.setStatus(msg.getStatusPlayer());
+	readyPlayer.setStatus(msg.getStatusPlayer());
 	mServer.broadcast(msg);
-        sendInfoTo(player.getmConnection());
+        sendInfoTo(readyPlayer.getmConnection());
     }
     
     private void onNewStatusResv(HostedPlayer player,ExtendedSpecificationMessage msg){
@@ -163,6 +251,8 @@ public class ServerHandler implements ConnectionListener, MessageListener<Hosted
 
 	mServer.broadcast(msg);
 	if(isAllPlayersReady()){
+        countOfChecks = 0;
+            
          mServer.broadcast(createStartGameMessage());
          for(HostedPlayer p : mConnectedPlayers){
              p.setStatus(StatusPlayer.IN_GAME);
@@ -209,7 +299,7 @@ public class ServerHandler implements ConnectionListener, MessageListener<Hosted
         int count = 0;
         for(HostedPlayer p : mConnectedPlayers){
             List<NumsOfDice> list = new ArrayList<>();
-            for(int j = 0 ; j < 6; j++){
+            for(int j = 0 ; j < 7; j++){
 		list.add(dices.get(count++));
 	    }
             message.addNewEntry(p.getName(), list);
@@ -273,7 +363,7 @@ public class ServerHandler implements ConnectionListener, MessageListener<Hosted
 
             @Override
             public boolean apply(HostedConnection input) {
-                if(input.equals(who))
+                if(input.equals(who.getmConnection()))
                     return false;
                 else return true;
             }
@@ -286,6 +376,6 @@ public class ServerHandler implements ConnectionListener, MessageListener<Hosted
             if(player.getmConnection().equals(connection))
                 return player;
 	}
-	throw new NoSuchElementException("No such Player of connection " + connection);
+	return null;
     }
 }

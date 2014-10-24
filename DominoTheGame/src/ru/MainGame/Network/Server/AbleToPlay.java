@@ -4,6 +4,8 @@
  */
 package ru.MainGame.Network.Server;
 
+import ru.MainGame.Network.StatusPlayer;
+
 /**
  *
  * @author svt
@@ -11,6 +13,21 @@ package ru.MainGame.Network.Server;
 public class AbleToPlay {
     private String myName;
     private int indexOfAvatar;
+    private int score = 0;
+
+    public int getScore() {
+        return score;
+    }
+
+    public void setScore(int score) {
+        this.score = score;
+    }
+    
+    public void incScore(int inc){
+        score += inc;
+    }
+    
+    protected StatusPlayer myStatus;
 
     public int getIndexOfAvatar() {
         return indexOfAvatar;
@@ -57,6 +74,14 @@ public class AbleToPlay {
     @Override
     public String toString() {
 	return "SomePlayer,{" + "MyName=" + myName + '}';
+    }
+
+    public StatusPlayer getStatus() {
+        return myStatus;
+    }
+
+    public void setStatus(StatusPlayer myStatus) {
+        this.myStatus = myStatus;
     }
 
 

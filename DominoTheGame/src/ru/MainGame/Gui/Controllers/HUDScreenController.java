@@ -16,6 +16,7 @@ import de.lessvoid.nifty.screen.ScreenController;
  */
 public class HUDScreenController implements ScreenController{
     java.awt.event.ActionListener listener;
+    java.awt.event.ActionListener endLookToScoreNotify;
 
     public HUDScreenController() {
 
@@ -32,11 +33,20 @@ public class HUDScreenController implements ScreenController{
     @Override
     public void onEndScreen() {
     }
+
+    public void setEndLookToScoreNotify(java.awt.event.ActionListener endLookToScoreNotify) {
+        this.endLookToScoreNotify = endLookToScoreNotify;
+    }
+    
     public void setListener(java.awt.event.ActionListener listeer){
         this.listener = listeer;
     }
     
     public void action(){
         listener.actionPerformed(null);
+    }
+    
+    public void onEndLookToScore(){
+        endLookToScoreNotify.actionPerformed(null);
     }
 }

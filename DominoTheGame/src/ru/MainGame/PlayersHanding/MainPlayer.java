@@ -275,6 +275,7 @@ public abstract class MainPlayer extends AbstractPlayer{
         Spatial d = getHeap().getRandomDice();
 
         synchronized(Mutex){
+            if(d != null)
             queueAddToScreenDices.add(d);
         }
         return d;

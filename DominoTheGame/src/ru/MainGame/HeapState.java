@@ -15,6 +15,8 @@ import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 import java.util.logging.Level;
@@ -78,15 +80,21 @@ public class HeapState extends AbstractAppState{
     public void cleanup() {
         myNode.detachAllChildren();
     }
-    public Node getMyNode(){
+    public Node getNode(){
         return myNode;
     }
     public Spatial getDice(int left,int right){
-        return findDiceInNode(myNode,left,right);
+        return findDiceIn(myNode.getChildren(),left,right);
     }
     
-    public static Spatial findDiceInNode(Node node ,int left,int right){
-        for(Spatial d:node.getChildren()){
+    public static Spatial findDiceIn(Collection<Spatial> node ,int left,int right){
+        
+        List<Dice> list = new ArrayList<>();
+        for(Spatial d:node){
+            list.add(d.getControl(Dice.class));
+        }
+        
+        for(Spatial d:node){
             
             Dice dice = d.getControl(Dice.class);
             
@@ -118,12 +126,12 @@ public class HeapState extends AbstractAppState{
         Vector3f dropPoint = new Vector3f(0,TableHeight,0);
         for(int j = 0; j < 4;j++){
 
-        for(int i = 0; i < 6;i++){
+        for(int i = 0; i < 7;i++){
 
         Spatial DiceModel = listAllDices.get(numDice);
 
         DiceModel.scale(0.04f);
-	DiceModel.setLocalRotation(new Quaternion().fromAngles(90 * FastMath.DEG_TO_RAD, 0, 0));
+	DiceModel.setLocalRotation(new Quaternion().fromAngles(-90 * FastMath.DEG_TO_RAD, 0, 0));
         DiceModel.setLocalTranslation(dropPoint);
 
         myNode.attachChild(DiceModel);

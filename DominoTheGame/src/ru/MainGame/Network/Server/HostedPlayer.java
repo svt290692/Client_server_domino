@@ -16,20 +16,11 @@ import ru.MainGame.Network.StatusPlayer;
 public class HostedPlayer extends AbleToPlay{
 
     private HostedConnection mConnection;
-    private StatusPlayer myStatus;
     
     public HostedPlayer(HostedConnection connection) {
 	super();
 	myStatus = StatusPlayer.NOT_READY;
         mConnection = connection;
-    }
-
-    public StatusPlayer getStatus() {
-        return myStatus;
-    }
-
-    public void setStatus(StatusPlayer myStatus) {
-        this.myStatus = myStatus;
     }
 
     public void setmConnection(HostedConnection mConnection) {

@@ -37,7 +37,7 @@ public class DiceSimpleAnimator implements DiceAnimator{
  
     @Override
     public void doAnimation(final boolean finalReplace) {
-        final AnimationFactory factory = new AnimationFactory(8, "anim");
+        final AnimationFactory factory = new AnimationFactory(0.5f, "anim");
         final Transform takeOff = new Transform(
                 new Vector3f((endPlace.getTranslation().x - firstPlace.getTranslation().x) / 2 ,
                 firstPlace.getTranslation().y + 0.15f,
@@ -45,9 +45,9 @@ public class DiceSimpleAnimator implements DiceAnimator{
                 endPlace.getRotation().clone(), mDice.getLocalScale());
         
         factory.addTimeTransform(0f, firstPlace);
-        factory.addTimeTransform(0.5f, takeOff);
+        factory.addTimeTransform(0.25f, takeOff);
 //        factory.addTimeTranslation(2, endPlace.getTranslation().clone().setY(endPlace.getTranslation().y + 0.5f));
-        factory.addTimeTransform(1f, endPlace);
+        factory.addTimeTransform(0.5f, endPlace);
 
         final AnimControl control = new AnimControl();
         final Animation anim = factory.buildAnimation();
@@ -82,7 +82,9 @@ public class DiceSimpleAnimator implements DiceAnimator{
             control.getSpatial().setLocalTransform(endPlace);
             
             AnimationEventCounter.getInstance().releaseAnimationSlot();
-                
+            
+            System.err.println("END ANIMATE!");
+            
             this.control.removeAnim(anim);
             mDice.removeControl(AnimControl.class);
             endAction.perform();
