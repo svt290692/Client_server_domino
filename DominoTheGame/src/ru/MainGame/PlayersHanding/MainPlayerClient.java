@@ -29,7 +29,7 @@ import ru.MainGame.Network.MessageSpecification;
 import ru.MainGame.Network.NumsOfDice;
 import ru.MainGame.Network.StatusPlayer;
 import ru.MainGame.Network.StepToSend;
-import ru.MainGame.TableHanding.ClassicRules;
+import ru.MainGame.TableHanding.GoatRules;
 
 import ru.MainGame.TableHanding.Rules;
 
@@ -74,9 +74,6 @@ public class MainPlayerClient extends MainPlayer{
             @Override
             public void readyPushed() {
                 super.readyPushed();
-                //TEST
-//                mInterface.makePopupText("MEGATEXT!!!");
-                //END
                 
                 ExtendedSpecificationMessage message= new ExtendedSpecificationMessage();
                 message.setSpecification(MessageSpecification.NEW_STATUS);
@@ -148,29 +145,28 @@ public class MainPlayerClient extends MainPlayer{
                     new NumsOfDice(inTableControll.getLeftNum(),inTableControll.getRightNum()),
                     stepEvent.getInTableNum(),stepEvent.getInHandNum()));
         
-        Boolean isPrefToLeft = hand.getUserData(ClassicRules.MAPPING_PREF_TO_LEFT);
+        Boolean isPrefToLeft = hand.getUserData(GoatRules.MAPPING_PREF_TO_LEFT);
         
         if(isPrefToLeft != null)
             message.setMessage(isPrefToLeft ? "left" : "right");
         
         mClient.send(message);
         
-        try{Thread.sleep(10);}catch(InterruptedException ignore){}
+//        try{Thread.sleep(10);}catch(InterruptedException ignore){}
         
-        if(getHand().isEmpty()){
-            mInterface.makePopupText("You're out!!!");
-            ExtendedSpecificationMessage msg = new ExtendedSpecificationMessage();
-            msg.setWhoSend(CurrentPlayer.getInstance().getName());
-            msg.setSpecification(MessageSpecification.EMPTY_HAND);
-            msg.setStatusPlayer(StatusPlayer.WATCHER);
-            CurrentPlayer.getInstance().getClientOfCurSession().send(msg);
-        }
+        
     }
 
     @Override
-    protected void startGame(Spatial diceToStart) {
+    protected void startGame(Spatial diceToStart,Spatial inGui) {
         ru.MainGame.Dice hand = diceToStart.getControl(ru.MainGame.Dice.class);
         
+        if( ! hand.equals(getLowestDuble())){
+            mInterface.makePopupText("You can start game only lowest duble");
+            return;
+        }
+        
+        myHandGuiNode.detachChild(inGui);
         ExtendedSpecificationMessage message = new ExtendedSpecificationMessage(
                 MessageSpecification.STEP,
                 CurrentPlayer.getInstance().getName(),
@@ -180,7 +176,21 @@ public class MainPlayerClient extends MainPlayer{
         message.setMessage("start");
         mClient.send(message);
     }
-
+    
+    private ru.MainGame.Dice getLowestDuble(){
+        int lowest = 7;
+        ru.MainGame.Dice lowestDice = null;
+        for(Spatial s : getHand()){
+            ru.MainGame.Dice handDice = s.getControl(ru.MainGame.Dice.class);
+            
+            int bothNum = handDice.getBothNum();
+            if(bothNum != -1 && bothNum < lowest){
+                lowest = bothNum;
+                lowestDice = handDice;
+            }
+        }
+        return lowestDice;
+    }
     
     private class Handler implements MessageListener<Client>, ErrorListener<Client>, ClientStateListener{
 

@@ -128,6 +128,7 @@ public class ServerHandler implements ConnectionListener, MessageListener<Hosted
     
     private void onScoreResv(HostedPlayer player,ExtendedSpecificationMessage msg){
         int score = (Integer)msg.getRestrictedObject();
+        player.setStatus(StatusPlayer.WATCHER);
         if(player.getScore() == 0){
             if(score > 13){
                 player.setScore(score);
@@ -135,43 +136,59 @@ public class ServerHandler implements ConnectionListener, MessageListener<Hosted
         }else{
             player.incScore(score);
         }
-        
-        
-        
-        boolean isAnotherWatchers = true;
-        for(AbleToPlay p : queuePlayers.asList()){
-            if(p.getName().equals(player.getName()) && !p.getStatus().equals(StatusPlayer.WATCHER)){
-                isAnotherWatchers = false;
-                break;
-            }
-        }
-        
-        if(isAnotherWatchers || (fish == true && isAnotherWatchers == true && player.getStatus().equals(StatusPlayer.WATCHER))){
-            Map<String,Integer> finalScore = new HashMap<>();
-            for(AbleToPlay p : queuePlayers.asList()){
-                finalScore.put(p.getName(), p.getScore());
-            }
-            ExtendedSpecificationMessage message = new ExtendedSpecificationMessage();
-            message.setWhoSend("SERVER");
-            message.setRestrictedObject(finalScore);
-            message.setSpecification(MessageSpecification.SCORE);
-            mServer.broadcast(message);
+        if(hasWinner() == true || (fish == true && isAllWatcher() == true)){
+            sendFinalScore(fish);
             fish = false;
         }
     }
     
+    private boolean isAllWatcher(){
+        for(AbleToPlay p : queuePlayers.asList()){
+            if(!p.getStatus().equals(StatusPlayer.WATCHER)){
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    private boolean hasWinner(){
+        int countWatchers = 0;
+        
+        for(AbleToPlay p : queuePlayers.asList()){
+            if(p.getStatus().equals(StatusPlayer.WATCHER)){
+                countWatchers++;
+            }
+        }
+        
+        if(countWatchers == (queuePlayers.asList().size() - 1)){
+            return true;
+        }
+        
+        return false;
+    }
+    
+    private void sendFinalScore(boolean fish){
+        Map<String,Integer> finalScore = new HashMap<>();
+        for(AbleToPlay p : queuePlayers.asList()){
+            finalScore.put(p.getName(), p.getScore());
+        }
+        ExtendedSpecificationMessage message = new ExtendedSpecificationMessage();
+        message.setWhoSend("SERVER");
+        message.setRestrictedObject(finalScore);
+        message.setSpecification(MessageSpecification.SCORE);
+        if(fish == true){
+            message.setMessage("fish");
+        }
+        mServer.broadcast(message);
+    }
+    
     private void onEmptyHandResv(HostedPlayer player,ExtendedSpecificationMessage msg){
         player.setStatus(StatusPlayer.WATCHER);
-        int countWatcher = 0;
-        for(AbleToPlay p : queuePlayers.asList()){
-            if(StatusPlayer.WATCHER.equals(p.getStatus()))
-                countWatcher++;
-        }
         
-        if(countWatcher == (queuePlayers.asList().size() -1)){
-            
-        }
         
+        if(fish == false &&  hasWinner()){
+            sendFinalScore(fish);
+        }
 //        mServer.broadcast(msg);
     }
 
@@ -285,16 +302,13 @@ public class ServerHandler implements ConnectionListener, MessageListener<Hosted
 		j = k;
             }else j++;
         }
-
-        Collections.sort(dices, new Comparator<Object>() {
-
-                Random rand = new Random();
-            @Override
-            public int compare(Object o1, Object o2) {
-                return (1 - rand.nextInt(3));
-            }
-        });
+        
+        boolean isAllOk = false;
         StartGameMessage message = new StartGameMessage();
+        String firstPlayer = null;
+        
+        while(isAllOk == false){
+        Collections.shuffle(dices);
 
         int count = 0;
         for(HostedPlayer p : mConnectedPlayers){
@@ -305,34 +319,34 @@ public class ServerHandler implements ConnectionListener, MessageListener<Hosted
             message.addNewEntry(p.getName(), list);
         }
         
-        String firstPlayer = null;
         
-        int biggest = -1;
+        int lowest = 7;
         for(Map.Entry<String, List<NumsOfDice> > e : message.getStartGamePart().entrySet()){
             for(NumsOfDice d: e.getValue()){
                 if(d.getLeft() == d.getRight()){
-                    if(d.getLeft() > biggest){
-                        biggest = d.getLeft();
+                    if(d.getLeft() < lowest){
+                        lowest = d.getLeft();
                         firstPlayer = e.getKey();
                     }
                 }
             }
         }
-        if(null == firstPlayer){
-        biggest = 0;
-        for(Map.Entry<String, List<NumsOfDice> > e : message.getStartGamePart().entrySet()){
-            
-            for(NumsOfDice d: e.getValue()){
-                int summ = (d.getLeft() + d.getRight());
-
-                if(summ  > biggest){
-                    biggest = summ;
-                    firstPlayer = e.getKey();
-                }
-            }   
+        if(null != firstPlayer) isAllOk = true;
+//        if(null == firstPlayer){
+//        lowest = 100;
+//        for(Map.Entry<String, List<NumsOfDice> > e : message.getStartGamePart().entrySet()){
+//            
+//            for(NumsOfDice d: e.getValue()){
+//                int summ = (d.getLeft() + d.getRight());
+//
+//                if(summ  < lowest){
+//                    lowest = summ;
+//                    firstPlayer = e.getKey();
+//                }
+//            }   
+//        }
+//        }
         }
-        }
-        
         List<String> queue = new LinkedList<>();
         queue.add(firstPlayer);
         

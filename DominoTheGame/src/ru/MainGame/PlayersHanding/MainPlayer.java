@@ -6,7 +6,6 @@ package ru.MainGame.PlayersHanding;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.collision.CollisionResults;
-import com.jme3.cursors.plugins.JmeCursor;
 import com.jme3.input.InputManager;
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
@@ -16,19 +15,11 @@ import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.atomic.AtomicBoolean;
 import ru.MainGame.DominoApp;
 import ru.MainGame.Events.StepEvent;
 import ru.MainGame.Gui.HUDInterface;
 import ru.MainGame.HeapState;
-import ru.MainGame.TableHanding.DiceAnimator;
-import ru.MainGame.TableHanding.DiceSimpleAnimator;
 import ru.MainGame.TableHanding.Rules;
-import ru.MainGame.TableHanding.TableState;
 
 /**
  *
@@ -36,11 +27,11 @@ import ru.MainGame.TableHanding.TableState;
  */
 public abstract class MainPlayer extends AbstractPlayer{
 
-    private final Node guiNode;
-    private final Node myHandGuiNode;
+    protected final Node guiNode;
+    protected final Node myHandGuiNode;
     private final Node cursorSpecialNode;
     private final InputManager inputManager;
-    private final Node tableNode;
+    protected final Node tableNode;
     private Camera cam;
     private SimpleApplication sApp;
 
@@ -91,8 +82,7 @@ public abstract class MainPlayer extends AbstractPlayer{
 			DiceTrigger(collideGui);
 		    }
 		    else{
-			startGame(inTable);
-			myHandGuiNode.detachChild(collideGui);
+			startGame(inTable,collideGui);
 			sortDices();
 		    }
 		}
@@ -114,8 +104,9 @@ public abstract class MainPlayer extends AbstractPlayer{
      * to do something when game started
      * @param diceToStart 
      */
-    protected void startGame(Spatial diceToStart){
+    protected void startGame(Spatial diceToStart,Spatial inGui){
         rules.startGame(diceToStart);
+        myHandGuiNode.detachChild(inGui);
     }
     /**
      * just remove cursor dice
@@ -209,6 +200,15 @@ public abstract class MainPlayer extends AbstractPlayer{
 		 myHandGuiNode.detachChild(selectedGuiDice);
 		 selectedGuiDice = null;
 	}
+    }
+    /**
+     * detach all dices from gui
+     */
+    public void clearGui(){
+        myHandGuiNode.detachAllChildren();
+        cursorSpecialNode.detachAllChildren();
+        cursorDice = null;
+        selectedGuiDice = null;
     }
     /**
      * try make step in current cursor location

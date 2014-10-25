@@ -22,7 +22,7 @@ import com.jme3.scene.Spatial;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import ru.MainGame.TableHanding.ClassicRules;
+import ru.MainGame.TableHanding.GoatRules;
 import ru.MainGame.TableHanding.Rules;
 
 /**
@@ -76,7 +76,7 @@ public class GameState extends AbstractAppState{
 	    app.stop();
 	}
 	this.mTable = new TableState(mHeap);
-	this.curRules = new ClassicRules(mTable,assetManager);
+	this.curRules = new GoatRules(mTable,assetManager);
 	this.mPlayers = new PlayersState(mHeap, mTable,curRules,this);
         this.tableNode = mTable.getNode();
 	this.heapNode = mHeap.getNode();

@@ -11,16 +11,21 @@ import com.jme3.app.state.AppStateManager;
 import com.jme3.asset.AssetManager;
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
+import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import de.lessvoid.nifty.EndNotify;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import ru.MainGame.TableHanding.AnimationEventCounter;
+import ru.MainGame.TableHanding.DiceSimpleAnimator;
 
 /**
  *
@@ -35,10 +40,16 @@ public class HeapState extends AbstractAppState{
 
     private ModelsLoader mLoader;
     private List<Spatial> listAllDices;
+    private Transform[][] heapCoords;
 
     private static final float MDominoHeight = 0.16f;
     private static final float MDominoWidth = 0.08f;
     private static final float TableHeight = 0;
+    
+    private boolean awaitReturn = false;
+    private boolean awaiitAnim = false;
+    
+    private Vector3f mLocation = new Vector3f(-1.6f, TableHeight, 0.29f);
 
     private static final Logger LOG = Logger.getLogger(HeapState.class.getName());
 
@@ -47,8 +58,9 @@ public class HeapState extends AbstractAppState{
 	this.mLoader = loader;
 
 	this.myNode = new Node("Heap");
-        this.myNode.setLocalTranslation(-1.6f, TableHeight, 0.29f);
+        this.myNode.setLocalTranslation(0,0,0);
 	listAllDices = mLoader.load();
+        heapCoords = new Transform[4][7];
     }
 
     public static float getDicesHeight() {
@@ -74,6 +86,10 @@ public class HeapState extends AbstractAppState{
 
     @Override
     public void update(float tpf) {
+        if(awaitReturn == true && !AnimationEventCounter.getInstance().isAnimationInTableExists()){
+            awaitReturn = false;
+            replaceAllBack(awaiitAnim);
+        }
     }
 
     @Override
@@ -118,12 +134,54 @@ public class HeapState extends AbstractAppState{
 
         return myNode.getChildren().get(index);
     }
+    
+    public void returnAllDicesToHeap(boolean anim){
+       awaitReturn = true;
+       awaiitAnim = anim;
+    }
+    
+    private void replaceAllBack(Boolean anim){
+         List<Spatial> dices = getEntangledDices();
+        
+        int countDice = 0;
+        for(int i = 0 ; i < 4; i++){
+            for (int j = 0; j < 7; j++) {
+                final Spatial dice = dices.get(countDice);
+                Transform t = dice.getWorldTransform();
+                rootNode.attachChild(dice);
+                if(anim == true){
+                    DiceSimpleAnimator animator = new DiceSimpleAnimator(
+                            dice, t,heapCoords[i][j]);
+                    animator.setEndAction(new EndNotify() {
+
+                        @Override
+                        public void perform() {
+                        }
+                    });
+                    animator.doAnimation(true);
+                }
+                else{
+                    dice.setLocalTransform(heapCoords[i][j]);
+                }
+                countDice++;
+                getNode().attachChild(dice);
+            }
+        }
+    }
+    
+    private List<Spatial> getEntangledDices(){
+        List<Spatial> newList = new ArrayList<>(listAllDices);
+        Collections.shuffle(newList);
+        return newList;
+    }
+
 
     private void initMyNode(){
         int numDice = 0;
         float widthDist = MDominoWidth;
         float heightDist = MDominoHeight;
-        Vector3f dropPoint = new Vector3f(0,TableHeight,0);
+        Vector3f dropPoint = new Vector3f(mLocation.x,TableHeight,mLocation.z);
+        
         for(int j = 0; j < 4;j++){
 
         for(int i = 0; i < 7;i++){
@@ -133,6 +191,8 @@ public class HeapState extends AbstractAppState{
         DiceModel.scale(0.04f);
 	DiceModel.setLocalRotation(new Quaternion().fromAngles(-90 * FastMath.DEG_TO_RAD, 0, 0));
         DiceModel.setLocalTranslation(dropPoint);
+        
+        heapCoords[j][i] = DiceModel.getWorldTransform().clone();
 
         myNode.attachChild(DiceModel);
 
@@ -140,7 +200,7 @@ public class HeapState extends AbstractAppState{
         dropPoint.x += widthDist;
         }
         dropPoint.z -= heightDist;
-        dropPoint.x = 0;
+        dropPoint.x = mLocation.x;
 	}
     }
 }

@@ -39,9 +39,9 @@ public class DiceSimpleAnimator implements DiceAnimator{
     public void doAnimation(final boolean finalReplace) {
         final AnimationFactory factory = new AnimationFactory(0.5f, "anim");
         final Transform takeOff = new Transform(
-                new Vector3f((endPlace.getTranslation().x - firstPlace.getTranslation().x) / 2 ,
+                new Vector3f(((endPlace.getTranslation().x + firstPlace.getTranslation().x) / 2) ,
                 firstPlace.getTranslation().y + 0.15f,
-                endPlace.getTranslation().z - ((endPlace.getTranslation().z - firstPlace.getTranslation().z) / 2)),
+                (endPlace.getTranslation().z + firstPlace.getTranslation().z) / 2),
                 endPlace.getRotation().clone(), mDice.getLocalScale());
         
         factory.addTimeTransform(0f, firstPlace);

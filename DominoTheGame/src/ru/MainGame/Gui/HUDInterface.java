@@ -85,16 +85,17 @@ public class HUDInterface{
         Element el = nifty.getScreen("hud").findElementByName("state" + player);
         if(el == null)
             return;
-        
-        Label l = ((Label)el.getNiftyControl(Label.class));
-        if(l != null){
-            l.setText(status);
-            System.err.println("!!!!!ChangeStatus of "+ player + " to " + l.getText());
+        try{
+            Label l = ((Label)el.getNiftyControl(Label.class));
+            if(l != null){
+                l.setText(status);
+                System.err.println("!!!!!ChangeStatus of "+ player + " to " + l.getText());
+            }
+        }catch(NullPointerException ex){
+            LOG.log(Level.WARNING, "error in gui change status player ex = {0}", ex);
         }
     }
     
-    
-
     public void clean(){
 //        synchronized(GuiInterfaceHandler.getInstance()){
 //            nifty.exit();
@@ -151,7 +152,7 @@ public class HUDInterface{
         });
     }
     
-    public void removeGuiPbject(String name,EndNotify end){
+    public void removeGuiObject(String name,EndNotify end){
         Element element = nifty.getScreen("hud").
                 findElementByName(name);
         if(element != null){
@@ -159,7 +160,7 @@ public class HUDInterface{
         }
     }
     
-    public void makeScoreDeck(final Collection<String> stringsToPut,final boolean fish){
+    public void makeScoreDeck(final Collection<String> stringsToPut,final boolean fish,final EndNotify end){
         final Element el = (new PanelBuilder("Score"){{
         childLayout(ElementBuilder.ChildLayoutType.Vertical);
         
@@ -240,6 +241,7 @@ public class HUDInterface{
             @Override
             public void actionPerformed(ActionEvent e) {
                 el.markForRemoval();
+                end.perform();
             }
         });
     }

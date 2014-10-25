@@ -16,14 +16,11 @@ import com.jme3.input.controls.MouseButtonTrigger;
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.network.Client;
-import com.jme3.network.ClientStateListener;
-import com.jme3.network.ErrorListener;
 import com.jme3.network.Message;
 import com.jme3.network.MessageListener;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
-import de.lessvoid.nifty.elements.Element;
-import de.lessvoid.nifty.tools.Color;
+import de.lessvoid.nifty.EndNotify;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -37,13 +34,9 @@ import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import ru.MainGame.CurrentPlayer;
 import ru.MainGame.Dice;
-import ru.MainGame.DiceNumbers;
 import ru.MainGame.Events.StepEvent;
-import ru.MainGame.GameStarter;
 import ru.MainGame.GameState;
 import ru.MainGame.GlobalLogConfig;
-import ru.MainGame.Gui.GuiInterfaceHandler;
-import ru.MainGame.Gui.MenuState;
 import ru.MainGame.HeapState;
 import ru.MainGame.Network.FromBothSides.ExtendedSpecificationMessage;
 import ru.MainGame.Network.FromServerToPlayers.StartGameMessage;
@@ -55,7 +48,7 @@ import static ru.MainGame.Network.StatusPlayer.NOT_READY;
 import static ru.MainGame.Network.StatusPlayer.READY_TO_PLAY;
 import ru.MainGame.Network.StepToSend;
 import ru.MainGame.TableHanding.AnimationEventCounter;
-import ru.MainGame.TableHanding.ClassicRules;
+import ru.MainGame.TableHanding.GoatRules;
 import ru.MainGame.TableHanding.Rules;
 import ru.MainGame.TableHanding.TableState;
 
@@ -202,6 +195,13 @@ public class PlayersState extends AbstractAppState{
                 sendMyNewDiceFromHeap(diceToSend);
             }
         }
+        
+        if(isNetGameStarted == false){
+            if( ! mainPlayer.getHand().isEmpty()){
+                mainPlayer.clearGui();
+            }
+        }
+        
     }
 
     private void sendMyNewDiceFromHeap(NumsOfDice dice){
@@ -259,20 +259,20 @@ public class PlayersState extends AbstractAppState{
                     isCantStep = true;
             }
 
-//            boolean isAllExceptMeEmpty = true;
-//
-//            for(AbstractPlayer p : mAllPlayers){
-//                if(!(p instanceof MainPlayer))
-//                {
-//                    if(!p.getHand().isEmpty()){
-//                        isAllExceptMeEmpty = false;
-//                        break;
-//                    }
-//                }
-//            }
-//            if(isAllExceptMeEmpty == true){
-//                sendMyScoreToServer();
-//            }
+            boolean isAllExceptMeEmpty = true;
+
+            for(AbstractPlayer p : mAllPlayers){
+                if(!(p instanceof MainPlayer))
+                {
+                    if(!p.getHand().isEmpty()){
+                        isAllExceptMeEmpty = false;
+                        break;
+                    }
+                }
+            }
+            if(isAllExceptMeEmpty == true){
+                sendMyScoreToServer();
+            }
         }
     }
     private AbstractPlayer getPlayer(String name){
@@ -282,8 +282,9 @@ public class PlayersState extends AbstractAppState{
         return null;
     }
     
-    private void sendExtendedMessage(MessageSpecification specific,Object restrictedObject,String message){
+    private void sendExtendedMessage(MessageSpecification specific,Object restrictedObject,String message,StatusPlayer status){
         ExtendedSpecificationMessage msg = new ExtendedSpecificationMessage();
+        msg.setStatusPlayer(status);
         msg.setSpecification(specific);
         msg.setWhoSend(CurrentPlayer.getInstance().getName());
         msg.setRestrictedObject(restrictedObject);
@@ -315,6 +316,7 @@ public class PlayersState extends AbstractAppState{
 
     private class PickingListener implements ActionListener{
 
+        @Override
 	public void onAction(String name, boolean isPressed, float tpf) {
 	    if(name.equals(MappingsToInput.PICK.map) 
                     && isMainPlayerStepWait == true 
@@ -322,8 +324,9 @@ public class PlayersState extends AbstractAppState{
 		mainPlayer.mouseClick(isPressed);
 	    }
             else if(name.equals(MappingsToInput.CLEAR.map)){
-                if(true == isPressed)
-                mainPlayer.clearCursor();
+                if(true == isPressed){
+                    mainPlayer.clearCursor();
+                }
             }
 	}
     }
@@ -418,7 +421,16 @@ public class PlayersState extends AbstractAppState{
                     strings.add("PLAYER : " + name + "____" + map.get(name));
                 }
                 mainPlayer.getInterface().makeScoreDeck(
-                        strings,"fish".equals(extendedMessage.getMessage()));
+                        strings,"fish".equals(extendedMessage.getMessage()),new EndNotify() {
+
+                    @Override
+                    public void perform() {
+                        mainPlayer.getInterface().makeButtonInButtonLayer("Ready");
+                    }
+                });
+                endGame();
+                sendExtendedMessage(MessageSpecification.NEW_STATUS,
+                        null, null,NOT_READY);
             }
         }
         else{
@@ -433,6 +445,7 @@ public class PlayersState extends AbstractAppState{
             queuePlayersToAllowSteps = new ConcurrentLinkedQueue<>(startMessage.getQueueToSteps());
             if(queuePlayersToAllowSteps.element().equals(CurrentPlayer.getInstance().getName())){
                 allowMainStep();
+                mainPlayer.getInterface().makePopupText("Your first");
             }
                 mainPlayer.getInterface().changeStatus(queuePlayersToAllowSteps.element(),
                     "Move \ndominoes");
@@ -440,6 +453,16 @@ public class PlayersState extends AbstractAppState{
             isNetGameStarted = true;
             mainPlayer.getInterface().makePopupText("Lets start!!!");
         }
+    }
+    
+    private void endGame(){
+        heap.returnAllDicesToHeap(true);
+        isNetGameStarted = false;
+        isCantStep = false;
+        isMainPlayerStepWait = false;
+        rules.endGame();
+        rules.removeTips();
+        mainPlayer.clearGui();
     }
     
     private void sendMyScoreToServer(){
@@ -487,10 +510,10 @@ public class PlayersState extends AbstractAppState{
 //                            try{
                             switch (m) {
                                 case "left":
-                                    onHand.setUserData(ClassicRules.MAPPING_PREF_TO_LEFT, true);
+                                    onHand.setUserData(GoatRules.MAPPING_PREF_TO_LEFT, true);
                                     break;
                                 case "right":
-                                    onHand.setUserData(ClassicRules.MAPPING_PREF_TO_LEFT, false);
+                                    onHand.setUserData(GoatRules.MAPPING_PREF_TO_LEFT, false);
                                     break;
                             }
 //                            }catch(NullPointerException ex){
@@ -506,11 +529,28 @@ public class PlayersState extends AbstractAppState{
                     //
                     turnNextPlayerStep();
                     
+                    if(name.equals(CurrentPlayer.getInstance().getName())){
+                        
+                        
+                        
+                        //DEBUG
+                        System.out.println("MyHand size ==" + mainPlayer.getHand().size() + "it is == " + mainPlayer.getHand());
+
+                        if(mainPlayer.getHand().isEmpty()){
+                            mainPlayer.getInterface().makePopupText("You're out!!!");
+                            ExtendedSpecificationMessage msg = new ExtendedSpecificationMessage();
+                            msg.setWhoSend(CurrentPlayer.getInstance().getName());
+                            msg.setSpecification(MessageSpecification.EMPTY_HAND);
+                            msg.setStatusPlayer(StatusPlayer.WATCHER);
+                            CurrentPlayer.getInstance().getClientOfCurSession().send(msg);
+                        }
+                    }
                     break;
                 }
             }
         }
     }
+    
 
     private class OnlineClientHandler implements MessageListener<Client>{
 
