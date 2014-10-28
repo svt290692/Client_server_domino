@@ -6,17 +6,15 @@ package ru.MainGame.Network.FromServerToPlayers;
 
 import com.jme3.network.AbstractMessage;
 import com.jme3.network.serializing.Serializable;
-import com.jme3.network.serializing.Serializer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import ru.MainGame.Network.NumsOfDice;
-import ru.MainGame.Network.Server.HostedPlayer;
 
 /**
- *
+ * This special message that tell players about game started
  * @author svt
  */
 @Serializable

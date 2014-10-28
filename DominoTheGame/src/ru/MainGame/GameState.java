@@ -26,7 +26,8 @@ import ru.MainGame.TableHanding.GoatRules;
 import ru.MainGame.TableHanding.Rules;
 
 /**
- *
+ * state main game 
+ * this state contain table loading and initialize game without gui
  * @author svt
  */
 public class GameState extends AbstractAppState{
@@ -48,6 +49,7 @@ public class GameState extends AbstractAppState{
     private Node tableNode;
     
     DirectionalLight light;
+    DirectionalLight guiLight;
 
     private Rules curRules;
 
@@ -94,8 +96,7 @@ public class GameState extends AbstractAppState{
         stateManager.attach(mPlayers);
 
     }
-
-
+    
     @Override
     public void update(float tpf) {
     }
@@ -107,20 +108,22 @@ public class GameState extends AbstractAppState{
         stateManager.detach(mPlayers);
         rootNode.detachAllChildren();
         rootNode.removeLight(light);
+        guiNode.removeLight(guiLight);
     }
 
-    void InitLight(){
+    private void InitLight(){
     light = new DirectionalLight();
     light.setDirection((cam.getDirection()));
     light.setColor(ColorRGBA.White);
     rootNode.addLight(light);
 
-    DirectionalLight sunGui = new DirectionalLight();
-    sunGui.setDirection(new Vector3f(0, 0, -1.0f));
-    guiNode.addLight(sunGui);
+    guiLight = new DirectionalLight();
+    guiLight.setDirection(new Vector3f(0, 0, -1.0f));
+    guiNode.addLight(guiLight);
     LOG.finest("Light was initialized");
     }
-    void InitScene(){
+    
+    private void InitScene(){
         table = assetManager.loadModel("Models/table/table.j3o");
         table.setLocalTranslation(0,-2.37f, 0);
         rootNode.attachChild(table);

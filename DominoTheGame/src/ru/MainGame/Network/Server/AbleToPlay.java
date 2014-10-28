@@ -7,7 +7,7 @@ package ru.MainGame.Network.Server;
 import ru.MainGame.Network.StatusPlayer;
 
 /**
- *
+ * just info about abstract player that can play domino
  * @author svt
  */
 public class AbleToPlay {

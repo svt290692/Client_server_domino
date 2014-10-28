@@ -4,10 +4,13 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.niftygui.NiftyJmeDisplay;
 import de.lessvoid.nifty.Nifty;
 import java.util.logging.Logger;
-import ru.MainGame.Gui.Controllers.AbstractMenuScreenController;
 import ru.MainGame.Gui.GuiInterfaceHandler;
 import ru.MainGame.Gui.MenuState;
 
+/**
+ * that class contain all game and initialize it
+ * @author svt
+ */
 public class DominoApp extends SimpleApplication {
 
     public static float screenWidth;
@@ -30,18 +33,23 @@ public class DominoApp extends SimpleApplication {
 
 	screenHeight = settings.getHeight();
 	screenWidth  = settings.getWidth();
-        NiftyJmeDisplay display = new NiftyJmeDisplay(assetManager, inputManager, audioRenderer, viewPort);
-        GuiInterfaceHandler.getInstance().setDisplay(display);
-        
-        Nifty nifty = display.getNifty();
-        nifty.fromXml("Interface/menu.xml", "start");
-        GuiInterfaceHandler.getInstance().setNifty(nifty);
-        getGuiViewPort().addProcessor(display);
         
         setPauseOnLostFocus(false);
+        inputManager.deleteMapping("SIMPLEAPP_Exit");
         
+        setDisplayFps(false);
+        setDisplayStatView(false);
+        initGui();
+        //StartMenu
         stateManager.attach(new MenuState());
 
 	LOG.fine("The game was run with name :" + GAME_NAME);
+    }
+    private void initGui(){
+        NiftyJmeDisplay display = new NiftyJmeDisplay(assetManager, inputManager, audioRenderer, viewPort);
+        GuiInterfaceHandler.getInstance().setDisplay(display);
+        getGuiViewPort().addProcessor(display);
+        Nifty nifty = display.getNifty();
+        GuiInterfaceHandler.getInstance().setNifty(nifty);
     }
 }

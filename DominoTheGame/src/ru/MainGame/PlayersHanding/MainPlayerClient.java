@@ -8,7 +8,6 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.network.Client;
 import com.jme3.network.ClientStateListener;
 import com.jme3.network.ErrorListener;
-import com.jme3.network.Message;
 import com.jme3.network.MessageListener;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
@@ -20,9 +19,7 @@ import javax.swing.JOptionPane;
 import ru.MainGame.CurrentPlayer;
 import ru.MainGame.Events.StepEvent;
 import ru.MainGame.GlobalLogConfig;
-import ru.MainGame.Gui.GuiInterfaceHandler;
 import ru.MainGame.Gui.HUDInterface;
-import ru.MainGame.Gui.MenuState;
 import ru.MainGame.HeapState;
 import ru.MainGame.Network.FromBothSides.ExtendedSpecificationMessage;
 import ru.MainGame.Network.MessageSpecification;
@@ -34,7 +31,7 @@ import ru.MainGame.TableHanding.GoatRules;
 import ru.MainGame.TableHanding.Rules;
 
 /**
- *
+ * player to play networking
  * @author svt
  */
 public class MainPlayerClient extends MainPlayer{
@@ -63,14 +60,13 @@ public class MainPlayerClient extends MainPlayer{
         }
         mClient.addClientStateListener(netHandler);
         mClient.addErrorListener(netHandler);
-        mClient.addMessageListener(netHandler);
 
         if(messageListener != null)
             mClient.addMessageListener(messageListener);
 
         mClient.start();
 
-        mInterface = new HUDInterface(sApp, GuiInterfaceHandler.getInstance().getDisplay()){
+        mInterface = new HUDInterface(sApp){
             @Override
             public void readyPushed() {
                 super.readyPushed();
@@ -192,13 +188,8 @@ public class MainPlayerClient extends MainPlayer{
         return lowestDice;
     }
     
-    private class Handler implements MessageListener<Client>, ErrorListener<Client>, ClientStateListener{
+    private class Handler implements  ErrorListener<Client>, ClientStateListener{
 
-        @Override
-        public void messageReceived(Client source, Message m) {
-//            System.out.println("Message resive :" + m);
-            //TODO ?
-        }
 
         @Override
         public void handleError(Client source, Throwable t) {

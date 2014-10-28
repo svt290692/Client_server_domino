@@ -13,7 +13,7 @@ import ru.MainGame.DiceNumbers;
 import ru.MainGame.DiceRotations;
 import ru.MainGame.Events.ReplaceEvent;
 import ru.MainGame.Events.StepEvent;
-import ru.MainGame.PlayersHanding.PlacesToAttach;
+import ru.MainGame.PlacesToAttach;
 
 /**
  *

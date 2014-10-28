@@ -5,7 +5,6 @@
 
 package ru.MainGame.Gui.Controllers;
 
-import com.jme3.input.controls.ActionListener;
 import de.lessvoid.nifty.Nifty;
 import de.lessvoid.nifty.screen.Screen;
 import de.lessvoid.nifty.screen.ScreenController;
@@ -17,6 +16,10 @@ import de.lessvoid.nifty.screen.ScreenController;
 public class HUDScreenController implements ScreenController{
     java.awt.event.ActionListener listener;
     java.awt.event.ActionListener endLookToScoreNotify;
+    
+    java.awt.event.ActionListener wantExitListener;
+    java.awt.event.ActionListener dontWantExitListener;
+    
 
     public HUDScreenController() {
 
@@ -34,6 +37,25 @@ public class HUDScreenController implements ScreenController{
     public void onEndScreen() {
     }
 
+    public void setWantExitListener(java.awt.event.ActionListener wantExitListener) {
+        this.wantExitListener = wantExitListener;
+    }
+
+    public void setDontWantExitListener(java.awt.event.ActionListener dontWantExitListener) {
+        this.dontWantExitListener = dontWantExitListener;
+    }
+
+    
+    
+    public void popupExit(String exit){
+        if(exit.equals("no")){
+            dontWantExitListener.actionPerformed(null);
+        }
+        else{
+            wantExitListener.actionPerformed(null);
+        }
+    }
+    
     public void setEndLookToScoreNotify(java.awt.event.ActionListener endLookToScoreNotify) {
         this.endLookToScoreNotify = endLookToScoreNotify;
     }

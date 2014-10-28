@@ -28,7 +28,7 @@ import ru.MainGame.TableHanding.AnimationEventCounter;
 import ru.MainGame.TableHanding.DiceSimpleAnimator;
 
 /**
- *
+ * state that contain all dices and has method to get and take dices to heap and from it
  * @author svt
  */
 public class HeapState extends AbstractAppState{
@@ -96,19 +96,23 @@ public class HeapState extends AbstractAppState{
     public void cleanup() {
         myNode.detachAllChildren();
     }
+    
     public Node getNode(){
         return myNode;
     }
+    
     public Spatial getDice(int left,int right){
         return findDiceIn(myNode.getChildren(),left,right);
     }
     
+    /**
+     * 
+     * @param node where find dices
+     * @param left num of dice
+     * @param right num of dice
+     * @return Spatial dice if it node contain that dice or null if in havenot it
+     */
     public static Spatial findDiceIn(Collection<Spatial> node ,int left,int right){
-        
-        List<Dice> list = new ArrayList<>();
-        for(Spatial d:node){
-            list.add(d.getControl(Dice.class));
-        }
         
         for(Spatial d:node){
             
@@ -124,7 +128,11 @@ public class HeapState extends AbstractAppState{
         }
         return null;
     }
-
+    
+    /**
+     * 
+     * @return random dice in heap node or null if heap is empty
+     */
     public Spatial getRandomDice(){
         int size = myNode.getChildren().size();
         if(size == 0) return null;
@@ -135,6 +143,10 @@ public class HeapState extends AbstractAppState{
         return myNode.getChildren().get(index);
     }
     
+    /**
+     * return and attach all dices to heap
+     * @param anim activate animation or can be false if anim is not neeed fo now
+     */
     public void returnAllDicesToHeap(boolean anim){
        awaitReturn = true;
        awaiitAnim = anim;
@@ -189,7 +201,7 @@ public class HeapState extends AbstractAppState{
         Spatial DiceModel = listAllDices.get(numDice);
 
         DiceModel.scale(0.04f);
-	DiceModel.setLocalRotation(new Quaternion().fromAngles(-90 * FastMath.DEG_TO_RAD, 0, 0));
+	DiceModel.setLocalRotation(new Quaternion().fromAngles(90 * FastMath.DEG_TO_RAD, 0, 0));
         DiceModel.setLocalTranslation(dropPoint);
         
         heapCoords[j][i] = DiceModel.getWorldTransform().clone();

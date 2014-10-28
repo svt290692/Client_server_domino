@@ -5,9 +5,6 @@
 package ru.MainGame;
 
 import com.jme3.asset.AssetManager;
-import com.jme3.math.FastMath;
-import com.jme3.math.Quaternion;
-import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import java.io.IOException;
@@ -15,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
+ * loader of simple dices
  * @author svt
  */
 public class SimpleDicesLoader implements ModelsLoader{

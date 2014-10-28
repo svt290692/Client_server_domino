@@ -4,8 +4,11 @@ import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.ViewPort;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.control.AbstractControl;
-import java.util.Random;
 
+/**
+ * this class provide dice entity for dice Models
+ * @author svt
+ */
 public class Dice extends AbstractControl implements Cloneable{
     private int leftNum;
     private int rightNum;
@@ -46,20 +49,25 @@ public class Dice extends AbstractControl implements Cloneable{
         }
         return true;
     }
+    
     Dice(int LeftNum,int RightNum){
         this.leftNum = LeftNum;
         this.rightNum = RightNum;
 //        this.Model = Model;
     }
+    
     Spatial getModel(){
         return spatial;
     }
+    
     public int getLeftNum(){
         return leftNum;
     }
+    
     public int getRightNum(){
         return rightNum;
     }
+    
     /**
      * @return return num if left and right num equals else return -1
      */
@@ -68,6 +76,7 @@ public class Dice extends AbstractControl implements Cloneable{
 	    return leftNum;
 	else return -1;
     }
+    
     public int getNum(DiceNumbers num){
 	if(num == DiceNumbers.LEFT_NUM) return leftNum;
 	else if(num == DiceNumbers.RIGHT_NUM) return rightNum;

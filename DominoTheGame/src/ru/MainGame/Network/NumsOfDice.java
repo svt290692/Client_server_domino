@@ -7,7 +7,7 @@ package ru.MainGame.Network;
 import java.io.Serializable;
 
 /**
- *
+ * light version nums of dices to (to send network)
  * @author svt
  */
 @com.jme3.network.serializing.Serializable

@@ -9,7 +9,7 @@ import java.util.Objects;
 import ru.MainGame.DiceNumbers;
 
 /**
- *
+ * light version of steo event(to send network)
  * @author svt
  */
 @Serializable

@@ -4,8 +4,6 @@
  */
 package ru.MainGame.Gui.Controllers;
 
-import de.lessvoid.nifty.Nifty;
-import de.lessvoid.nifty.screen.Screen;
 import ru.MainGame.Gui.ButtonNames;
 
 /**

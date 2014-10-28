@@ -6,11 +6,10 @@ package ru.MainGame.Network.Server;
 
 import com.jme3.network.HostedConnection;
 import ru.MainGame.Network.StatusPlayer;
-import ru.MainGame.Network.StatusPlayer;
 
 
 /**
- *
+ * 
  * @author svt
  */
 public class HostedPlayer extends AbleToPlay{

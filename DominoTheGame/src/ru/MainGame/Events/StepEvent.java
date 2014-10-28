@@ -7,16 +7,14 @@ package ru.MainGame.Events;
 import com.jme3.export.JmeExporter;
 import com.jme3.export.JmeImporter;
 import com.jme3.export.Savable;
-import com.jme3.network.serializing.Serializable;
 import com.jme3.scene.Spatial;
 import java.io.IOException;
 import ru.MainGame.DiceNumbers;
 
 /**
- *
+ * thi class abstract Step from dice to dice
  * @author svt
  */
-
 public class StepEvent implements Savable{
     private  Spatial diceInTable;
     private  Spatial diceInHand;

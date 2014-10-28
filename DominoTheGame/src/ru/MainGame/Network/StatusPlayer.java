@@ -5,7 +5,7 @@
 package ru.MainGame.Network;
 
 /**
- *
+ * statuses of players
  * @author svt
  */
 public enum StatusPlayer {

@@ -15,13 +15,24 @@ import ru.MainGame.Gui.MenuListener;
  */
 public abstract class AbstractMenuScreenController implements ScreenController{
 
+    protected Nifty nifty;
+    protected Screen screen;
+    @Override
     public void bind(Nifty nifty, Screen screen) {
+        this.nifty = nifty;
+        this.screen = screen;
     }
 
+    @Override
     public void onStartScreen() {
     }
 
+    @Override
     public void onEndScreen() {
+    }
+
+    public Nifty getNifty() {
+        return nifty;
     }
 
     MenuListener mListener;

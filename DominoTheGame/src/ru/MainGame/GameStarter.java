@@ -7,12 +7,16 @@ import java.util.logging.Logger;
 import ru.MainGame.Network.FromBothSides.ExtendedSpecificationMessage;
 import ru.MainGame.Network.FromServerToPlayers.StartGameMessage;
 import ru.MainGame.Network.NumsOfDice;
-import ru.MainGame.Network.StatusPlayer;
 import ru.MainGame.Network.StepToSend;
 
+/**
+ * the game starter class start game and set default settings for application
+ * @author svt
+ */
 public class GameStarter{
 
     static{
+        
         Serializer.registerClasses(ExtendedSpecificationMessage.class,
                 StartGameMessage.class, NumsOfDice.class, StepToSend.class);
     }
@@ -32,12 +36,12 @@ public class GameStarter{
         cfg.setResolution(800, 640);
         cfg.setFullscreen(false);
         cfg.setSamples(2);    // anti-aliasing
-        cfg.setTitle("GOAT"); // branding: window name
+        cfg.setTitle("Domino"); // branding: window name
 //        try {
 //          // Branding: window icon
-//          cfg.setIcons(new BufferedImage[]{ImageIO.read(new File("assets/Interface/icon.gif"))});
+//          cfg.setIcons(new BufferedImage[]{ImageIO.read(new File("assets/Interface/arrow.png"))});
 //        } catch (IOException ex) {
-//            Logger.getLogger(GameStarter.class.getName()).log(Level.SEVERE, "Icon missing.", ex);
+//            LOG.log(Level.SEVERE, "Icon missing.", ex);
 //        }
         // branding: load splashscreen from assets
 //        cfg.setSettingsDialogImage("Interface/MySplashscreen.png");

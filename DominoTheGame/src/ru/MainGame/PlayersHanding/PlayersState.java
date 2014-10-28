@@ -10,8 +10,10 @@ import com.jme3.app.state.AbstractAppState;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.input.FlyByCamera;
 import com.jme3.input.InputManager;
+import com.jme3.input.KeyInput;
 import com.jme3.input.MouseInput;
 import com.jme3.input.controls.ActionListener;
+import com.jme3.input.controls.KeyTrigger;
 import com.jme3.input.controls.MouseButtonTrigger;
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
@@ -21,6 +23,7 @@ import com.jme3.network.MessageListener;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import de.lessvoid.nifty.EndNotify;
+import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -37,6 +40,7 @@ import ru.MainGame.Dice;
 import ru.MainGame.Events.StepEvent;
 import ru.MainGame.GameState;
 import ru.MainGame.GlobalLogConfig;
+import ru.MainGame.Gui.MenuState;
 import ru.MainGame.HeapState;
 import ru.MainGame.Network.FromBothSides.ExtendedSpecificationMessage;
 import ru.MainGame.Network.FromServerToPlayers.StartGameMessage;
@@ -53,7 +57,7 @@ import ru.MainGame.TableHanding.Rules;
 import ru.MainGame.TableHanding.TableState;
 
 /**
- *
+ * main state that will process main player input and game events
  * @author svt
  */
 public class PlayersState extends AbstractAppState{
@@ -76,7 +80,8 @@ public class PlayersState extends AbstractAppState{
 
     private static enum MappingsToInput{
 	PICK("Left mouse pick"),
-        CLEAR("clear");
+        CLEAR("clear"),
+        ESC_MENU("MENU_REQUEST");
 
 	private MappingsToInput(String val) {
 	    this.map = val;
@@ -130,6 +135,7 @@ public class PlayersState extends AbstractAppState{
                     PlayersPlaces.MAIN_PLAYER,table.getNode(), sApp,"127.0.0.1","5511",
                     CurrentPlayer.getInstance().getName(),new OnlineClientHandler());
             this.mainPlayer = client;
+            registerPlace(PlayersPlaces.MAIN_PLAYER);
             this.mAllPlayers.add(client);
         } catch (IOException ex) {
             LOG.log(Level.SEVERE, "The Client can't connect to server because network problem. address: <<{0}>> port<<{1}>> ",
@@ -140,6 +146,14 @@ public class PlayersState extends AbstractAppState{
         mainPlayer.getInterface().addPlayerToTopPanel(
                 CurrentPlayer.getInstance().getName(), "Not ready",
                 CurrentPlayer.getInstance().getIndexOfAvatar(),true);
+        mainPlayer.getInterface().setExitListener(new java.awt.event.ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                exitToMenu();
+            }
+        });
+        
 //        markToClearInterface.set(true);
     }
     
@@ -150,8 +164,20 @@ public class PlayersState extends AbstractAppState{
 		new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
         inputManager.addMapping(MappingsToInput.CLEAR.map,
 		new MouseButtonTrigger(MouseInput.BUTTON_RIGHT));
+        inputManager.addMapping(MappingsToInput.ESC_MENU.map,
+		new KeyTrigger(KeyInput.KEY_ESCAPE));
 
 	inputManager.addListener(mMouseListener,MappingsToInput.PICK.map,MappingsToInput.CLEAR.map);
+        inputManager.addListener( new ActionListener() {
+
+            @Override
+            public void onAction(String name, boolean isPressed, float tpf) {
+                if(isPressed){
+                    mainPlayer.getInterface().makePopupMenu();
+                }
+            }
+        },MappingsToInput.ESC_MENU.map);
+        
     }
     
     @Override
@@ -203,7 +229,28 @@ public class PlayersState extends AbstractAppState{
         }
         
     }
-
+    
+    @Override
+    public void cleanup() {
+        if(mainPlayer != null){
+            mainPlayer.killPlayer();
+        }
+        clearInput();
+        busyPlaces.clear();
+    }
+    
+    private void clearInput(){
+        inputManager.deleteMapping(MappingsToInput.PICK.map);
+        inputManager.deleteMapping(MappingsToInput.CLEAR.map);
+        inputManager.deleteMapping(MappingsToInput.ESC_MENU.map);
+        inputManager.removeListener(mMouseListener);
+    }
+    
+    public void exitToMenu(){
+        sApp.getStateManager().detach(gameState);
+        sApp.getStateManager().attach(new MenuState());
+    }
+    
     private void sendMyNewDiceFromHeap(NumsOfDice dice){
         ExtendedSpecificationMessage msg = new ExtendedSpecificationMessage(
                         MessageSpecification.GET_DICE_FROM_HEAP,
@@ -275,6 +322,7 @@ public class PlayersState extends AbstractAppState{
             }
         }
     }
+    
     private AbstractPlayer getPlayer(String name){
         for(AbstractPlayer p : mAllPlayers)
             if(p.getName().equals(name))
@@ -302,17 +350,7 @@ public class PlayersState extends AbstractAppState{
         isMainPlayerStepWait = false;
     }
     
-    @Override
-    public void cleanup() {
-//        mainPlayer.getInterface().cleanTopPanel();
-        if(mainPlayer != null)
-        mainPlayer.killPlayer();
-        
-        inputManager.deleteMapping(MappingsToInput.PICK.map);
-        inputManager.deleteMapping(MappingsToInput.CLEAR.map);
-        inputManager.removeListener(mMouseListener);
-        
-    }
+  
 
     private class PickingListener implements ActionListener{
 
@@ -351,8 +389,11 @@ public class PlayersState extends AbstractAppState{
                             return;
                     }
                     PlayersPlaces place = findCorrectPlaceForDistancePlayer();
+                    registerPlace(place);
                     mAllPlayers.add(new DistancePlayer(place,
                             sApp.getRootNode(), heap, extendedMessage.getWhoSend()));
+
+
 
                     String status = null;
                     switch(extendedMessage.getStatusPlayer()){
@@ -386,11 +427,10 @@ public class PlayersState extends AbstractAppState{
                         turnNextPlayerStep();
                     queuePlayersToAllowSteps.remove(extendedMessage.getWhoSend());
                 }
-                
                 for(AbstractPlayer p : mAllPlayers){
                     if(p.getName().equals(extendedMessage.getWhoSend())){
                         mAllPlayers.remove(p);
-                        busyPlaces.remove(p.getPlace());
+                        unregisterPlace(p.getPlace());
                         break;
                     }
                 }
@@ -534,7 +574,7 @@ public class PlayersState extends AbstractAppState{
                         
                         
                         //DEBUG
-                        System.out.println("MyHand size ==" + mainPlayer.getHand().size() + "it is == " + mainPlayer.getHand());
+                        LOG.log(Level.FINEST, "MyHand size =={0}it is == {1}", new Object[]{mainPlayer.getHand().size(), mainPlayer.getHand()});
 
                         if(mainPlayer.getHand().isEmpty()){
                             mainPlayer.getInterface().makePopupText("You're out!!!");
@@ -556,7 +596,7 @@ public class PlayersState extends AbstractAppState{
 
         @Override
         public void messageReceived(Client source, Message m) {
-            System.err.println("I am resive message in Players state : "  + m);
+           LOG.log(Level.INFO, "I am resive message in Players state : {0}", m);
             if(m instanceof ExtendedSpecificationMessage){
                 
                 ExtendedSpecificationMessage message = (ExtendedSpecificationMessage)m;
@@ -572,7 +612,8 @@ public class PlayersState extends AbstractAppState{
                     queueUnprocessedMessages.add(message);
                 }else if(message.getSpecification().equals(MessageSpecification.KICK)){
                     JOptionPane.showMessageDialog(null, message.getMessage());
-                    sApp.stop();
+//                    sApp.stop();
+                    exitToMenu();
                 }
                 else if(message.getSpecification().equals(MessageSpecification.GET_DICE_FROM_HEAP)){
                     queueUnprocessedMessages.add(message);
@@ -603,15 +644,15 @@ public class PlayersState extends AbstractAppState{
                             Logger.getLogger(PlayersState.class.getName()).log(Level.SEVERE, "interrupt when wait", ex);
                         }
                     }
+                    LOG.log(Level.FINE, "Start game part ::: {0}", message.getStartGamePart().toString());
                     for(AbstractPlayer p : mAllPlayers){
                         List<NumsOfDice> mPart = message.getPartOf(p.getName());
 
                         for(NumsOfDice n : mPart){
                          p.TakeFromHeap(n.getLeft(), n.getRight());
-                        System.out.println(""+ p.getName() + " have got:" + n);
                         }
                     }
-                    System.out.println("LETS START!!!!");
+                    LOG.log(Level.INFO,"LETS START!!!!");
                     
                 }
             }
@@ -630,7 +671,7 @@ public class PlayersState extends AbstractAppState{
         public void UpdateFromApplication() {
             if(!queueAddToScreenDices.isEmpty()){
                 Spatial s = queueAddToScreenDices.remove();
-                s.setLocalRotation(new Quaternion().fromAngles(-90 * FastMath.DEG_TO_RAD, 0, 0));
+                s.setLocalRotation(new Quaternion().fromAngles(90 * FastMath.DEG_TO_RAD, 0, 0));
                 getNode().attachChild(s);
                 sortNodeDices(getNode(), HeapState.getDicesWidth());
             }

@@ -4,8 +4,10 @@
  */
 package ru.MainGame.Gui;
 
+import com.jme3.system.AppSettings;
+
 /**
- *
+ * listener of all menu buttons
  * @author svt
  */
 public interface MenuListener {
@@ -13,13 +15,11 @@ public interface MenuListener {
     void triggerdStartGame();
         void triggerdConnectToGame();
             void triggerdConnectToGame_connect();
-        void triggerdCreateGame();
-            void triggerdCreateGame_create();
+//        void triggerdCreateGame();
 
     void triggerdSettings();
+        void triggerApplySettings(AppSettings cfg);
     void triggerdAbout();
     void triggerdExit();
-
-
-
+    
 }

@@ -8,7 +8,7 @@ import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 
 /**
- *
+ * basic rotations of dices
  * @author svt
  */
 public enum DiceRotations {

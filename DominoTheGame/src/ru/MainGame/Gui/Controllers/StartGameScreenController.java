@@ -5,8 +5,6 @@
 
 package ru.MainGame.Gui.Controllers;
 
-import de.lessvoid.nifty.Nifty;
-import de.lessvoid.nifty.screen.Screen;
 import ru.MainGame.Gui.ButtonNames;
 
 /**
@@ -18,8 +16,12 @@ public class StartGameScreenController extends AbstractMenuScreenController{
     @Override
     public void buttonPushed(String what) {
         switch(ButtonNames.valueOf(what)){
-            case CREATE_GAME: mListener.triggerdCreateGame();break;
+//            case CREATE_GAME: mListener.triggerdCreateGame();break;
             case CONNECT_TO_GAME: mListener.triggerdConnectToGame();break;
         }
+    }
+    
+    public void goToPreviousScreen(){
+        getNifty().gotoScreen("start");
     }
 }

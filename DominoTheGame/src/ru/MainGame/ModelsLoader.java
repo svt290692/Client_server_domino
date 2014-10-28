@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- *
+ * intefrace that abstract loading dice models
  * @author svt
  */
 public interface ModelsLoader {

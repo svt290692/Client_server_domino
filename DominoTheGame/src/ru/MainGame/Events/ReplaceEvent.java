@@ -5,10 +5,10 @@
 package ru.MainGame.Events;
 
 import com.jme3.scene.Spatial;
-import ru.MainGame.PlayersHanding.PlacesToAttach;
+import ru.MainGame.PlacesToAttach;
 
 /**
- *
+ * this class astract event physics replace of dices
  * @author svt
  */
 public class ReplaceEvent {

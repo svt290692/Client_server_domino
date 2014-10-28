@@ -4,21 +4,17 @@
  */
 package ru.MainGame;
 
-import com.jme3.util.JmeFormatter;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.logging.FileHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
 import java.util.logging.XMLFormatter;
 
 /**
- *
+ * some config for logging my programm
  * @author svt
  */
 public class GlobalLogConfig {
@@ -52,7 +48,6 @@ public class GlobalLogConfig {
 	try {
 	    try{
 		long curTime = System.currentTimeMillis();
-		Date curDate = new Date(curTime);
 		String time = new SimpleDateFormat("dd_MM_yyyy_hh_mm_ss__").format(curTime);
 
 		handler = new FileHandler(nameOfLogFolder + File.separator + time + "GLOBAL_LOG " + ".xml",false);

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE log SYSTEM "logger.dtd">
+<log>
+<record>
+  <date>2014-10-28T15:08:07</date>
+  <millis>1414494487871</millis>
+  <sequence>0</sequence>
+  <logger>ru.MainGame.Server.ServerStarter</logger>
+  <level>FINE</level>
+  <class>ru.MainGame.Server.ServerStarter</class>
+  <method>main</method>
+  <thread>1</thread>
+  <message>server get listeners</message>
+</record>
+<record>
+  <date>2014-10-28T15:08:08</date>
+  <millis>1414494488015</millis>
+  <sequence>1</sequence>
+  <logger>ru.MainGame.Server.ServerStarter</logger>
+  <level>INFO</level>
+  <class>ru.MainGame.Server.ServerStarter</class>
+  <method>main</method>
+  <thread>1</thread>
+  <message>Server start at port:5 511</message>
+</record>

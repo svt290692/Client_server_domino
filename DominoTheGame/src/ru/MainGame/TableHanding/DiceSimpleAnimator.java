@@ -83,7 +83,6 @@ public class DiceSimpleAnimator implements DiceAnimator{
             
             AnimationEventCounter.getInstance().releaseAnimationSlot();
             
-            System.err.println("END ANIMATE!");
             
             this.control.removeAnim(anim);
             mDice.removeControl(AnimControl.class);

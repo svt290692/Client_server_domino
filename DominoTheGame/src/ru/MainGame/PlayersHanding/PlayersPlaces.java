@@ -7,7 +7,7 @@ package ru.MainGame.PlayersHanding;
 import com.jme3.math.Vector3f;
 
 /**
- *
+ * places in scene that need put players dices
  * @author svt
  */
 public enum PlayersPlaces {

@@ -8,7 +8,7 @@ import java.io.Serializable;
 import java.util.Random;
 
 /**
- *
+ *  this enum abstracts numbers of dices
  * @author svt
  */
 public enum DiceNumbers implements Serializable{

@@ -5,7 +5,6 @@
 package ru.MainGame;
 
 import com.jme3.network.Client;
-import java.util.Random;
 
 /**
  *this class represents Player of this session
@@ -16,22 +15,38 @@ public class CurrentPlayer {
     int indexOfAvatar;
     private Client ClientOfCurSession;
 
+    /**
+     * 
+     * @return index of avatar that player choice 
+     */
     public int getIndexOfAvatar() {
         return indexOfAvatar;
     }
-
+    /**
+     * 
+     * @param indexOfAvatar index of image in project asset
+     */
     public void setIndexOfAvatar(int indexOfAvatar) {
         this.indexOfAvatar = indexOfAvatar;
     }
     
+    /**
+     * 
+     * @return name that player was input
+     */
     public String getName() {
         return name;
     }
-
+    
+    /**
+     * 
+     * @return online client that contain current instance
+     */
     public Client getClientOfCurSession() {
         return ClientOfCurSession;
     }
-
+    
+    
     public void setName(String name) {
         this.name = name;
     }
@@ -41,9 +56,6 @@ public class CurrentPlayer {
     }
     
     private CurrentPlayer() {
-        ///only for test
-        Random r = new Random();
-        name = "Player" + r.nextInt(1000);
     }
     
     public static CurrentPlayer getInstance() {

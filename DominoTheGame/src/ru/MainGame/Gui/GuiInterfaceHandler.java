@@ -8,7 +8,7 @@ import com.jme3.niftygui.NiftyJmeDisplay;
 import de.lessvoid.nifty.Nifty;
 
 /**
- *
+ * singleton, it keep gui settings
  * @author svt
  */
 public class GuiInterfaceHandler {

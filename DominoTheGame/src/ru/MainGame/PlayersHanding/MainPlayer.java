@@ -22,7 +22,7 @@ import ru.MainGame.HeapState;
 import ru.MainGame.TableHanding.Rules;
 
 /**
- *
+ * abstract main player that can playe single or with someone
  * @author svt
  */
 public abstract class MainPlayer extends AbstractPlayer{
@@ -358,7 +358,7 @@ public abstract class MainPlayer extends AbstractPlayer{
         synchronized (Mutex) {
             if (!queueAddToScreenDices.isEmpty()) {
                 Spatial s = queueAddToScreenDices.remove();
-                s.setLocalRotation(new Quaternion().fromAngles(-90 * FastMath.DEG_TO_RAD, 0, 0));
+                s.setLocalRotation(new Quaternion().fromAngles(90 * FastMath.DEG_TO_RAD, 0, 0));
                 getNode().attachChild(s);
                 makeGuiClone(s);
                 sortDices();

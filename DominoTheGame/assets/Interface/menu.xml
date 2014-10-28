@@ -3,7 +3,7 @@
     <useControls filename="nifty-default-controls.xml"/>
     <useStyles filename="nifty-default-styles.xml"/>
     <screen id="start" controller="ru.MainGame.Gui.Controllers.MainMenuScreenController">
-        <layer id="menu" childLayout="vertical" backgroundImage="/Interface/preview.jpg">
+        <layer id="menu" childLayout="center" backgroundImage="/Interface/preview.jpg">
             <panel id="mainPanel" childLayout="vertical" width="100%" x="-2" y="3" valign="center" align="center" height="90%">
                 <effect>
                         <onStartScreen name="move" mode="in" direction="right" length="300" startDelay="0" inherit="true"/>
@@ -33,46 +33,111 @@
                     <interact onClick="buttonPushed(EXIT)" />
                  </control>
             </panel>
-            <control name="label" id="label" width="50%" x="305" y="45" text="Development of domino" align="right" height="15%" font="/Interface/Fonts/myDomFont.fnt"/>
+            <control name="label" id="label" width="50%"  x="305" y="45" text="Development of domino" valign="bottom" align="right"   font="/Interface/Fonts/myDomFont.fnt"/>
+        </layer>
+    </screen>
+    
+    <screen id="about" controller="ru.MainGame.Gui.Controllers.AboutScreenController">
+        <layer id="aboutLayer" childLayout="center" backgroundImage="/Interface/preview.jpg">
+            <panel id="aboutMainPanel" childLayout="center" width="80.0%" style="nifty-panel-red" height="80.0%">
+                <effect>
+                        <onStartScreen name="move" mode="in" direction="right" length="300" startDelay="0" inherit="true"/>
+                        <onEndScreen name="move" mode="out" direction="left" length="300" startDelay="0" inherit="true"/>
+                </effect>
+                <text text="Hello, this is my game of domino. I still develop it, so I will expand it as soon as i can." 
+                font="/Interface/Fonts/myDomFont.fnt" width="100%" height="100%" wrap="true" />
+            </panel>
+            <image id="backToStartScreenImage" filename="/Interface/arrow.png" width="151px" x="-1px" y="-1px" valign="bottom" align="left" height="70px">
+                    <interact onClick="goToPreviousScreen()" />
+            </image>
+            <control name="label" id="label" width="50%" x="305" y="45" text="Development of domino" align="right" valign="bottom"  font="/Interface/Fonts/myDomFont.fnt"/>
+        </layer>
+    </screen>
+    
+    <screen id="settings" controller="ru.MainGame.Gui.Controllers.SettingsScreenController">
+        <layer id="mainLayerSettings" childLayout="center" backgroundImage="/Interface/preview.jpg">
+            <panel id="mainPanelSettings" childLayout="center" width="80.0%" style="nifty-panel" height="80.0%">
+                <effect>
+                        <onStartScreen name="move" mode="in" direction="right" length="300" startDelay="0" inherit="true"/>
+                        <onEndScreen name="move" mode="out" direction="left" length="300" startDelay="0" inherit="true"/>
+                </effect>
+                
+                <panel id="panelSettings" childLayout="vertical" width="*" valign="top" align="left" height="60.0%">
+                    <panel id="resolutionPanel" childLayout="horizontal" width="*" x="94" y="81" height="16.0%">
+                        <control name="label" id="screenResolution_Label" childLayout="center" width="75px" x="-1px" y="-1px" text="Resolution" align="center" height="32px" font="aurulent-sans-16.fnt"/>
+                        <control name="dropDown" id="screenResolutionLabel_DD" width="100px"/>
+                    </panel>
+                    <panel id="FullscreenPanel" childLayout="horizontal" width="*" x="94" y="81" height="16.0%">
+                        <control name="label" id="Fullscreen_Label" childLayout="center" width="75px" x="-1px" y="-1px" text="Fullscreen" align="center" height="32px" font="aurulent-sans-16.fnt"/>
+                        <control name="checkbox" id="Fullscreen_CB">
+                            <interact onClick="fullscreenClick()"/>
+                        </control>
+                    </panel>
+                    <panel id="VsyncPanel" childLayout="horizontal" width="*" x="94" y="81" height="16.0%">
+                        <control name="label" id="Vsync_Label" childLayout="center" width="75px" x="-1px" y="-1px" text="Vsync" align="center" height="32px" font="aurulent-sans-16.fnt"/>
+                        <control name="checkbox" id="Vsync_CB"/>
+                    </panel>
+                    <panel id="AntiAliasingPanel" childLayout="horizontal" width="*" x="94" y="81" height="16.0%">
+                        <control name="label" id="AntiAliasing_Label" childLayout="center" width="75px" x="-1px" y="-1px" text="Anti-Aliasing" align="center" height="32px" font="aurulent-sans-16.fnt"/>
+                        <control name="dropDown" id="AntiAliasing_DD" width="100px"/>
+                    </panel>
+<!--                    <panel id="GPanel4Cloned(21)" childLayout="horizontal" width="*" x="94" y="81" height="16.0%">
+                        <control name="label" id="GLabel0Cloned(22)" childLayout="center" width="75px" x="-1px" y="-1px" text="GLabel0" align="center" height="32px" font="aurulent-sans-16.fnt"/>
+                        <control name="dropDown" id="GDropDown2" width="100px"/>
+                    </panel>
+                    <panel id="GPanel4Cloned(23)" childLayout="horizontal" width="*" x="94" y="81" height="16.0%">
+                        <control name="label" id="GLabel0Cloned(24)" childLayout="center" width="75px" x="-1px" y="-1px" text="GLabel0" align="center" height="32px" font="aurulent-sans-16.fnt"/>
+                        <control name="dropDown" id="GDropDown3" width="100px"/>
+                    </panel>-->
+                </panel>
+                <panel id="ButtonsPanel" childLayout="center" width="*" valign="bottom" align="left" height="20.0%">
+                    <control name="button" id="ApplyButton" childLayout="center" width="100px" valign="bottom" label="Apply" align="left" height="49px">
+                        <interact onClick="buttonPushed(APPLY_SETTINGS)" />
+                    </control>
+<!--                    <control name="button" id="DefaultButton" childLayout="center" x="-1px" width="100px" y="-1px" valign="bottom" label="Default" align="right" height="49px">
+                        <interact onClick="buttonPushed(DEFAULT_RESTORE)"/>
+                    </control>-->
+                </panel>
+            </panel>
+            <image id="backToStartScreenImage" filename="/Interface/arrow.png" width="151px" x="-1px" y="-1px" valign="bottom" align="left" height="70px">
+                    <interact onClick="goToPreviousScreen()" />
+            </image>
+            <control name="label" id="label" width="50%" x="305" y="45" text="Development of domino" align="right" valign="bottom"  font="/Interface/Fonts/myDomFont.fnt"/>
         </layer>
     </screen>
 
     <screen id="startGame" controller="ru.MainGame.Gui.Controllers.StartGameScreenController">
-        <layer id="menu" childLayout="vertical" backgroundImage="/Interface/preview.jpg">
+        <layer id="menu" childLayout="center" backgroundImage="/Interface/preview.jpg">
             <panel id="mainPanel" childLayout="vertical" width="100%" x="-2" y="3" valign="center" align="center" height="90%">
                 <effect>
                         <onStartScreen name="move" mode="in" direction="right" length="300" startDelay="0" inherit="true"/>
                         <onEndScreen name="move" mode="out" direction="left" length="300" startDelay="0" inherit="true"/>
                 </effect>
 
-<!--                <panel id="namePanel" childLayout="horizontal" width="50" x="-2" y="3" valign="center" align="left" height="20">
-                    <control name="label" id="LBL_name" color="#33cc00ff" width="100px" x="-1px" y="-1px" align="center" valign="center" text="Enter you name :" height="45px" font="aurulent-sans-16.fnt"/>
-                    <control name="textfield" id="TF_name" text="" width="192px" x="344px" y="242px" valign="center" align="center" height="23px"/>
-                </panel>-->
-
-                 <panel id="separate1" childLayout="absolute" width="50%"  align="center" height="10%"/>
+<!--                <panel id="separate1" childLayout="absolute" width="50%"  align="center" height="10%"/>
                 <control name="button" id="createGame" childLayout="center" backgroundColor="#ff993332" x="242" width="35%" y="10" valign="center"  label="CreateGame" align="center" height="20%">
                     <interact onClick="buttonPushed(CREATE_GAME)" />
-                </control>
+                </control>-->
                 <panel id="separate2" childLayout="absolute" width="50%"  align="center" height="10%"/>
 
                 <control name="button" id="connect" childLayout="center" backgroundColor="#ff993355" x="265" width="30%" y="145" valign="center" label="Connect" align="center" height="15%">
                     <interact onClick="buttonPushed(CONNECT_TO_GAME)" />
                 </control>
-
-
-
             </panel>
-            <control name="label" id="label" width="50%" x="305" y="45" text="Development of domino" align="right" height="15%" font="/Interface/Fonts/myDomFont.fnt"/>
+            
+            <image id="backToStartGameScreenImage" filename="/Interface/arrow.png" width="151px" x="-1px" y="-1px" valign="bottom" align="left" height="70px">
+                    <interact onClick="goToPreviousScreen()" />
+            </image>
+            <control name="label" id="label" width="50%" x="305" y="45" text="Development of domino" align="right" valign="bottom"  font="/Interface/Fonts/myDomFont.fnt"/>
         </layer>
     </screen>
 
     <screen id="ConnectToGame" controller="ru.MainGame.Gui.Controllers.ConnectToGameScreenController">
-        <layer id="mainLayer" childLayout="overlay" backgroundImage="/Interface/preview.jpg">
-            <panel id="overlayPanel" childLayout="center" width="100.0%" x="-1px" y="-1px" height="70.0%">
+        <layer id="mainLayer" childLayout="center" backgroundImage="/Interface/preview.jpg">
+            <panel id="overlayPanel" childLayout="center" valign="center" align="center" width="100.0%" x="-1px" y="-1px" height="70.0%">
                 <effect>
-                            <onStartScreen name="move" mode="in" direction="right" length="300" startDelay="0" inherit="true"/>
-                            <onEndScreen name="move" mode="out" direction="left" length="300" startDelay="0" inherit="true"/>
+                    <onStartScreen name="move" mode="in" direction="right" length="300" startDelay="0" inherit="true"/>
+                    <onEndScreen name="move" mode="out" direction="left" length="300" startDelay="0" inherit="true"/>
                 </effect>
                 
                 <panel id="namePanel" childLayout="horizontal" valign="top" align="left" width="*" x="-1px" y="-1px" height="30.0%">
@@ -90,19 +155,14 @@
                         <interact onClick="buttonPushed(CONNECT)" />
                     </control>
                 </panel>
-                <image id="back" filename="/Interface/arrow.png" width="151px" x="-1px" y="-1px" valign="bottom" align="left" height="70px"/>
             </panel>
+            <image id="backToStartGameScreenImage" filename="/Interface/arrow.png" width="151px" x="-1px" y="-1px" valign="bottom" align="left" height="70px">
+                    <interact onClick="goToPreviousScreen()" />
+            </image>
+            <control name="label" id="label" width="50%" x="305" y="45" text="Development of domino" valign="bottom" align="right"   font="/Interface/Fonts/myDomFont.fnt"/>
         </layer>
     </screen>
     
-    <screen id="hud" controller="ru.MainGame.Gui.Controllers.HUDScreenController">
-        <layer id="mainPanel" childLayout="vertical" >
-            <panel id="topPanel" childLayout="horizontal" backgroundColor="#cccccc12" width="*" x="264" y="58" valign="top" height="10.0%"/>
-            <panel id="toMenu" childLayout="center" width="*" height="90.0%">
-                <panel id="toText" childLayout="vertical" backgroundColor="#cccccc12" valign="top" align="center" width="*" x="264" y="58" height="40.0%"/>
-                <panel id="innerPanel" childLayout="absolute" width="30.0%" valign="center" align="center" height="30%"/>
-            </panel>
-        </layer>
-    </screen>
+    
 
 </nifty>

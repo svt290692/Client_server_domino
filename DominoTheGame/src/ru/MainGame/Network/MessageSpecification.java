@@ -5,7 +5,7 @@
 package ru.MainGame.Network;
 
 /**
- *
+ * this enum contain all types of message that will send from server and to server in Messages
  * @author svt
  */
 public enum MessageSpecification {

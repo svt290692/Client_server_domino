@@ -6,15 +6,13 @@ package ru.MainGame.PlayersHanding;
 
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import ru.MainGame.HeapState;
-import ru.MainGame.TableHanding.DiceSimpleAnimator;
 
 /**
- *
+ * abstract player that can play domino as client or single
  * @author svt
  */
 public abstract class AbstractPlayer{
@@ -32,7 +30,6 @@ public abstract class AbstractPlayer{
     public AbstractPlayer(PlayersPlaces Place,Node rootNode, HeapState heap,String name) {
         this.Place = Place;
         this.name = name;
-        PlayersState.registerPlace(Place);
         this.heap = heap;
 	this.rootNode = rootNode;
         myNode = new Node("Player, " + "loc:" + getPlace());
@@ -71,7 +68,12 @@ public abstract class AbstractPlayer{
         }
         return true;
     }
-
+    
+    /**
+     * 
+     * @param node that need sort dices
+     * @param dicesWidth width of dices
+     */
     public static void sortNodeDices(Node node, float dicesWidth) {
         float startPoint;
         final int size = node.getChildren().size();
@@ -86,6 +88,7 @@ public abstract class AbstractPlayer{
             startPoint += dicesWidth;
         }
     }
+    
     public abstract void sortDices();
     /**
      * this method will be call when application will update to do some

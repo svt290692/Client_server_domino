@@ -1,0 +1,410 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE log SYSTEM "logger.dtd">
+<log>
+<record>
+  <date>2014-10-28T20:47:23</date>
+  <millis>1414514843875</millis>
+  <sequence>0</sequence>
+  <logger>ru.MainGame.Server.ServerStarter</logger>
+  <level>FINE</level>
+  <class>ru.MainGame.Server.ServerStarter</class>
+  <method>main</method>
+  <thread>1</thread>
+  <message>server get listeners</message>
+</record>
+<record>
+  <date>2014-10-28T20:47:24</date>
+  <millis>1414514844029</millis>
+  <sequence>1</sequence>
+  <logger>ru.MainGame.Server.ServerStarter</logger>
+  <level>INFO</level>
+  <class>ru.MainGame.Server.ServerStarter</class>
+  <method>main</method>
+  <thread>1</thread>
+  <message>Server start at port:5 511</message>
+</record>
+<record>
+  <date>2014-10-28T20:47:55</date>
+  <millis>1414514875458</millis>
+  <sequence>2</sequence>
+  <logger>ru.MainGame.Server.ServerHandler</logger>
+  <level>INFO</level>
+  <class>ru.MainGame.Server.ServerHandler</class>
+  <method>connectionAdded</method>
+  <thread>10</thread>
+  <message>Connection Unnamed jME3 Game was added to server: /127.0.0.1:5163 .</message>
+</record>
+<record>
+  <date>2014-10-28T20:47:58</date>
+  <millis>1414514878779</millis>
+  <sequence>3</sequence>
+  <logger>ru.MainGame.Server.ServerHandler</logger>
+  <level>INFO</level>
+  <class>ru.MainGame.Server.ServerHandler</class>
+  <method>connectionAdded</method>
+  <thread>10</thread>
+  <message>Connection Unnamed jME3 Game was added to server: /127.0.0.1:5164 .</message>
+</record>
+<record>
+  <date>2014-10-28T20:48:02</date>
+  <millis>1414514882593</millis>
+  <sequence>4</sequence>
+  <logger>ru.MainGame.Server.ServerHandler</logger>
+  <level>INFO</level>
+  <class>ru.MainGame.Server.ServerHandler</class>
+  <method>onNewStatusResv</method>
+  <thread>10</thread>
+  <message>The game was running</message>
+</record>
+<record>
+  <date>2014-10-28T20:53:51</date>
+  <millis>1414515231923</millis>
+  <sequence>5</sequence>
+  <logger>ru.MainGame.Server.ServerHandler</logger>
+  <level>WARNING</level>
+  <class>ru.MainGame.Server.ServerHandler</class>
+  <method>connectionRemoved</method>
+  <thread>10</thread>
+  <message>Connection &lt;&lt; Unnamed jME3 Game &gt;&gt; lost from server: &lt;&lt; null &gt;&gt;</message>
+</record>
+<record>
+  <date>2014-10-28T20:53:53</date>
+  <millis>1414515233238</millis>
+  <sequence>6</sequence>
+  <logger>ru.MainGame.Server.ServerHandler</logger>
+  <level>WARNING</level>
+  <class>ru.MainGame.Server.ServerHandler</class>
+  <method>connectionRemoved</method>
+  <thread>10</thread>
+  <message>Connection &lt;&lt; Unnamed jME3 Game &gt;&gt; lost from server: &lt;&lt; null &gt;&gt;</message>
+</record>
+<record>
+  <date>2014-10-28T20:55:09</date>
+  <millis>1414515309941</millis>
+  <sequence>7</sequence>
+  <logger>ru.MainGame.Server.ServerHandler</logger>
+  <level>INFO</level>
+  <class>ru.MainGame.Server.ServerHandler</class>
+  <method>connectionAdded</method>
+  <thread>10</thread>
+  <message>Connection Unnamed jME3 Game was added to server: /127.0.0.1:5166 .</message>
+</record>
+<record>
+  <date>2014-10-28T20:55:13</date>
+  <millis>1414515313004</millis>
+  <sequence>8</sequence>
+  <logger>ru.MainGame.Server.ServerHandler</logger>
+  <level>INFO</level>
+  <class>ru.MainGame.Server.ServerHandler</class>
+  <method>connectionAdded</method>
+  <thread>10</thread>
+  <message>Connection Unnamed jME3 Game was added to server: /127.0.0.1:5167 .</message>
+</record>
+<record>
+  <date>2014-10-28T20:55:14</date>
+  <millis>1414515314575</millis>
+  <sequence>9</sequence>
+  <logger>ru.MainGame.Server.ServerHandler</logger>
+  <level>INFO</level>
+  <class>ru.MainGame.Server.ServerHandler</class>
+  <method>onNewStatusResv</method>
+  <thread>10</thread>
+  <message>The game was running</message>
+</record>
+<record>
+  <date>2014-10-28T20:55:57</date>
+  <millis>1414515357368</millis>
+  <sequence>10</sequence>
+  <logger>ru.MainGame.Server.ServerHandler</logger>
+  <level>WARNING</level>
+  <class>ru.MainGame.Server.ServerHandler</class>
+  <method>connectionRemoved</method>
+  <thread>10</thread>
+  <message>Connection &lt;&lt; Unnamed jME3 Game &gt;&gt; lost from server: &lt;&lt; null &gt;&gt;</message>
+</record>
+<record>
+  <date>2014-10-28T20:55:58</date>
+  <millis>1414515358943</millis>
+  <sequence>11</sequence>
+  <logger>ru.MainGame.Server.ServerHandler</logger>
+  <level>WARNING</level>
+  <class>ru.MainGame.Server.ServerHandler</class>
+  <method>connectionRemoved</method>
+  <thread>10</thread>
+  <message>Connection &lt;&lt; Unnamed jME3 Game &gt;&gt; lost from server: &lt;&lt; null &gt;&gt;</message>
+</record>
+<record>
+  <date>2014-10-28T21:02:34</date>
+  <millis>1414515754723</millis>
+  <sequence>12</sequence>
+  <logger>ru.MainGame.Server.ServerHandler</logger>
+  <level>INFO</level>
+  <class>ru.MainGame.Server.ServerHandler</class>
+  <method>connectionAdded</method>
+  <thread>10</thread>
+  <message>Connection Unnamed jME3 Game was added to server: /127.0.0.1:5172 .</message>
+</record>
+<record>
+  <date>2014-10-28T21:02:55</date>
+  <millis>1414515775122</millis>
+  <sequence>13</sequence>
+  <logger>ru.MainGame.Server.ServerHandler</logger>
+  <level>INFO</level>
+  <class>ru.MainGame.Server.ServerHandler</class>
+  <method>connectionAdded</method>
+  <thread>10</thread>
+  <message>Connection Unnamed jME3 Game was added to server: /127.0.0.1:5173 .</message>
+</record>
+<record>
+  <date>2014-10-28T21:02:56</date>
+  <millis>1414515776797</millis>
+  <sequence>14</sequence>
+  <logger>ru.MainGame.Server.ServerHandler</logger>
+  <level>INFO</level>
+  <class>ru.MainGame.Server.ServerHandler</class>
+  <method>onNewStatusResv</method>
+  <thread>10</thread>
+  <message>The game was running</message>
+</record>
+<record>
+  <date>2014-10-28T21:03:26</date>
+  <millis>1414515806733</millis>
+  <sequence>15</sequence>
+  <logger>ru.MainGame.Server.ServerHandler</logger>
+  <level>WARNING</level>
+  <class>ru.MainGame.Server.ServerHandler</class>
+  <method>connectionRemoved</method>
+  <thread>10</thread>
+  <message>Connection &lt;&lt; Unnamed jME3 Game &gt;&gt; lost from server: &lt;&lt; null &gt;&gt;</message>
+</record>
+<record>
+  <date>2014-10-28T21:03:28</date>
+  <millis>1414515808061</millis>
+  <sequence>16</sequence>
+  <logger>ru.MainGame.Server.ServerHandler</logger>
+  <level>WARNING</level>
+  <class>ru.MainGame.Server.ServerHandler</class>
+  <method>connectionRemoved</method>
+  <thread>10</thread>
+  <message>Connection &lt;&lt; Unnamed jME3 Game &gt;&gt; lost from server: &lt;&lt; null &gt;&gt;</message>
+</record>
+<record>
+  <date>2014-10-28T21:06:40</date>
+  <millis>1414516000862</millis>
+  <sequence>17</sequence>
+  <logger>ru.MainGame.Server.ServerHandler</logger>
+  <level>INFO</level>
+  <class>ru.MainGame.Server.ServerHandler</class>
+  <method>connectionAdded</method>
+  <thread>10</thread>
+  <message>Connection Unnamed jME3 Game was added to server: /127.0.0.1:5179 .</message>
+</record>
+<record>
+  <date>2014-10-28T21:06:44</date>
+  <millis>1414516004565</millis>
+  <sequence>18</sequence>
+  <logger>ru.MainGame.Server.ServerHandler</logger>
+  <level>INFO</level>
+  <class>ru.MainGame.Server.ServerHandler</class>
+  <method>connectionAdded</method>
+  <thread>10</thread>
+  <message>Connection Unnamed jME3 Game was added to server: /127.0.0.1:5180 .</message>
+</record>
+<record>
+  <date>2014-10-28T21:06:46</date>
+  <millis>1414516006987</millis>
+  <sequence>19</sequence>
+  <logger>ru.MainGame.Server.ServerHandler</logger>
+  <level>INFO</level>
+  <class>ru.MainGame.Server.ServerHandler</class>
+  <method>onNewStatusResv</method>
+  <thread>10</thread>
+  <message>The game was running</message>
+</record>
+<record>
+  <date>2014-10-28T21:07:40</date>
+  <millis>1414516060121</millis>
+  <sequence>20</sequence>
+  <logger>ru.MainGame.Server.ServerHandler</logger>
+  <level>WARNING</level>
+  <class>ru.MainGame.Server.ServerHandler</class>
+  <method>connectionRemoved</method>
+  <thread>10</thread>
+  <message>Connection &lt;&lt; Unnamed jME3 Game &gt;&gt; lost from server: &lt;&lt; null &gt;&gt;</message>
+</record>
+<record>
+  <date>2014-10-28T21:07:41</date>
+  <millis>1414516061626</millis>
+  <sequence>21</sequence>
+  <logger>ru.MainGame.Server.ServerHandler</logger>
+  <level>WARNING</level>
+  <class>ru.MainGame.Server.ServerHandler</class>
+  <method>connectionRemoved</method>
+  <thread>10</thread>
+  <message>Connection &lt;&lt; Unnamed jME3 Game &gt;&gt; lost from server: &lt;&lt; null &gt;&gt;</message>
+</record>
+<record>
+  <date>2014-10-28T21:12:47</date>
+  <millis>1414516367750</millis>
+  <sequence>22</sequence>
+  <logger>ru.MainGame.Server.ServerHandler</logger>
+  <level>INFO</level>
+  <class>ru.MainGame.Server.ServerHandler</class>
+  <method>connectionAdded</method>
+  <thread>10</thread>
+  <message>Connection Unnamed jME3 Game was added to server: /127.0.0.1:5183 .</message>
+</record>
+<record>
+  <date>2014-10-28T21:12:50</date>
+  <millis>1414516370426</millis>
+  <sequence>23</sequence>
+  <logger>ru.MainGame.Server.ServerHandler</logger>
+  <level>INFO</level>
+  <class>ru.MainGame.Server.ServerHandler</class>
+  <method>connectionAdded</method>
+  <thread>10</thread>
+  <message>Connection Unnamed jME3 Game was added to server: /127.0.0.1:5184 .</message>
+</record>
+<record>
+  <date>2014-10-28T21:12:56</date>
+  <millis>1414516376791</millis>
+  <sequence>24</sequence>
+  <logger>ru.MainGame.Server.ServerHandler</logger>
+  <level>INFO</level>
+  <class>ru.MainGame.Server.ServerHandler</class>
+  <method>onNewStatusResv</method>
+  <thread>10</thread>
+  <message>The game was running</message>
+</record>
+<record>
+  <date>2014-10-28T21:13:55</date>
+  <millis>1414516435227</millis>
+  <sequence>25</sequence>
+  <logger>ru.MainGame.Server.ServerHandler</logger>
+  <level>WARNING</level>
+  <class>ru.MainGame.Server.ServerHandler</class>
+  <method>connectionRemoved</method>
+  <thread>10</thread>
+  <message>Connection &lt;&lt; Unnamed jME3 Game &gt;&gt; lost from server: &lt;&lt; null &gt;&gt;</message>
+</record>
+<record>
+  <date>2014-10-28T21:13:55</date>
+  <millis>1414516435916</millis>
+  <sequence>26</sequence>
+  <logger>ru.MainGame.Server.ServerHandler</logger>
+  <level>WARNING</level>
+  <class>ru.MainGame.Server.ServerHandler</class>
+  <method>connectionRemoved</method>
+  <thread>10</thread>
+  <message>Connection &lt;&lt; Unnamed jME3 Game &gt;&gt; lost from server: &lt;&lt; null &gt;&gt;</message>
+</record>
+<record>
+  <date>2014-10-28T21:15:59</date>
+  <millis>1414516559970</millis>
+  <sequence>27</sequence>
+  <logger>ru.MainGame.Server.ServerHandler</logger>
+  <level>INFO</level>
+  <class>ru.MainGame.Server.ServerHandler</class>
+  <method>connectionAdded</method>
+  <thread>10</thread>
+  <message>Connection Unnamed jME3 Game was added to server: /127.0.0.1:5187 .</message>
+</record>
+<record>
+  <date>2014-10-28T21:16:07</date>
+  <millis>1414516567207</millis>
+  <sequence>28</sequence>
+  <logger>ru.MainGame.Server.ServerHandler</logger>
+  <level>INFO</level>
+  <class>ru.MainGame.Server.ServerHandler</class>
+  <method>connectionAdded</method>
+  <thread>10</thread>
+  <message>Connection Unnamed jME3 Game was added to server: /127.0.0.1:5188 .</message>
+</record>
+<record>
+  <date>2014-10-28T21:16:10</date>
+  <millis>1414516570481</millis>
+  <sequence>29</sequence>
+  <logger>ru.MainGame.Server.ServerHandler</logger>
+  <level>INFO</level>
+  <class>ru.MainGame.Server.ServerHandler</class>
+  <method>onNewStatusResv</method>
+  <thread>10</thread>
+  <message>The game was running</message>
+</record>
+<record>
+  <date>2014-10-28T21:16:39</date>
+  <millis>1414516599330</millis>
+  <sequence>30</sequence>
+  <logger>ru.MainGame.Server.ServerHandler</logger>
+  <level>WARNING</level>
+  <class>ru.MainGame.Server.ServerHandler</class>
+  <method>connectionRemoved</method>
+  <thread>10</thread>
+  <message>Connection &lt;&lt; Unnamed jME3 Game &gt;&gt; lost from server: &lt;&lt; null &gt;&gt;</message>
+</record>
+<record>
+  <date>2014-10-28T21:16:39</date>
+  <millis>1414516599916</millis>
+  <sequence>31</sequence>
+  <logger>ru.MainGame.Server.ServerHandler</logger>
+  <level>WARNING</level>
+  <class>ru.MainGame.Server.ServerHandler</class>
+  <method>connectionRemoved</method>
+  <thread>10</thread>
+  <message>Connection &lt;&lt; Unnamed jME3 Game &gt;&gt; lost from server: &lt;&lt; null &gt;&gt;</message>
+</record>
+<record>
+  <date>2014-10-28T21:18:07</date>
+  <millis>1414516687305</millis>
+  <sequence>32</sequence>
+  <logger>ru.MainGame.Server.ServerHandler</logger>
+  <level>INFO</level>
+  <class>ru.MainGame.Server.ServerHandler</class>
+  <method>connectionAdded</method>
+  <thread>10</thread>
+  <message>Connection Unnamed jME3 Game was added to server: /127.0.0.1:5189 .</message>
+</record>
+<record>
+  <date>2014-10-28T21:18:10</date>
+  <millis>1414516690291</millis>
+  <sequence>33</sequence>
+  <logger>ru.MainGame.Server.ServerHandler</logger>
+  <level>INFO</level>
+  <class>ru.MainGame.Server.ServerHandler</class>
+  <method>connectionAdded</method>
+  <thread>10</thread>
+  <message>Connection Unnamed jME3 Game was added to server: /127.0.0.1:5190 .</message>
+</record>
+<record>
+  <date>2014-10-28T21:18:11</date>
+  <millis>1414516691110</millis>
+  <sequence>34</sequence>
+  <logger>ru.MainGame.Server.ServerHandler</logger>
+  <level>INFO</level>
+  <class>ru.MainGame.Server.ServerHandler</class>
+  <method>onNewStatusResv</method>
+  <thread>10</thread>
+  <message>The game was running</message>
+</record>
+<record>
+  <date>2014-10-28T21:19:24</date>
+  <millis>1414516764019</millis>
+  <sequence>35</sequence>
+  <logger>ru.MainGame.Server.ServerHandler</logger>
+  <level>WARNING</level>
+  <class>ru.MainGame.Server.ServerHandler</class>
+  <method>connectionRemoved</method>
+  <thread>10</thread>
+  <message>Connection &lt;&lt; Unnamed jME3 Game &gt;&gt; lost from server: &lt;&lt; null &gt;&gt;</message>
+</record>
+<record>
+  <date>2014-10-28T21:19:24</date>
+  <millis>1414516764469</millis>
+  <sequence>36</sequence>
+  <logger>ru.MainGame.Server.ServerHandler</logger>
+  <level>WARNING</level>
+  <class>ru.MainGame.Server.ServerHandler</class>
+  <method>connectionRemoved</method>
+  <thread>10</thread>
+  <message>Connection &lt;&lt; Unnamed jME3 Game &gt;&gt; lost from server: &lt;&lt; null &gt;&gt;</message>
+</record>

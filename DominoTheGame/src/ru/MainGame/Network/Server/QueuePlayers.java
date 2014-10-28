@@ -5,12 +5,10 @@
 package ru.MainGame.Network.Server;
 
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
 
 /**
- *
+ * 
  * @author svt
  */
 public interface QueuePlayers {

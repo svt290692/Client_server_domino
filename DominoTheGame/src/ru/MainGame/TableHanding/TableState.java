@@ -17,7 +17,7 @@ import com.jme3.scene.Spatial;
 import ru.MainGame.DiceRotations;
 import ru.MainGame.Events.ReplaceEvent;
 import ru.MainGame.HeapState;
-import ru.MainGame.PlayersHanding.PlacesToAttach;
+import ru.MainGame.PlacesToAttach;
 
 /**
  *
@@ -45,7 +45,6 @@ public class TableState extends AbstractAppState {
         SimpleApplication sApp = (SimpleApplication) app;
         this.rootNode = sApp.getRootNode();
 
-
         this.rootNode.attachChild(mTableNode);
     }
 
@@ -60,7 +59,7 @@ public class TableState extends AbstractAppState {
 
     public TableState(HeapState heap) {
         this.heap = heap;
-        MDominoHeight = heap.getDicesHeight();
+        MDominoHeight = HeapState.getDicesHeight();
 
 	mTableNode = new Node("Table");
     }
@@ -82,11 +81,9 @@ public class TableState extends AbstractAppState {
             System.err.println("Error null pointer geted please debug");
             return;
         }
-
         Transform newPlace;
         newPlace = tableManager.getNewTransformFrom(
                 new ReplaceEvent(diceInTable, diceInHand,inTable, inHand));
-
         if(Animate){
             DiceAnimator animator = new DiceSimpleAnimator(
                     diceInHand,
@@ -293,7 +290,7 @@ public class TableState extends AbstractAppState {
 
             dice.setLocalTranslation(dropPoint);
 	    old.getRotation().toAngles(tempAngles);
-            dice.setLocalRotation(new Quaternion().fromAngles(tempAngles[0], dropAngle, 0));
+            dice.setLocalRotation(new Quaternion().fromAngles(-90 * FastMath.DEG_TO_RAD, dropAngle, 0));
 
             Node tempNode = new Node();
 
