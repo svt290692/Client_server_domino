@@ -70,7 +70,12 @@ public class MainPlayerClient extends MainPlayer{
             @Override
             public void readyPushed() {
                 super.readyPushed();
-                
+//                mInterface.makeScoreDeck(Arrays.asList(new String[]{"asdasdas dads asd asd asd asd as","sadasdasd "}), false, new EndNotify() {
+//
+//                    @Override
+//                    public void perform() {
+//                    }
+//                });
                 ExtendedSpecificationMessage message= new ExtendedSpecificationMessage();
                 message.setSpecification(MessageSpecification.NEW_STATUS);
                 message.setWhoSend(CurrentPlayer.getInstance().getName());

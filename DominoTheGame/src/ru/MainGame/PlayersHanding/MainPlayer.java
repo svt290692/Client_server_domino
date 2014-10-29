@@ -35,7 +35,7 @@ public abstract class MainPlayer extends AbstractPlayer{
     private Camera cam;
     private SimpleApplication sApp;
 
-    private boolean isDicesBig = false;
+    private boolean isDicesBig = true;
 
     private final String DICE_IN_TABLE = "I am In Table";
     private Spatial cursorDice = null;
@@ -265,9 +265,8 @@ public abstract class MainPlayer extends AbstractPlayer{
 //		    heap.TakeFromHeap(6, 0));
 //	getNode().attachChild(
 //		    heap.TakeFromHeap(0, 0));
-//	for(int i = 0 ; i < 6; i++){
-//	    getNode().attachChild(
-//		    heap.TakeFromHeapRandom());
+//	for(int i = 0 ; i < 12; i++){
+//	    
 //	}
     }
 
@@ -293,6 +292,7 @@ public abstract class MainPlayer extends AbstractPlayer{
     protected void sortHandDicesInTable(){
 	sortNodeDices(getNode(), dicesWidth);
     }
+    
     /**
      * this method must be invoked after initDiceInTable because he take dices in Table Node
      */
@@ -312,22 +312,26 @@ public abstract class MainPlayer extends AbstractPlayer{
 
     protected void sortHandDicesInGui(){
 	float width;
+        
 	if(myHandGuiNode.getChildren().size() > 10){
-	    width = 60;
-	    if(isDicesBig == false){
-		changeSizeOfGuiDices(true);
-		isDicesBig = !isDicesBig;
+	    width = 40;
+	    if(isDicesBig == true){
+		changeSizeOfGuiDices(false);
+		isDicesBig = false;
+                width = 49;
 	    }
 	}
 	else{
 	    width = 49;
-	    if(isDicesBig == true){
-		changeSizeOfGuiDices(false);
-		isDicesBig = !isDicesBig;
+	    if(isDicesBig == false){
+		changeSizeOfGuiDices(true);
+		isDicesBig = true;
+                width = 60;
 	    }
        }
+        
 	float startPoint;
-	float height = DominoApp.screenHeight / 4;
+	float height = sApp.getCamera().getHeight() / 4;
 	final int size = myHandGuiNode.getChildren().size();
 	if((size % 2) == 0)
 	    startPoint = (-((size / 2) * width));
@@ -346,6 +350,7 @@ public abstract class MainPlayer extends AbstractPlayer{
 	sortHandDicesInTable();
 	sortHandDicesInGui();
     }
+    
     /**
      * method for subclasses to do some actions when game come to end
      */

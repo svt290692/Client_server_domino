@@ -22,7 +22,7 @@ public abstract class AbstractPlayer{
     protected final Node myNode;
     private final Node rootNode;
 
-    private final HeapState heap;
+    protected final HeapState heap;
     protected final Queue<Spatial> queueAddToScreenDices;
     protected final Object Mutex = new Object();
     protected String name;

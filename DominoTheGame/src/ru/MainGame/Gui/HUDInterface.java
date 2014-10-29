@@ -21,6 +21,7 @@ import de.lessvoid.nifty.screen.Screen;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Collection;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import ru.MainGame.GlobalLogConfig;
@@ -175,7 +176,14 @@ public class HUDInterface{
     }
     
     public void makeScoreDeck(final Collection<String> stringsToPut,final boolean fish,final EndNotify end){
-        final Element el = (new PanelBuilder("Score"){{
+        
+        Element el = hudScreen.findElementByName("Score");
+        if(el != null){
+//            el.markForRemoval();
+            LOG.log(Level.WARNING, "Warning, Score deck was request twice! ignore second request");
+            return;
+        }
+        new PanelBuilder("Score"){{
         childLayout(ElementBuilder.ChildLayoutType.Vertical);
         
         backgroundImage("/Interface/Images/deck.jpg");
@@ -187,7 +195,7 @@ public class HUDInterface{
             image(new ImageBuilder("fish"){{
                 
             onStartScreenEffect(new EffectBuilder("move"){{
-            length(200);
+            length(800);
             effectParameter("mode", "in");
             effectParameter("direction", "bottom");
             }});
@@ -201,12 +209,15 @@ public class HUDInterface{
             filename("/Interface/Images/fish.png");
             }});
         }
-        
+        final AtomicInteger inc = new AtomicInteger(1000);
         for(String s : stringsToPut){
+            
             control(new LabelBuilder("scoreName" + s, s){{
                 font("/Interface/Fonts/myDomFont.fnt");
             onStartScreenEffect(new EffectBuilder("move"){{
             length(200);
+            startDelay(inc.get());
+            inc.set(inc.get() + 500);
             effectParameter("mode", "in");
             effectParameter("direction", "bottom");
             }});
@@ -219,14 +230,17 @@ public class HUDInterface{
             }});
         }
         
-        control(new ButtonBuilder("closeScore", "Ok"){{
-        interactOnClick("onEndLookToScore()");
-            alignLeft();
-            valignCenter();
+        image(new ImageBuilder("okImage"){{
+            filename("/Interface/Images/ok.png");
+            
+            width("50px");
+            height("50px");
+            
             onStartScreenEffect(new EffectBuilder("move"){{
             length(200);
+            startDelay(7000);
             effectParameter("mode", "in");
-            effectParameter("direction", "bottom");
+            effectParameter("direction", "left");
             }});
             
             onEndScreenEffect(new EffectBuilder("move"){{
@@ -234,30 +248,31 @@ public class HUDInterface{
             effectParameter("mode", "out");
             effectParameter("direction", "bottom");
             }});
-        
+            
+            interactOnClick("onEndLookToScore()");
         }});
         
         onStartScreenEffect(new EffectBuilder("move"){{
-            length(200);
+            length(500);
             effectParameter("mode", "in");
             effectParameter("direction", "bottom");
         }});
         onEndScreenEffect(new EffectBuilder("move"){{
-            length(200);
+            length(500);
             effectParameter("mode", "out");
             effectParameter("direction", "bottom");
         }});
         alignCenter();
         valignCenter();
-        }}.build(nifty, hudScreen, hudScreen.findElementByName("toMenu")));
+        }}.build(nifty, hudScreen, hudScreen.findElementByName("toMenu"));
         mController.setEndLookToScoreNotify(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                el.markForRemoval();
-                end.perform();
+                hudScreen.findElementByName("Score").markForRemoval(end);
             }
         });
+        LOG.log(Level.INFO, "Score deck created");
     }
     
     /**
@@ -271,8 +286,6 @@ public class HUDInterface{
         width("25.0%");
         height("*");
         style("nifty-panel");
-//        if(isMainPlayer)
-//            backgroundColor("#33ff3323");
         
         image(new ImageBuilder("avatar"+name){{
             filename("/Interface/Images/avatar"+indexOfAvatar+".png");

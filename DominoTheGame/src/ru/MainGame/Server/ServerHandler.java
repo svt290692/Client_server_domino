@@ -131,7 +131,8 @@ public class ServerHandler implements ConnectionListener, MessageListener<Hosted
         }else{
             player.incScore(score);
         }
-        if(hasWinner() == true || (fish == true && isAllWatcher() == true)){
+        
+        if(isAllWatcher() == true){
             sendFinalScore(fish);
             fish = false;
         }
@@ -146,21 +147,21 @@ public class ServerHandler implements ConnectionListener, MessageListener<Hosted
         return true;
     }
     
-    private boolean hasWinner(){
-        int countWatchers = 0;
-        
-        for(AbleToPlay p : queuePlayers.asList()){
-            if(p.getStatus().equals(StatusPlayer.WATCHER)){
-                countWatchers++;
-            }
-        }
-        
-        if(countWatchers == (queuePlayers.asList().size() - 1)){
-            return true;
-        }
-        
-        return false;
-    }
+//    private boolean hasWinner(){
+//        int countWatchers = 0;
+//        
+//        for(AbleToPlay p : queuePlayers.asList()){
+//            if(p.getStatus().equals(StatusPlayer.WATCHER)){
+//                countWatchers++;
+//            }
+//        }
+//        
+//        if(countWatchers == (queuePlayers.asList().size() - 1)){
+//            return true;
+//        }
+//        
+//        return false;
+//    }
     
     private void sendFinalScore(boolean fish){
         Map<String,Integer> finalScore = new HashMap<>();
@@ -181,7 +182,7 @@ public class ServerHandler implements ConnectionListener, MessageListener<Hosted
         player.setStatus(StatusPlayer.WATCHER);
         
         
-        if(fish == false &&  hasWinner()){
+        if(isAllWatcher() == true){
             sendFinalScore(fish);
         }
 //        mServer.broadcast(msg);
