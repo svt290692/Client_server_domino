@@ -85,7 +85,7 @@ public class TableState extends AbstractAppState {
         newPlace = tableManager.getNewTransformFrom(
                 new ReplaceEvent(diceInTable, diceInHand,inTable, inHand));
         if(Animate){
-            DiceAnimator animator = new DiceSimpleAnimator(
+            DiceAnimator animator = new DiceStepsAnimator(
                     diceInHand,
                     diceInHand.getWorldTransform().clone(), newPlace.clone());
             animator.doAnimation(true);
@@ -107,7 +107,7 @@ public class TableState extends AbstractAppState {
 
             Transform center = tableManager.getCenterDicePlace(firstDice);
             if(Animate){ //ANIM
-            DiceAnimator animator = new DiceSimpleAnimator(
+            DiceAnimator animator = new DiceStepsAnimator(
                     dice,
                     dice.getWorldTransform().clone(), center.clone());
             animator.doAnimation(true);

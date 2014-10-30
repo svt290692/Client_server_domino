@@ -38,12 +38,17 @@ public abstract class MainPlayer extends AbstractPlayer{
     private boolean isDicesBig = true;
 
     private final String DICE_IN_TABLE = "I am In Table";
+    
+    private final float littleBehindWidth = 39;
+    private final float bigBehindWidth = 49;
+    
     private Spatial cursorDice = null;
     private Spatial selectedGuiDice = null;
     
     protected final Rules rules;
 
     private final float dicesWidth;
+    private Vector3f cursorDiceScale = null;
     protected HUDInterface mInterface;
 
     public MainPlayer(HeapState heap, Rules rules, PlayersPlaces Place,Node tableNode, SimpleApplication sApp,String name) {
@@ -126,8 +131,8 @@ public abstract class MainPlayer extends AbstractPlayer{
 
 	Spatial clone = wasClicked.clone();
 	selectedGuiDice = wasClicked;
-
-	clone.setLocalScale(wasClicked.getWorldScale().mult(0.6f));
+        
+	clone.setLocalScale(cursorDiceScale);
 
 	if(cursorDice != null)
 	    cursorSpecialNode.detachChild(cursorDice);
@@ -284,6 +289,13 @@ public abstract class MainPlayer extends AbstractPlayer{
         Spatial cloneToGui = dice.clone();
         cloneToGui.setLocalTranslation(Vector3f.ZERO);
         cloneToGui.scale(600);
+        if(null == cursorDiceScale){
+            cursorDiceScale = cloneToGui.getWorldScale().mult(0.6f);
+        }
+        if(false == isDicesBig){
+            cloneToGui.scale(0.8f);
+        }
+        
         cloneToGui.setLocalRotation(new Quaternion().fromAngles(-15 * FastMath.DEG_TO_RAD, 0, 0));
         cloneToGui.setUserData(DICE_IN_TABLE, dice);
         myHandGuiNode.attachChild(cloneToGui);
@@ -314,19 +326,17 @@ public abstract class MainPlayer extends AbstractPlayer{
 	float width;
         
 	if(myHandGuiNode.getChildren().size() > 10){
-	    width = 40;
+	    width = littleBehindWidth;
 	    if(isDicesBig == true){
 		changeSizeOfGuiDices(false);
 		isDicesBig = false;
-                width = 49;
 	    }
 	}
 	else{
-	    width = 49;
+	    width = bigBehindWidth;
 	    if(isDicesBig == false){
 		changeSizeOfGuiDices(true);
 		isDicesBig = true;
-                width = 60;
 	    }
        }
         

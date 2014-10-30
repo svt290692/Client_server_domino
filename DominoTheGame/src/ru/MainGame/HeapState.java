@@ -25,7 +25,8 @@ import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import ru.MainGame.TableHanding.AnimationEventCounter;
-import ru.MainGame.TableHanding.DiceSimpleAnimator;
+import ru.MainGame.TableHanding.DiceAnimator;
+import ru.MainGame.TableHanding.DiceHeapReplaceAnimator;
 
 /**
  * state that contain all dices and has method to get and take dices to heap and from it
@@ -162,7 +163,7 @@ public class HeapState extends AbstractAppState{
                 Transform t = dice.getWorldTransform();
                 rootNode.attachChild(dice);
                 if(anim == true){
-                    DiceSimpleAnimator animator = new DiceSimpleAnimator(
+                    DiceAnimator animator = new DiceHeapReplaceAnimator(
                             dice, t,heapCoords[i][j]);
                     animator.setEndAction(new EndNotify() {
 

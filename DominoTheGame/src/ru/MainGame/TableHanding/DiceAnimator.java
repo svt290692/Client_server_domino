@@ -14,6 +14,7 @@ import com.jme3.scene.Spatial;
 import de.lessvoid.nifty.EndNotify;
 import java.util.Map;
 import java.util.Objects;
+import java.util.TreeMap;
 
 /**
  *
@@ -28,6 +29,7 @@ public abstract class DiceAnimator {
     protected final Transform endPlace;
     protected final Transform firstPlace;
     protected final Spatial mDice;
+    Map<Float, Transform> mPositions = new TreeMap<>();
 
     public DiceAnimator(Transform endPlace, Transform firstPlace, Spatial mDice) {
         this.endPlace = endPlace;
@@ -37,12 +39,7 @@ public abstract class DiceAnimator {
     
     
     public abstract Map<Float,Transform> getBehindPositions();
-    
-    public abstract Transform getEndPlace();
 
-    public abstract Transform getFirstPlace();
-
-    public abstract Spatial getModel();
 
     @Override
     public int hashCode() {
@@ -85,9 +82,11 @@ public abstract class DiceAnimator {
     public String toString() {
         return "DiceSimpleAnimator{" + "mDice=" + mDice + ", firstPlace=" + firstPlace + ", endPlace=" + endPlace + '}';
     }
+    
+    protected abstract float animWholeTime();
 
     public void doAnimation(final boolean finalReplace) {
-        final AnimationFactory factory = new AnimationFactory(0.5F, "anim");
+        final AnimationFactory factory = new AnimationFactory(animWholeTime(), "anim");
         
         factory.addTimeTransform(0.0F, firstPlace);
         
@@ -109,6 +108,22 @@ public abstract class DiceAnimator {
         AnimationEventCounter.getInstance().captureAnimationSlot();
         
         control.createChannel().setAnim("anim");
+    }
+
+    public final void addBehindPlaceAndTime(Float time, Transform place) {
+        mPositions.put(time, place);
+    }
+
+    public Transform getEndPlace() {
+        return endPlace;
+    }
+
+    public Transform getFirstPlace() {
+        return firstPlace;
+    }
+
+    public Spatial getModel() {
+        return mDice;
     }
 
     class MyAnimPostListener implements AnimEventListener {

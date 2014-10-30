@@ -99,6 +99,13 @@ public class GameState extends AbstractAppState{
     
     @Override
     public void update(float tpf) {
+        // do not allow go down for player
+        Vector3f  loc = app.getCamera().getLocation();
+        
+        if(loc.y < 1.2f){
+            loc.setY(1.2f);
+            app.getCamera().setLocation(loc);
+        }
     }
 
     @Override

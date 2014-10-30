@@ -196,7 +196,7 @@ public class PlayersState extends AbstractAppState{
 	}
 
         if(!queueUnprocessedMessages.isEmpty())
-            resiveNewMessagesAppProcess();
+            mOnlineHandler.resiveNewMessagesAppProcess();
         
         for(AbstractPlayer player : mAllPlayers){
             player.UpdateFromApplication();
@@ -204,6 +204,10 @@ public class PlayersState extends AbstractAppState{
         
         if(isCantStep == true && waitingScore == false){
             Spatial dice = mainPlayer.TakeFromHeapRandom();
+            
+            if(null != dice){
+System.err.println(">>>>DEBUG! HEAP GIVE ME: ==" + dice.getControl(Dice.class));
+            }
             
             if(dice == null){
                 ExtendedSpecificationMessage msg = new ExtendedSpecificationMessage(
@@ -221,12 +225,12 @@ public class PlayersState extends AbstractAppState{
                 rules.removeTips();
                 isCantStep = false;
                 mainPlayer.getInterface().makePopupText("Found!");
-                sendMyNewDiceFromHeap(diceToSend);
+                mOnlineHandler.sendMyNewDiceFromHeap(diceToSend);
             }else{
                 NumsOfDice diceToSend = new NumsOfDice(
                             dice.getControl(Dice.class).getLeftNum(),
                             dice.getControl(Dice.class).getRightNum());
-                sendMyNewDiceFromHeap(diceToSend);
+                mOnlineHandler.sendMyNewDiceFromHeap(diceToSend);
             }
         }
         
@@ -259,13 +263,6 @@ public class PlayersState extends AbstractAppState{
         sApp.getStateManager().attach(new MenuState());
     }
     
-    private void sendMyNewDiceFromHeap(NumsOfDice dice){
-        ExtendedSpecificationMessage msg = new ExtendedSpecificationMessage(
-                        MessageSpecification.GET_DICE_FROM_HEAP,
-                        CurrentPlayer.getInstance().getName(),
-                        IN_GAME,dice);
-                CurrentPlayer.getInstance().getClientOfCurSession().send(msg);
-    }
     
     private void turnNextPlayerStep(){
         if(queuePlayersToAllowSteps.element().equals(CurrentPlayer.getInstance().getName())){
@@ -287,7 +284,7 @@ public class PlayersState extends AbstractAppState{
         if(queuePlayersToAllowSteps.size() == 1 && 
                 queuePlayersToAllowSteps.element().equals(
                 CurrentPlayer.getInstance().getName())){
-            sendMyScoreToServer();
+            mOnlineHandler.sendMyScoreToServer();
             waitingScore = true;
             return;
         }
@@ -305,6 +302,9 @@ public class PlayersState extends AbstractAppState{
                     System.err.println(">>>>DEBUG! STEP EXISTS:");
                     break;
                 }
+                else{
+                    System.err.println(">>>>DEBUG! STEP NOT EXISTS: with dice : " + s.getControl(Dice.class));
+                }
             }
             rules.removeTips();
             if(isStepsExists){
@@ -316,6 +316,7 @@ public class PlayersState extends AbstractAppState{
                     waitingScore = true;
                 }
                 else if(mainPlayer.getHand().size() > 0 && heap.getNode().getChildren().size() > 0){
+                    System.err.println(">>>>DEBUG! ORDER TO HEAP: heap size ==" + heap.getNode().getChildren().size());
                     mainPlayer.getInterface().makePopupText("You must go to heap...");
                     isCantStep = true;
                 }
@@ -333,7 +334,7 @@ public class PlayersState extends AbstractAppState{
                 }
             }
             if(isAllExceptMeEmpty == true){
-                sendMyScoreToServer();
+                mOnlineHandler.sendMyScoreToServer();
             }
         }
     }
@@ -345,15 +346,6 @@ public class PlayersState extends AbstractAppState{
         return null;
     }
     
-    private void sendExtendedMessage(MessageSpecification specific,Object restrictedObject,String message,StatusPlayer status){
-        ExtendedSpecificationMessage msg = new ExtendedSpecificationMessage();
-        msg.setStatusPlayer(status);
-        msg.setSpecification(specific);
-        msg.setWhoSend(CurrentPlayer.getInstance().getName());
-        msg.setRestrictedObject(restrictedObject);
-        msg.setMessage(message);
-        CurrentPlayer.getInstance().getClientOfCurSession().send(msg);
-    }
     
     private void allowMainStep(){
 //        sApp.getInputManager().setCursorVisible(true);
@@ -392,7 +384,168 @@ public class PlayersState extends AbstractAppState{
             return null;
     }
     
-    private void resiveNewMessagesAppProcess(){
+    
+    private void endGame(){
+        heap.returnAllDicesToHeap(true);
+        isNetGameStarted = false;
+        isCantStep = false;
+        isMainPlayerStepWait = false;
+        rules.endGame();
+        rules.removeTips();
+        mainPlayer.clearGui();
+    }
+    
+    private class OnlineClientHandler implements MessageListener<Client>{
+
+        @Override
+        public void messageReceived(Client source, Message m) {
+           LOG.log(Level.INFO, "I am resive message in Players state : {0}", m);
+            if(m instanceof ExtendedSpecificationMessage){
+                
+                ExtendedSpecificationMessage message = (ExtendedSpecificationMessage)m;
+                if(message.getSpecification().equals(MessageSpecification.INITIALIZATION)||
+                        message.getSpecification().equals(MessageSpecification.NEW_STATUS)||
+                        message.getSpecification().equals(MessageSpecification.DISCONNECT)){
+                    
+                    if(!(message.getWhoSend().equals(CurrentPlayer.getInstance().getName()))){
+                        queueUnprocessedMessages.add(message);
+                    }
+                }
+                else if(message.getSpecification().equals(MessageSpecification.STEP)){
+                    queueUnprocessedMessages.add(message);
+                }else if(message.getSpecification().equals(MessageSpecification.KICK)){
+                    JOptionPane.showMessageDialog(null, message.getMessage());
+//                    sApp.stop();
+//                    exitToMenu();
+                    markToExit.set(true);
+                }
+                else if(message.getSpecification().equals(MessageSpecification.GET_DICE_FROM_HEAP)){
+                    queueUnprocessedMessages.add(message);
+                }
+//                else if(message.getSpecification().equals(MessageSpecification.EMPTY_HAND)){
+//                    for(AbstractPlayer p : mAllPlayers){
+//                        if(p.getName().equals(message.getWhoSend())){
+//                            
+//                        }
+//                    }
+//                }
+                else if(message.getSpecification().equals(MessageSpecification.FISH)){
+                    queueUnprocessedMessages.add(message);                    
+                }
+                else if(message.getSpecification().equals(MessageSpecification.SCORE)){
+                    queueUnprocessedMessages.add(message);                    
+                }
+            }
+            else if(m instanceof StartGameMessage){
+                
+                synchronized(this){
+                    StartGameMessage message = ((StartGameMessage)m);
+                        queueUnprocessedMessages.add(message);
+                    while(!queueUnprocessedMessages.isEmpty()){
+                        try {
+                            this.wait(10);
+                        } catch (InterruptedException ex) {
+                            Logger.getLogger(PlayersState.class.getName()).log(Level.SEVERE, "interrupt when wait", ex);
+                        }
+                    }
+                    LOG.log(Level.FINE, "Start game part ::: {0}", message.getStartGamePart().toString());
+                    for(AbstractPlayer p : mAllPlayers){
+                        List<NumsOfDice> mPart = message.getPartOf(p.getName());
+
+                        for(NumsOfDice n : mPart){
+                         p.TakeFromHeap(n.getLeft(), n.getRight());
+                        }
+                    }
+                    LOG.log(Level.INFO,"LETS START!!!!");
+                    
+                }
+            }
+        }
+        
+        void makeResivedStepFromDistancePlayer(ExtendedSpecificationMessage message){
+        String name = message.getWhoSend();
+        StepToSend step = (StepToSend)message.getRestrictedObject();
+        if(step == null){
+            turnNextPlayerStep();
+            if(!name.equals(CurrentPlayer.getInstance().getName()))
+                mainPlayer.getInterface().makePopupText("Player : " + name +" Check!");
+        }else{
+            for(AbstractPlayer p :mAllPlayers ){
+                
+                if(p.getName().equals(name)){
+                    if(message.getMessage() != null && message.getMessage().split(" ")[0].equals("start")){
+                        rules.startGame(HeapState.findDiceIn(p.getNode().getChildren(),
+                                step.getInHand().getLeft(),step.getInHand().getRight()));
+    
+                    }
+                    else{
+                        Spatial onHand = HeapState.findDiceIn(p.getNode().getChildren(),
+                                step.getInHand().getLeft(), step.getInHand().getRight());
+
+                        Spatial onTable = HeapState.findDiceIn(table.getNode().getChildren(),
+                                step.getInTable().getLeft(), step.getInTable().getRight());
+
+                        if(message.getMessage() != null){ 
+                            String m = message.getMessage().split(" ")[0];
+//                            try{
+                            switch (m) {
+                                case "left":
+                                    onHand.setUserData(GoatRules.MAPPING_PREF_TO_LEFT, true);
+                                    break;
+                                case "right":
+                                    onHand.setUserData(GoatRules.MAPPING_PREF_TO_LEFT, false);
+                                    break;
+                            }
+//                            }catch(NullPointerException ex){
+//                                System.err.println("pipec");
+//                            }
+                        }
+                        
+                        StepEvent event = new StepEvent(onTable, onHand, step.getInTableNum(),step.getInHandNum());
+                        
+                        rules.doStep(event);
+                    }
+                    p.sortDices();
+                    
+                    turnNextPlayerStep();
+                    
+                    if(name.equals(CurrentPlayer.getInstance().getName())){
+                        
+                        LOG.log(Level.FINEST, "MyHand size =={0}it is == {1}", new Object[]{mainPlayer.getHand().size(), mainPlayer.getHand()});
+
+                        if(mainPlayer.getHand().isEmpty()){
+                            mainPlayer.getInterface().makePopupText("You're out!!!");
+                            ExtendedSpecificationMessage msg = new ExtendedSpecificationMessage();
+                            msg.setWhoSend(CurrentPlayer.getInstance().getName());
+                            msg.setSpecification(MessageSpecification.EMPTY_HAND);
+                            msg.setStatusPlayer(StatusPlayer.WATCHER);
+                            CurrentPlayer.getInstance().getClientOfCurSession().send(msg);
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+    }
+        
+        private void sendMyScoreToServer(){
+        int score = 0;
+        for(Spatial s : mainPlayer.getHand()){
+            Dice d = s.getControl(Dice.class);
+            
+            if(d.getBothNum() == 0) 
+                score += 25;
+            else
+                score += d.getLeftNum() +d.getRightNum();
+        }
+        
+        ExtendedSpecificationMessage msg = new ExtendedSpecificationMessage(
+                MessageSpecification.SCORE, CurrentPlayer.getInstance().getName(),
+                IN_GAME, new Integer(score));
+        CurrentPlayer.getInstance().getClientOfCurSession().send(msg);
+    }
+        
+        private void resiveNewMessagesAppProcess(){
         Message message = queueUnprocessedMessages.remove();
         if(message instanceof ExtendedSpecificationMessage){
             ExtendedSpecificationMessage extendedMessage = (ExtendedSpecificationMessage)message;
@@ -439,7 +592,7 @@ public class PlayersState extends AbstractAppState{
                 if(isNetGameStarted){
                     JOptionPane.showMessageDialog(null, "Connection with one of players is refused when gae is running");
                     LOG.log(Level.SEVERE, "Connection with  {0} has been refused, the game back to menu", extendedMessage.getWhoSend());
-                    exitToMenu();
+                    markToExit.set(true);
                     return;
                 }
                 for(AbstractPlayer p : mAllPlayers){
@@ -511,167 +664,24 @@ public class PlayersState extends AbstractAppState{
             mainPlayer.getInterface().makePopupText("Lets start!!!");
         }
     }
-    
-    private void endGame(){
-        heap.returnAllDicesToHeap(true);
-        isNetGameStarted = false;
-        isCantStep = false;
-        isMainPlayerStepWait = false;
-        rules.endGame();
-        rules.removeTips();
-        mainPlayer.clearGui();
-    }
-    
-    private void sendMyScoreToServer(){
-        int score = 0;
-        for(Spatial s : mainPlayer.getHand()){
-            Dice d = s.getControl(Dice.class);
-            
-            if(d.getBothNum() == 0) 
-                score += 25;
-            else
-                score += d.getLeftNum() +d.getRightNum();
-        }
         
-        ExtendedSpecificationMessage msg = new ExtendedSpecificationMessage(
-                MessageSpecification.SCORE, CurrentPlayer.getInstance().getName(),
-                IN_GAME, new Integer(score));
+        private void sendExtendedMessage(MessageSpecification specific,Object restrictedObject,String message,StatusPlayer status){
+        ExtendedSpecificationMessage msg = new ExtendedSpecificationMessage();
+        msg.setStatusPlayer(status);
+        msg.setSpecification(specific);
+        msg.setWhoSend(CurrentPlayer.getInstance().getName());
+        msg.setRestrictedObject(restrictedObject);
+        msg.setMessage(message);
         CurrentPlayer.getInstance().getClientOfCurSession().send(msg);
     }
-    
-    void makeResivedStepFromDistancePlayer(ExtendedSpecificationMessage message){
-        String name = message.getWhoSend();
-        StepToSend step = (StepToSend)message.getRestrictedObject();
-        if(step == null){
-            turnNextPlayerStep();
-            if(!name.equals(CurrentPlayer.getInstance().getName()))
-                mainPlayer.getInterface().makePopupText("Player : " + name +" Check!");
-        }else{
-            for(AbstractPlayer p :mAllPlayers ){
-                
-                if(p.getName().equals(name)){
-                    if(message.getMessage() != null && message.getMessage().split(" ")[0].equals("start")){
-                        rules.startGame(HeapState.findDiceIn(p.getNode().getChildren(),
-                                step.getInHand().getLeft(),step.getInHand().getRight()));
-    
-                    }
-                    else{
-                        Spatial onHand = HeapState.findDiceIn(p.getNode().getChildren(),
-                                step.getInHand().getLeft(), step.getInHand().getRight());
-
-                        Spatial onTable = HeapState.findDiceIn(table.getNode().getChildren(),
-                                step.getInTable().getLeft(), step.getInTable().getRight());
-
-                        if(message.getMessage() != null){ 
-                            String m = message.getMessage().split(" ")[0];
-//                            try{
-                            switch (m) {
-                                case "left":
-                                    onHand.setUserData(GoatRules.MAPPING_PREF_TO_LEFT, true);
-                                    break;
-                                case "right":
-                                    onHand.setUserData(GoatRules.MAPPING_PREF_TO_LEFT, false);
-                                    break;
-                            }
-//                            }catch(NullPointerException ex){
-//                                System.err.println("pipec");
-//                            }
-                        }
-                        
-                        StepEvent event = new StepEvent(onTable, onHand, step.getInTableNum(),step.getInHandNum());
-                        
-                        rules.doStep(event);
-                    }
-                    p.sortDices();
-                    
-                    turnNextPlayerStep();
-                    
-                    if(name.equals(CurrentPlayer.getInstance().getName())){
-                        
-                        LOG.log(Level.FINEST, "MyHand size =={0}it is == {1}", new Object[]{mainPlayer.getHand().size(), mainPlayer.getHand()});
-
-                        if(mainPlayer.getHand().isEmpty()){
-                            mainPlayer.getInterface().makePopupText("You're out!!!");
-                            ExtendedSpecificationMessage msg = new ExtendedSpecificationMessage();
-                            msg.setWhoSend(CurrentPlayer.getInstance().getName());
-                            msg.setSpecification(MessageSpecification.EMPTY_HAND);
-                            msg.setStatusPlayer(StatusPlayer.WATCHER);
-                            CurrentPlayer.getInstance().getClientOfCurSession().send(msg);
-                        }
-                    }
-                    break;
-                }
-            }
-        }
-    }
-    
-    private class OnlineClientHandler implements MessageListener<Client>{
-
-        @Override
-        public void messageReceived(Client source, Message m) {
-           LOG.log(Level.INFO, "I am resive message in Players state : {0}", m);
-            if(m instanceof ExtendedSpecificationMessage){
-                
-                ExtendedSpecificationMessage message = (ExtendedSpecificationMessage)m;
-                if(message.getSpecification().equals(MessageSpecification.INITIALIZATION)||
-                        message.getSpecification().equals(MessageSpecification.NEW_STATUS)||
-                        message.getSpecification().equals(MessageSpecification.DISCONNECT)){
-                    
-                    if(!(message.getWhoSend().equals(CurrentPlayer.getInstance().getName()))){
-                        queueUnprocessedMessages.add(message);
-                    }
-                }
-                else if(message.getSpecification().equals(MessageSpecification.STEP)){
-                    queueUnprocessedMessages.add(message);
-                }else if(message.getSpecification().equals(MessageSpecification.KICK)){
-                    JOptionPane.showMessageDialog(null, message.getMessage());
-//                    sApp.stop();
-//                    exitToMenu();
-                    markToExit.set(true);
-                }
-                else if(message.getSpecification().equals(MessageSpecification.GET_DICE_FROM_HEAP)){
-                    queueUnprocessedMessages.add(message);
-                }
-//                else if(message.getSpecification().equals(MessageSpecification.EMPTY_HAND)){
-//                    for(AbstractPlayer p : mAllPlayers){
-//                        if(p.getName().equals(message.getWhoSend())){
-//                            
-//                        }
-//                    }
-//                }
-                else if(message.getSpecification().equals(MessageSpecification.FISH)){
-                    queueUnprocessedMessages.add(message);                    
-                }
-                else if(message.getSpecification().equals(MessageSpecification.SCORE)){
-                    queueUnprocessedMessages.add(message);                    
-                }
-            }
-            else if(m instanceof StartGameMessage){
-                
-                synchronized(this){
-                    StartGameMessage message = ((StartGameMessage)m);
-                        queueUnprocessedMessages.add(message);
-                    while(!queueUnprocessedMessages.isEmpty()){
-                        try {
-                            this.wait(10);
-                        } catch (InterruptedException ex) {
-                            Logger.getLogger(PlayersState.class.getName()).log(Level.SEVERE, "interrupt when wait", ex);
-                        }
-                    }
-                    LOG.log(Level.FINE, "Start game part ::: {0}", message.getStartGamePart().toString());
-                    for(AbstractPlayer p : mAllPlayers){
-                        List<NumsOfDice> mPart = message.getPartOf(p.getName());
-
-                        for(NumsOfDice n : mPart){
-                         p.TakeFromHeap(n.getLeft(), n.getRight());
-                        }
-                    }
-                    LOG.log(Level.INFO,"LETS START!!!!");
-                    
-                }
-            }
-        }
         
+        private void sendMyNewDiceFromHeap(NumsOfDice dice){
+        ExtendedSpecificationMessage msg = new ExtendedSpecificationMessage(
+                        MessageSpecification.GET_DICE_FROM_HEAP,
+                        CurrentPlayer.getInstance().getName(),
+                        IN_GAME,dice);
+                CurrentPlayer.getInstance().getClientOfCurSession().send(msg);
+    }
     }
     
     public class DistancePlayer extends AbstractPlayer{
