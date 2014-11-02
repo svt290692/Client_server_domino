@@ -33,7 +33,7 @@
                     <interact onClick="buttonPushed(EXIT)" />
                  </control>
             </panel>
-            <control name="label" id="label" width="50%"  x="305" y="45" text="Development of domino" valign="bottom" align="right"   font="/Interface/Fonts/myDomFont.fnt"/>
+            <control name="label" id="label" width="50%"  x="305" y="45" text="Domino the game. v1.0" height="30px" valign="bottom" align="right"   font="/Interface/Fonts/myDomFont.fnt"/>
         </layer>
     </screen>
     
@@ -50,7 +50,7 @@
             <image id="backToStartScreenImage" filename="/Interface/arrow.png" width="151px" x="-1px" y="-1px" valign="bottom" align="left" height="70px">
                     <interact onClick="goToPreviousScreen()" />
             </image>
-            <control name="label" id="label" width="50%" x="305" y="45" text="Development of domino" align="right" valign="bottom"  font="/Interface/Fonts/myDomFont.fnt"/>
+            <control name="label" id="label" width="50%" x="305" y="45" text="Domino the game. v1.0" height="30px" align="right" valign="bottom"  font="/Interface/Fonts/myDomFont.fnt"/>
         </layer>
     </screen>
     
@@ -102,7 +102,7 @@
             <image id="backToStartScreenImage" filename="/Interface/arrow.png" width="151px" x="-1px" y="-1px" valign="bottom" align="left" height="70px">
                     <interact onClick="goToPreviousScreen()" />
             </image>
-            <control name="label" id="label" width="50%" x="305" y="45" text="Development of domino" align="right" valign="bottom"  font="/Interface/Fonts/myDomFont.fnt"/>
+            <control name="label" id="label" width="50%" x="305" y="45" text="Domino the game. v1.0" height="30px" align="right" valign="bottom"  font="/Interface/Fonts/myDomFont.fnt"/>
         </layer>
     </screen>
 
@@ -128,7 +128,7 @@
             <image id="backToStartGameScreenImage" filename="/Interface/arrow.png" width="151px" x="-1px" y="-1px" valign="bottom" align="left" height="70px">
                     <interact onClick="goToPreviousScreen()" />
             </image>
-            <control name="label" id="label" width="50%" x="305" y="45" text="Development of domino" align="right" valign="bottom"  font="/Interface/Fonts/myDomFont.fnt"/>
+            <control name="label" id="label" width="50%" x="305" y="45" text="Domino the game. v1.0" height="30px" align="right" valign="bottom"  font="/Interface/Fonts/myDomFont.fnt"/>
         </layer>
     </screen>
 
@@ -143,7 +143,7 @@
                 <panel id="namePanel" childLayout="horizontal" valign="top" align="left" width="*" x="-1px" y="-1px" height="30.0%">
                     <control name="label" id="LBL_name" color="#33cc00ff" width="100px" x="-1px" y="-1px" valign="center" text="Name :" height="45px" font="aurulent-sans-16.fnt"/>
                     <control name="textfield" id="TF_name" text="Player" width="192px" x="344px" y="242px" valign="center" align="center" height="23px"/>
-                    <control id="#imageSelect" name="imageSelect" width="126px" imageWidth="80px" imageHeight="80px" imageList="/Interface/Images/avatar0.png,/Interface/Images/avatar1.png,/Interface/Images/avatar2.png,/Interface/Images/avatar3.png" />
+                    <control id="#imageSelect" name="imageSelect" width="126px" imageWidth="80px" imageHeight="80px" imageList="/Interface/Images/avatar0.png,/Interface/Images/avatar1.png,/Interface/Images/avatar2.png,/Interface/Images/avatar3.png,/Interface/Images/avatar4.png,/Interface/Images/avatar5.png,/Interface/Images/avatar6.png,/Interface/Images/avatar7.png,/Interface/Images/avatar8.png" />
                 </panel>
                 
                 <panel id="mainPanel" childLayout="horizontal" valign="center" align="left" width="*" x="-1px" y="-1px" height="30.0%">
@@ -159,7 +159,7 @@
             <image id="backToStartGameScreenImage" filename="/Interface/arrow.png" width="151px" x="-1px" y="-1px" valign="bottom" align="left" height="70px">
                     <interact onClick="goToPreviousScreen()" />
             </image>
-            <control name="label" id="label" width="50%" x="305" y="45" text="Development of domino" valign="bottom" align="right"   font="/Interface/Fonts/myDomFont.fnt"/>
+            <control name="label" id="label" width="50%" x="305" y="45" text="Domino the game. v1.0" height="30px" valign="bottom" align="right"   font="/Interface/Fonts/myDomFont.fnt"/>
         </layer>
     </screen>
     

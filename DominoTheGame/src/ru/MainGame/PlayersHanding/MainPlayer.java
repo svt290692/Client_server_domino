@@ -10,11 +10,13 @@ import com.jme3.input.InputManager;
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Ray;
+import com.jme3.math.Transform;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import ru.MainGame.Dice;
 import ru.MainGame.DominoApp;
 import ru.MainGame.Events.StepEvent;
 import ru.MainGame.Gui.HUDInterface;
@@ -235,6 +237,7 @@ public abstract class MainPlayer extends AbstractPlayer{
      */
     protected void endOfStep(StepEvent stepEvent){
         rules.doStep(stepEvent);
+        releaseBacklight();
     }
 
     Spatial getCursorDice() {
@@ -341,7 +344,7 @@ public abstract class MainPlayer extends AbstractPlayer{
        }
         
 	float startPoint;
-	float height = sApp.getCamera().getHeight() / 4;
+	float height = -(sApp.getCamera().getHeight() / 4);
 	final int size = myHandGuiNode.getChildren().size();
 	if((size % 2) == 0)
 	    startPoint = (-((size / 2) * width));
@@ -350,7 +353,7 @@ public abstract class MainPlayer extends AbstractPlayer{
 
 	for(Spatial s : myHandGuiNode.getChildren()){
 //	    if(s.equals(cursorDice)) continue;
-	    s.setLocalTranslation(startPoint,-height,0);
+	    s.setLocalTranslation(startPoint,height,0);
 	    startPoint += width;
 	}
     }
@@ -379,6 +382,82 @@ public abstract class MainPlayer extends AbstractPlayer{
                 sortDices();
             }
         }
+    }
+    
+    public boolean readyToStep(){
+        return queueAddToScreenDices.isEmpty();
+    }
+    
+    public void backlightProcess( boolean seekStartGameDice){
+        if(true == seekStartGameDice)seek:{
+            Dice dice = getLowestDuble();
+            if(null == dice){
+                break seek;
+            }
+            Spatial lowest = dice.getSpatial();
+            
+            if(null != lowest){
+                lowest.setUserData(WordsKeeper.USER_DATA_DICE_CAN_STEP.map, true);
+            }
+        }
+        releaseBacklight();
+        Spatial guiCollide = requestToGuiCollide();
+        if( null != guiCollide ){
+            makeBacklight(guiCollide);
+        }
+    }
+    
+    public void makeBacklight(Spatial s){
+            Spatial inTable = s.getUserData(DICE_IN_TABLE);
+            Boolean isStepable = inTable.getUserData(WordsKeeper.USER_DATA_DICE_CAN_STEP.map);
+            Boolean isBacklighted = s.getUserData(WordsKeeper.USER_DATA_DICE_IS_BACKLIGHT.map);
+            
+            if(null != isStepable && true == isStepable && (null == isBacklighted || false == isBacklighted)){
+                final float height = -(sApp.getCamera().getHeight() / 4);
+                
+                Transform endTrans = s.getLocalTransform().clone();
+                Vector3f end = endTrans.getTranslation();
+                end.setY(endTrans.getTranslation().y + 25);
+                endTrans.setTranslation(end);
+                
+                s.setLocalTransform(endTrans);
+                
+                s.setUserData(WordsKeeper.USER_DATA_DICE_IS_BACKLIGHT.map, true);
+            }
+        
+    }
+    
+    private void releaseBacklight(){
+        for(Spatial s : myHandGuiNode.getChildren()){
+            Spatial inTable = s.getUserData(DICE_IN_TABLE);
+            Boolean isBacklighted = s.getUserData(WordsKeeper.USER_DATA_DICE_IS_BACKLIGHT.map);
+            
+            if(null != isBacklighted && true == isBacklighted){
+                final float height = -(sApp.getCamera().getHeight() / 4);
+                Transform firstTrans = s.getLocalTransform().clone();
+                
+                Transform endTrans = s.getLocalTransform().clone();
+                endTrans.getTranslation().setY(height);
+                
+                s.setLocalTransform(endTrans);
+                
+                s.setUserData(WordsKeeper.USER_DATA_DICE_IS_BACKLIGHT.map, false);
+            }
+        }
+    }
+
+    protected Dice getLowestDuble() {
+        int lowest = 7;
+        Dice lowestDice = null;
+        for (Spatial s : getHand()) {
+            Dice handDice = s.getControl(Dice.class);
+            int bothNum = handDice.getBothNum();
+            if (bothNum != -1 && bothNum < lowest) {
+                lowest = bothNum;
+                lowestDice = handDice;
+            }
+        }
+        return lowestDice;
     }
     
 }

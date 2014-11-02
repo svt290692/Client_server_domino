@@ -178,21 +178,6 @@ public class MainPlayerClient extends MainPlayer{
         mClient.send(message);
     }
     
-    private ru.MainGame.Dice getLowestDuble(){
-        int lowest = 7;
-        ru.MainGame.Dice lowestDice = null;
-        for(Spatial s : getHand()){
-            ru.MainGame.Dice handDice = s.getControl(ru.MainGame.Dice.class);
-            
-            int bothNum = handDice.getBothNum();
-            if(bothNum != -1 && bothNum < lowest){
-                lowest = bothNum;
-                lowestDice = handDice;
-            }
-        }
-        return lowestDice;
-    }
-    
     private class Handler implements  ErrorListener<Client>, ClientStateListener{
 
 

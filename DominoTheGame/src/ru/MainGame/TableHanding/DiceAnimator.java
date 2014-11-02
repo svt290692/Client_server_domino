@@ -38,8 +38,9 @@ public abstract class DiceAnimator {
     }
     
     
-    public abstract Map<Float,Transform> getBehindPositions();
-
+    public Map<Float,Transform> getBehindPositions(){
+        return mPositions;
+    }
 
     @Override
     public int hashCode() {

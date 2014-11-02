@@ -47,9 +47,8 @@ import ru.MainGame.Network.FromServerToPlayers.StartGameMessage;
 import ru.MainGame.Network.MessageSpecification;
 import ru.MainGame.Network.NumsOfDice;
 import ru.MainGame.Network.StatusPlayer;
-import static ru.MainGame.Network.StatusPlayer.IN_GAME;
-import static ru.MainGame.Network.StatusPlayer.NOT_READY;
-import static ru.MainGame.Network.StatusPlayer.READY_TO_PLAY;
+import static ru.MainGame.Network.StatusPlayer.*;
+import static ru.MainGame.PlayersHanding.WordsKeeper.*;
 import ru.MainGame.Network.StepToSend;
 import ru.MainGame.TableHanding.AnimationEventCounter;
 import ru.MainGame.TableHanding.GoatRules;
@@ -162,7 +161,7 @@ public class PlayersState extends AbstractAppState{
     
     private void initInput(){
         mMouseListener = new PickingListener();
-
+        
 	inputManager.addMapping(MappingsToInput.PICK.map,
 		new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
         inputManager.addMapping(MappingsToInput.CLEAR.map,
@@ -170,7 +169,12 @@ public class PlayersState extends AbstractAppState{
         inputManager.addMapping(MappingsToInput.ESC_MENU.map,
 		new KeyTrigger(KeyInput.KEY_ESCAPE));
 
-	inputManager.addListener(mMouseListener,MappingsToInput.PICK.map,MappingsToInput.CLEAR.map);
+        
+
+        
+	inputManager.addListener(mMouseListener,
+                MappingsToInput.PICK.map,
+                MappingsToInput.CLEAR.map);
         inputManager.addListener( new ActionListener() {
 
             @Override
@@ -194,6 +198,15 @@ public class PlayersState extends AbstractAppState{
 	    mainPlayer.setCursorDicePos(
 		    inputManager.getCursorPosition());
 	}
+        if( true == isMainPlayerStepWait){
+            if( false == rules.isGameStarted()){
+                nullingCanStepData();
+                mainPlayer.backlightProcess(true);
+            }
+            else{
+                mainPlayer.backlightProcess(false);
+            }
+        }
 
         if(!queueUnprocessedMessages.isEmpty())
             mOnlineHandler.resiveNewMessagesAppProcess();
@@ -210,10 +223,7 @@ System.err.println(">>>>DEBUG! HEAP GIVE ME: ==" + dice.getControl(Dice.class));
             }
             
             if(dice == null){
-                ExtendedSpecificationMessage msg = new ExtendedSpecificationMessage(
-                        MessageSpecification.STEP, CurrentPlayer.getInstance().getName(),
-                        StatusPlayer.IN_GAME, null);
-                CurrentPlayer.getInstance().getClientOfCurSession().send(msg);
+                mOnlineHandler.sendCheck();
                 mainPlayer.getInterface().makePopupText("You Check");
                 isCantStep = false;
             }else if(rules.TryMakeTips(dice) == true){
@@ -221,12 +231,14 @@ System.err.println(">>>>DEBUG! HEAP GIVE ME: ==" + dice.getControl(Dice.class));
                 NumsOfDice diceToSend = new NumsOfDice(
                             dice.getControl(Dice.class).getLeftNum(),
                             dice.getControl(Dice.class).getRightNum());
-                
+                dice.setUserData(USER_DATA_DICE_CAN_STEP.map, true);
                 rules.removeTips();
                 isCantStep = false;
                 mainPlayer.getInterface().makePopupText("Found!");
                 mOnlineHandler.sendMyNewDiceFromHeap(diceToSend);
+                
             }else{
+                dice.setUserData(USER_DATA_DICE_CAN_STEP.map, false);
                 NumsOfDice diceToSend = new NumsOfDice(
                             dice.getControl(Dice.class).getLeftNum(),
                             dice.getControl(Dice.class).getRightNum());
@@ -263,7 +275,6 @@ System.err.println(">>>>DEBUG! HEAP GIVE ME: ==" + dice.getControl(Dice.class));
         sApp.getStateManager().attach(new MenuState());
     }
     
-    
     private void turnNextPlayerStep(){
         if(queuePlayersToAllowSteps.element().equals(CurrentPlayer.getInstance().getName())){
             denieMainStep();
@@ -294,20 +305,8 @@ System.err.println(">>>>DEBUG! HEAP GIVE ME: ==" + dice.getControl(Dice.class));
         if(queuePlayersToAllowSteps.element().equals(CurrentPlayer.getInstance().getName())){
             allowMainStep();
 
-            boolean isStepsExists = false;
-            for(Spatial s : mainPlayer.getHand()){
-                if(rules.TryMakeTips(s) == true){
-                    isStepsExists = true;
-                    //DEBUG
-                    System.err.println(">>>>DEBUG! STEP EXISTS:");
-                    break;
-                }
-                else{
-                    System.err.println(">>>>DEBUG! STEP NOT EXISTS: with dice : " + s.getControl(Dice.class));
-                }
-            }
-            rules.removeTips();
-            if(isStepsExists){
+            
+            if(isStepExists() == true){
                 mainPlayer.getInterface().makePopupText("Your turn");
                 LOG.log(Level.FINE, "Step exists, main player can do step");
             }
@@ -315,10 +314,13 @@ System.err.println(">>>>DEBUG! HEAP GIVE ME: ==" + dice.getControl(Dice.class));
                 if(fish.get() == true){
                     waitingScore = true;
                 }
-                else if(mainPlayer.getHand().size() > 0 && heap.getNode().getChildren().size() > 0){
+                else if(mainPlayer.getHand().size() > 0 && heap.getNode().getChildren().isEmpty() == false){
                     System.err.println(">>>>DEBUG! ORDER TO HEAP: heap size ==" + heap.getNode().getChildren().size());
                     mainPlayer.getInterface().makePopupText("You must go to heap...");
                     isCantStep = true;
+                }
+                else if(heap.getNode().getChildren().isEmpty() == true){
+                    mOnlineHandler.sendCheck();
                 }
             }
 
@@ -339,13 +341,37 @@ System.err.println(">>>>DEBUG! HEAP GIVE ME: ==" + dice.getControl(Dice.class));
         }
     }
     
+    private boolean isStepExists(){
+        nullingCanStepData();
+        boolean haveStep = false;
+        for(Spatial s : mainPlayer.getHand()){
+            if(rules.TryMakeTips(s) == true){
+                haveStep = true;
+                s.setUserData(USER_DATA_DICE_CAN_STEP.map, true);
+                //DEBUG
+                System.err.println(">>>>DEBUG! STEP EXISTS: " + s.getControl(Dice.class));
+            }
+            else{
+                s.setUserData(USER_DATA_DICE_CAN_STEP.map, false);
+                System.err.println(">>>>DEBUG! STEP NOT EXISTS: with dice : " + s.getControl(Dice.class));
+            }
+        }
+        rules.removeTips();
+        return haveStep;
+    } 
+    
+    private void nullingCanStepData(){
+        for(Spatial s : mainPlayer.getHand()){
+            s.setUserData(USER_DATA_DICE_CAN_STEP.map, false);
+        }
+    }
+    
     private AbstractPlayer getPlayer(String name){
         for(AbstractPlayer p : mAllPlayers)
             if(p.getName().equals(name))
                 return p;
         return null;
     }
-    
     
     private void allowMainStep(){
 //        sApp.getInputManager().setCursorVisible(true);
@@ -372,6 +398,7 @@ System.err.println(">>>>DEBUG! HEAP GIVE ME: ==" + dice.getControl(Dice.class));
                     rules.removeTips();
                 }
             }
+            
 	}
     }
     
@@ -383,7 +410,6 @@ System.err.println(">>>>DEBUG! HEAP GIVE ME: ==" + dice.getControl(Dice.class));
             
             return null;
     }
-    
     
     private void endGame(){
         heap.returnAllDicesToHeap(true);
@@ -551,7 +577,39 @@ System.err.println(">>>>DEBUG! HEAP GIVE ME: ==" + dice.getControl(Dice.class));
             ExtendedSpecificationMessage extendedMessage = (ExtendedSpecificationMessage)message;
             if(extendedMessage.getSpecification().equals(MessageSpecification.INITIALIZATION)){
                 synchronized(this){
-                    for(AbstractPlayer p : mAllPlayers){
+                    initializationMessageProcess(extendedMessage);
+                    notifyAll();
+                }
+            }
+            else if(extendedMessage.getSpecification().equals(MessageSpecification.NEW_STATUS)){
+                mainPlayer.getInterface().changeStatus(extendedMessage.getWhoSend(),extendedMessage.getStatusPlayer().toString());
+            }
+            
+            else if(extendedMessage.getSpecification().equals(MessageSpecification.DISCONNECT)){
+                disconnectMessageProcess(extendedMessage);
+            }
+            else if(extendedMessage.getSpecification().equals(MessageSpecification.STEP)){
+                makeResivedStepFromDistancePlayer(extendedMessage);
+            }
+            else if(extendedMessage.getSpecification().equals(MessageSpecification.GET_DICE_FROM_HEAP)){
+                getDiceFromHeapMessageProcess(extendedMessage);
+            }
+            else if(extendedMessage.getSpecification().equals(MessageSpecification.FISH)){
+                sendMyScoreToServer();
+                fish.set(true);
+//                mainPlayer.getInterface().makeFish(null);
+            }
+            else if(extendedMessage.getSpecification().equals(MessageSpecification.SCORE)){
+                scoreMessageProcess(extendedMessage);
+            }
+        }
+        else{
+            startGameMessageProcess((StartGameMessage)message);
+        }
+    }
+        
+        private void initializationMessageProcess(ExtendedSpecificationMessage extendedMessage){
+            for(AbstractPlayer p : mAllPlayers){
                         if(p.getName().equals(extendedMessage.getWhoSend()))
                             return;
                     }
@@ -559,34 +617,14 @@ System.err.println(">>>>DEBUG! HEAP GIVE ME: ==" + dice.getControl(Dice.class));
                     registerPlace(place);
                     mAllPlayers.add(new DistancePlayer(place,
                             sApp.getRootNode(), heap, extendedMessage.getWhoSend()));
-
-
-
-                    String status = null;
-                    switch(extendedMessage.getStatusPlayer()){
-                        case READY_TO_PLAY: status = "Ready";break;
-                        case NOT_READY: status = "Not ready";break;
-                        case IN_GAME: status = "";break;
-                    }
+                    
                     int index = (Integer)extendedMessage.getRestrictedObject();
                     mainPlayer.getInterface().addPlayerToTopPanel(
-                            extendedMessage.getWhoSend(),status,index,false);
-                    notifyAll();
-                }
-            }
-            else if(extendedMessage.getSpecification().equals(MessageSpecification.NEW_STATUS)){
-                String status = null;
-                switch(extendedMessage.getStatusPlayer()){
-                    case READY_TO_PLAY: status = "Ready";break;
-                    case NOT_READY: status = "Not ready";break;
-                    case IN_GAME: status = "";break;
-                }
-                mainPlayer.getInterface().changeStatus(extendedMessage.getWhoSend(),status);
-//                mainPlayer.getInterface().changeColor(status, new Color(255f, 0.5f, 0.7f, 0.5f));
-            }
-            
-            else if(extendedMessage.getSpecification().equals(MessageSpecification.DISCONNECT)){
-                mainPlayer.getInterface().removePlayer(extendedMessage.getWhoSend());
+                            extendedMessage.getWhoSend(),extendedMessage.getStatusPlayer().toString(),index,false);
+        }
+        
+        private void disconnectMessageProcess(ExtendedSpecificationMessage extendedMessage){
+            mainPlayer.getInterface().removePlayer(extendedMessage.getWhoSend());
                 mainPlayer.getInterface().makePopupText("Player : " + extendedMessage.getWhoSend() + " Disconnect");
                 
                 if(isNetGameStarted){
@@ -602,12 +640,10 @@ System.err.println(">>>>DEBUG! HEAP GIVE ME: ==" + dice.getControl(Dice.class));
                         break;
                     }
                 }
-            }
-            else if(extendedMessage.getSpecification().equals(MessageSpecification.STEP)){
-                makeResivedStepFromDistancePlayer(extendedMessage);
-            }
-            else if(extendedMessage.getSpecification().equals(MessageSpecification.GET_DICE_FROM_HEAP)){
-                for(AbstractPlayer p : mAllPlayers){
+        }
+        
+        private void getDiceFromHeapMessageProcess(ExtendedSpecificationMessage extendedMessage){
+            for(AbstractPlayer p : mAllPlayers){
                     if(p.getName().equals(extendedMessage.getWhoSend())){
                         NumsOfDice dice = (NumsOfDice)extendedMessage.getRestrictedObject();
                         p.TakeFromHeap(dice.getLeft(),dice.getRight());
@@ -615,14 +651,10 @@ System.err.println(">>>>DEBUG! HEAP GIVE ME: ==" + dice.getControl(Dice.class));
 //                                    message.getWhoSend() + "take dice from heap");
                     }
                 }
-            }
-            else if(extendedMessage.getSpecification().equals(MessageSpecification.FISH)){
-                sendMyScoreToServer();
-                fish.set(true);
-//                mainPlayer.getInterface().makeFish(null);
-            }
-            else if(extendedMessage.getSpecification().equals(MessageSpecification.SCORE)){
-                Map<String,Integer> map = (Map<String,Integer>)(extendedMessage.getRestrictedObject());
+        }
+        
+        private void scoreMessageProcess(ExtendedSpecificationMessage extendedMessage){
+            Map<String,Integer> map = (Map<String,Integer>)(extendedMessage.getRestrictedObject());
                 List<String> strings = new ArrayList<>();
                 
                 for(String name : map.keySet()){
@@ -639,14 +671,11 @@ System.err.println(">>>>DEBUG! HEAP GIVE ME: ==" + dice.getControl(Dice.class));
                 endGame();
                 sendExtendedMessage(MessageSpecification.NEW_STATUS,
                         null, null,NOT_READY);
-            }
         }
-        else{
-            StartGameMessage startMessage = (StartGameMessage)message;
-//            mainPlayer.getInterface().cleanTopPanel();
+        
+        private void startGameMessageProcess(StartGameMessage startMessage){
             
             for(String name :startMessage.getStartGamePart().keySet()){
-//                if( ! (CurrentPlayer.getInstance().getName().equals(name)) )
                 mainPlayer.getInterface().changeStatus(name, " ");
             }
             
@@ -655,15 +684,18 @@ System.err.println(">>>>DEBUG! HEAP GIVE ME: ==" + dice.getControl(Dice.class));
                 allowMainStep();
                 mainPlayer.getInterface().makePopupText("Your first");
             }
+            
                 mainPlayer.getInterface().changeStatus(queuePlayersToAllowSteps.element(),
                     "Move \ndominoes");
+                
             mainPlayer.getInterface().removeCurButtonInMenu(null);
             isNetGameStarted = true;
             fish.set(false);
             waitingScore = false;
+            
             mainPlayer.getInterface().makePopupText("Lets start!!!");
+            
         }
-    }
         
         private void sendExtendedMessage(MessageSpecification specific,Object restrictedObject,String message,StatusPlayer status){
         ExtendedSpecificationMessage msg = new ExtendedSpecificationMessage();
@@ -682,6 +714,13 @@ System.err.println(">>>>DEBUG! HEAP GIVE ME: ==" + dice.getControl(Dice.class));
                         IN_GAME,dice);
                 CurrentPlayer.getInstance().getClientOfCurSession().send(msg);
     }
+        
+        private void sendCheck(){
+            ExtendedSpecificationMessage msg = new ExtendedSpecificationMessage(
+                        MessageSpecification.STEP, CurrentPlayer.getInstance().getName(),
+                        StatusPlayer.IN_GAME, null);
+                CurrentPlayer.getInstance().getClientOfCurSession().send(msg);
+        }
     }
     
     public class DistancePlayer extends AbstractPlayer{
