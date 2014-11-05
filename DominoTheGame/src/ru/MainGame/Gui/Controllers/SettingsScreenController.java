@@ -40,7 +40,7 @@ public class SettingsScreenController extends AbstractMenuScreenController{
         
         windowList = new ArrayList<>(Arrays.asList(new String[]{"640x480","800x480","800x600","1024x600",
                     "1024x768","1280x720","1280x768","1280x995","1360x768"}));
-        fullscreenList = new ArrayList<>(Arrays.asList(new String[]{"640x480","800x480","800x600","1024x600",
+        fullscreenList = new ArrayList<>(Arrays.asList(new String[]{"640x480","800x600",
                     "1024x768","1280x720","1280x768","1366x768"}));
         
         

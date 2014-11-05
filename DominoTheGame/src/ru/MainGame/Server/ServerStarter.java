@@ -3,6 +3,12 @@ package ru.MainGame.Server;
 import com.jme3.network.Network;
 import com.jme3.network.Server;
 import com.jme3.network.serializing.Serializer;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -48,8 +54,32 @@ public class ServerStarter{
 	initParam(args);
 	initServersLog();
 	Server server = null;
+        final String fileName = "cfg.txt";
 
 	int port = 5511;
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(new File(fileName)));
+            String sPort = br.readLine();
+            if(sPort != null && ! sPort.isEmpty())
+                port = Integer.parseInt(sPort.split("=")[1]);
+            else{
+                LOG.warning("error reading port from file. file is emply");
+            }
+            br.close();
+        } catch (FileNotFoundException ex) {
+            try {
+                File file = new File(fileName);
+                file.createNewFile();
+                BufferedWriter bw = new BufferedWriter(new FileWriter(file));
+                bw.write("port="+Integer.toString(port));
+                bw.flush();
+                bw.close();
+            } catch (IOException ex1) {
+            }
+            LOG.warning("file with port not found. it will create");
+        } catch (IOException ex) {
+            LOG.warning("error reading from file. server try start with standart 5511 port");
+        }
 
 	try {
 	    server = Network.createServer(port ,-1);
@@ -73,7 +103,7 @@ public class ServerStarter{
 	}
 
 	if(server.isRunning())
-	LOG.log(Level.INFO,"Server start at port:{0}" , new Object[]{port});
+	LOG.log(Level.INFO,"Server start at port:"+port);
 
         try {
             Thread.currentThread().join();

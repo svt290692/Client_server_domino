@@ -18,6 +18,7 @@ import de.lessvoid.nifty.controls.label.builder.LabelBuilder;
 import de.lessvoid.nifty.effects.EffectEventId;
 import de.lessvoid.nifty.elements.Element;
 import de.lessvoid.nifty.screen.Screen;
+import de.lessvoid.nifty.tools.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Collection;
@@ -134,7 +135,7 @@ public class HUDInterface{
         new LabelBuilder("popupText" + text){{
             text(text);
             font("/Interface/Fonts/popopFont.fnt");
-            color("#000000ff");
+            color(Color.WHITE);
 //            width("*");
             onStartScreenEffect(new EffectBuilder("fade"){{
                     effectParameter("start", "#0");

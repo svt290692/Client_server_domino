@@ -75,6 +75,11 @@ public class ServerHandler implements ConnectionListener, MessageListener<Hosted
                 MessageSpecification.DISCONNECT, player.getName(),
                 StatusPlayer.NOT_READY,null);
         mServer.broadcast(msg);
+        
+        for(AbleToPlay p : queuePlayers.asList()){
+            p.setScore(0);
+        }
+        
     }
 
     @Override
