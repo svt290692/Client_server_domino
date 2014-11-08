@@ -21,6 +21,9 @@ public class ConnectToGameScreenController extends AbstractMenuScreenController{
     }
     
     public void goToPreviousScreen(){
-        getNifty().gotoScreen("startGame");
+        //migth be this
+//        getNifty().gotoScreen("startGame");
+        //or
+        getNifty().gotoScreen("start");
     }
 }

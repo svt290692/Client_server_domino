@@ -85,7 +85,10 @@ public class MenuState extends AbstractAppState implements MenuListener{
     @Override
     public void triggerdStartGame() {
         LOG.log(Level.FINE,"triggerdStartGame");
-        nifty.gotoScreen("startGame");
+        //might be this
+//        nifty.gotoScreen("startGame");
+        //or
+        nifty.gotoScreen("ConnectToGame");
     }
 
     @Override

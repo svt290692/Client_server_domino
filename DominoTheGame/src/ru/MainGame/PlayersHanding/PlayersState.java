@@ -301,7 +301,7 @@ System.err.println(">>>>DEBUG! HEAP GIVE ME: ==" + dice.getControl(Dice.class));
         }
         
         mainPlayer.getInterface().changeStatus(queuePlayersToAllowSteps.element(),
-                    "Move\n dominoes");
+                    "Makes\n turn");
         if(queuePlayersToAllowSteps.element().equals(CurrentPlayer.getInstance().getName())){
             allowMainStep();
 
@@ -686,7 +686,7 @@ System.err.println(">>>>DEBUG! HEAP GIVE ME: ==" + dice.getControl(Dice.class));
             }
             
                 mainPlayer.getInterface().changeStatus(queuePlayersToAllowSteps.element(),
-                    "Move \ndominoes");
+                    "Makes\n turn");
                 
             mainPlayer.getInterface().removeCurButtonInMenu(null);
             isNetGameStarted = true;
