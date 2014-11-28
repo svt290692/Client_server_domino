@@ -10,15 +10,11 @@
                         <onEndScreen name="move" mode="out" direction="left" length="300" startDelay="0" inherit="true"/>
                 </effect>
 
-                <control name="button" id="startGame" childLayout="center" backgroundColor="#ff993332" x="242" width="35%" y="10" valign="center"  label="StartGame" align="center" height="20%">
+                <control name="button" id="startGame" childLayout="center" backgroundColor="#ff993332" x="242" width="35%" y="10" valign="center"  label="Start game" align="center" height="20%">
                     <interact onClick="buttonPushed(START_GAME)" />
                 </control>
                 <panel id="separate1" childLayout="absolute" width="50%"  align="center" height="10%"/>
 
-                <control name="button" id="settings" childLayout="center" backgroundColor="#ff993355" x="265" width="30%" y="145" valign="center" label="Oprions" align="center" height="15%">
-                    <interact onClick="buttonPushed(SETTINGS)" />
-                </control>
-                <panel id="separate2" childLayout="absolute" width="50%"  align="center" height="10%"/>
 
                 <control name="button" id="about" childLayout="center" backgroundColor="#ff993377" x="284" width="25%" y="259" valign="center" label="About" align="center" height="12%">
                     <interact onClick="buttonPushed(ABOUT)" />
@@ -54,57 +50,7 @@
         </layer>
     </screen>
     
-    <screen id="settings" controller="ru.MainGame.Gui.Controllers.SettingsScreenController">
-        <layer id="mainLayerSettings" childLayout="center" backgroundImage="/Interface/preview.jpg">
-            <panel id="mainPanelSettings" childLayout="center" width="80.0%" style="nifty-panel" height="80.0%">
-                <effect>
-                        <onStartScreen name="move" mode="in" direction="right" length="300" startDelay="0" inherit="true"/>
-                        <onEndScreen name="move" mode="out" direction="left" length="300" startDelay="0" inherit="true"/>
-                </effect>
-                
-                <panel id="panelSettings" childLayout="vertical" width="*" valign="top" align="left" height="60.0%">
-                    <panel id="resolutionPanel" childLayout="horizontal" width="*" x="94" y="81" height="16.0%">
-                        <control name="label" id="screenResolution_Label" childLayout="center" width="75px" x="-1px" y="-1px" text="Resolution" align="center" height="32px" font="aurulent-sans-16.fnt"/>
-                        <control name="dropDown" id="screenResolutionLabel_DD" width="100px"/>
-                    </panel>
-                    <panel id="FullscreenPanel" childLayout="horizontal" width="*" x="94" y="81" height="16.0%">
-                        <control name="label" id="Fullscreen_Label" childLayout="center" width="75px" x="-1px" y="-1px" text="Fullscreen" align="center" height="32px" font="aurulent-sans-16.fnt"/>
-                        <control name="checkbox" id="Fullscreen_CB">
-                            <interact onClick="fullscreenClick()"/>
-                        </control>
-                    </panel>
-                    <panel id="VsyncPanel" childLayout="horizontal" width="*" x="94" y="81" height="16.0%">
-                        <control name="label" id="Vsync_Label" childLayout="center" width="75px" x="-1px" y="-1px" text="Vsync" align="center" height="32px" font="aurulent-sans-16.fnt"/>
-                        <control name="checkbox" id="Vsync_CB"/>
-                    </panel>
-                    <panel id="AntiAliasingPanel" childLayout="horizontal" width="*" x="94" y="81" height="16.0%">
-                        <control name="label" id="AntiAliasing_Label" childLayout="center" width="75px" x="-1px" y="-1px" text="Anti-Aliasing" align="center" height="32px" font="aurulent-sans-16.fnt"/>
-                        <control name="dropDown" id="AntiAliasing_DD" width="100px"/>
-                    </panel>
-<!--                    <panel id="GPanel4Cloned(21)" childLayout="horizontal" width="*" x="94" y="81" height="16.0%">
-                        <control name="label" id="GLabel0Cloned(22)" childLayout="center" width="75px" x="-1px" y="-1px" text="GLabel0" align="center" height="32px" font="aurulent-sans-16.fnt"/>
-                        <control name="dropDown" id="GDropDown2" width="100px"/>
-                    </panel>
-                    <panel id="GPanel4Cloned(23)" childLayout="horizontal" width="*" x="94" y="81" height="16.0%">
-                        <control name="label" id="GLabel0Cloned(24)" childLayout="center" width="75px" x="-1px" y="-1px" text="GLabel0" align="center" height="32px" font="aurulent-sans-16.fnt"/>
-                        <control name="dropDown" id="GDropDown3" width="100px"/>
-                    </panel>-->
-                </panel>
-                <panel id="ButtonsPanel" childLayout="center" width="*" valign="bottom" align="left" height="20.0%">
-                    <control name="button" id="ApplyButton" childLayout="center" width="100px" valign="bottom" label="Apply" align="left" height="49px">
-                        <interact onClick="buttonPushed(APPLY_SETTINGS)" />
-                    </control>
-<!--                    <control name="button" id="DefaultButton" childLayout="center" x="-1px" width="100px" y="-1px" valign="bottom" label="Default" align="right" height="49px">
-                        <interact onClick="buttonPushed(DEFAULT_RESTORE)"/>
-                    </control>-->
-                </panel>
-            </panel>
-            <image id="backToStartScreenImage" filename="/Interface/arrow.png" width="151px" x="-1px" y="-1px" valign="bottom" align="left" height="70px">
-                    <interact onClick="goToPreviousScreen()" />
-            </image>
-            <control name="label" id="label" width="50%" x="305" y="45" text="Domino the game. v1.0" height="30px" align="right" valign="bottom"  font="/Interface/Fonts/myDomFont.fnt"/>
-        </layer>
-    </screen>
+    
 
     <screen id="startGame" controller="ru.MainGame.Gui.Controllers.StartGameScreenController">
         <layer id="menu" childLayout="center" backgroundImage="/Interface/preview.jpg">

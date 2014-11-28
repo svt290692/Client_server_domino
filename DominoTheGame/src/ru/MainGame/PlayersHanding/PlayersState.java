@@ -153,6 +153,7 @@ public class PlayersState extends AbstractAppState{
 
             @Override
             public void actionPerformed(ActionEvent e) {
+                
                 exitToMenu();
             }
         });
@@ -218,9 +219,9 @@ public class PlayersState extends AbstractAppState{
         if(isCantStep == true && waitingScore == false){
             Spatial dice = mainPlayer.TakeFromHeapRandom();
             
-            if(null != dice){
-System.err.println(">>>>DEBUG! HEAP GIVE ME: ==" + dice.getControl(Dice.class));
-            }
+//            if(null != dice){
+//                System.err.println(">>>>DEBUG! HEAP GIVE ME: ==" + dice.getControl(Dice.class));
+//            }
             
             if(dice == null){
                 mOnlineHandler.sendCheck();
@@ -271,6 +272,8 @@ System.err.println(">>>>DEBUG! HEAP GIVE ME: ==" + dice.getControl(Dice.class));
     }
     
     public void exitToMenu(){
+        mainPlayer.clearGui();
+        
         sApp.getStateManager().detach(gameState);
         sApp.getStateManager().attach(new MenuState());
     }
@@ -315,7 +318,7 @@ System.err.println(">>>>DEBUG! HEAP GIVE ME: ==" + dice.getControl(Dice.class));
                     waitingScore = true;
                 }
                 else if(mainPlayer.getHand().size() > 0 && heap.getNode().getChildren().isEmpty() == false){
-                    System.err.println(">>>>DEBUG! ORDER TO HEAP: heap size ==" + heap.getNode().getChildren().size());
+//                    System.err.println(">>>>DEBUG! ORDER TO HEAP: heap size ==" + heap.getNode().getChildren().size());
                     mainPlayer.getInterface().makePopupText("You must go to heap...");
                     isCantStep = true;
                 }
@@ -349,11 +352,11 @@ System.err.println(">>>>DEBUG! HEAP GIVE ME: ==" + dice.getControl(Dice.class));
                 haveStep = true;
                 s.setUserData(USER_DATA_DICE_CAN_STEP.map, true);
                 //DEBUG
-                System.err.println(">>>>DEBUG! STEP EXISTS: " + s.getControl(Dice.class));
+//                System.err.println(">>>>DEBUG! STEP EXISTS: " + s.getControl(Dice.class));
             }
             else{
                 s.setUserData(USER_DATA_DICE_CAN_STEP.map, false);
-                System.err.println(">>>>DEBUG! STEP NOT EXISTS: with dice : " + s.getControl(Dice.class));
+//                System.err.println(">>>>DEBUG! STEP NOT EXISTS: with dice : " + s.getControl(Dice.class));
             }
         }
         rules.removeTips();
@@ -660,6 +663,7 @@ System.err.println(">>>>DEBUG! HEAP GIVE ME: ==" + dice.getControl(Dice.class));
                 for(String name : map.keySet()){
                     strings.add("PLAYER : " + name + "____" + map.get(name));
                 }
+                
                 mainPlayer.getInterface().makeScoreDeck(
                         strings,"fish".equals(extendedMessage.getMessage()),new EndNotify() {
 

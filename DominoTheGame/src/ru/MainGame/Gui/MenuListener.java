@@ -17,7 +17,6 @@ public interface MenuListener {
             void triggerdConnectToGame_connect();
 //        void triggerdCreateGame();
 
-    void triggerdSettings();
         void triggerApplySettings(AppSettings cfg);
     void triggerdAbout();
     void triggerdExit();

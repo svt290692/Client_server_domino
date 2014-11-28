@@ -148,7 +148,7 @@ public class HUDInterface{
                 onEndScreenEffect(new EffectBuilder("fade"){{
                     effectParameter("start", "#f");
                     effectParameter("end", "#0");
-                    startDelay(6000);
+//                    startDelay(6000);
                     length(1000);
 //                    alternateDisable("exit");
 //                    inherit(false);
@@ -239,7 +239,7 @@ public class HUDInterface{
             
             onStartScreenEffect(new EffectBuilder("move"){{
             length(200);
-            startDelay(7000);
+            startDelay(2000);
             effectParameter("mode", "in");
             effectParameter("direction", "left");
             }});

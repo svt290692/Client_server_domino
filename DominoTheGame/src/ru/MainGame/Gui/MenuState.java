@@ -61,8 +61,6 @@ public class MenuState extends AbstractAppState implements MenuListener{
                     getScreenController()).setListener(this);
             ((AbstractMenuScreenController)nifty.getScreen("ConnectToGame").
                     getScreenController()).setListener(this);
-            ((AbstractMenuScreenController)nifty.getScreen("settings").
-                    getScreenController()).setListener(this);
             
         LOG.fine("initialize MenuGui");
     }
@@ -97,11 +95,7 @@ public class MenuState extends AbstractAppState implements MenuListener{
         nifty.gotoScreen("ConnectToGame");
     }
 
-    @Override
-    public void triggerdSettings() {
-        nifty.gotoScreen("settings");
-        LOG.log(Level.FINE,"triggerdSettings");
-    }
+
 
     @Override
     public void triggerdAbout() {

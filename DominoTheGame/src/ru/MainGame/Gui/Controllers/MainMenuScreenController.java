@@ -16,7 +16,6 @@ public class MainMenuScreenController extends AbstractMenuScreenController{
     public void buttonPushed(String what){
         switch(ButtonNames.valueOf(what)){
             case START_GAME: mListener.triggerdStartGame(); break;
-            case SETTINGS: mListener.triggerdSettings();break;
             case ABOUT: mListener.triggerdAbout();break;
             case EXIT: mListener.triggerdExit();break;
         }
